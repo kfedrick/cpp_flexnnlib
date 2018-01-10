@@ -493,6 +493,31 @@ void ActorCriticTrainer::train2(EnvironmentSimulator* _trainingEnv,
    cout << ">>> best epoch = " << best_epoch << endl;
 }
 
+
+void ActorCriticTrainer::train3(EnvironmentSimulator* _trainingEnv,
+      double _objVal)
+{
+   double perf;
+   double global_performance = 0.5, prev_global_performance = 9999999.0;
+   double best_global_performance = 0;
+   double score, prev_score = 0;
+   unsigned int best_epoch = 0;
+
+   init_train();
+
+   save_weights(best_weights_id);
+
+   for (unsigned int epoch = 0; epoch < max_training_epochs; epoch++)
+   {
+      cout << " -------- epoch " << epoch << " --------" << endl;
+      train_actor(_trainingEnv, _objVal, actor_batch_size);
+   }
+
+// Restore weights to the best training epoch
+   restore_weights(best_weights_id);
+   cout << ">>> best epoch = " << best_epoch << endl;
+}
+
 /*
  void ActorCriticTrainer::train(EnvironmentSimulator* _trainingEnv,
  double _objVal)

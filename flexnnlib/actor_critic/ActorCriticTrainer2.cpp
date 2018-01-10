@@ -118,6 +118,38 @@ double ActorCriticTrainer2::sim(EnvironmentSimulator* _env,
    return score / _sampleCount;
 }
 
+double ActorCriticTrainer2::sim2(EnvironmentSimulator* _env,
+      unsigned int _sampleCount)
+{
+   Pattern state;
+   Action action;
+   ActorCriticOutput ac_out;
+
+   // Flag whether there was external reinforcement available
+   bool external_rflag;
+
+   // External reinforcement signal
+   double external_rsig;
+
+   double score = 0;
+
+   for (unsigned int i = 0; i < _sampleCount; i++)
+   {
+      state = _env->reset();
+      while (!_env->is_terminal_state(state))
+      {
+         ac_out = actor_critic_model(state, _env->hint());
+         state = _env->next_state(ac_out.action());
+      }
+      external_rsig = _env->get_reinforcement(external_rflag);
+
+      if (external_rflag)
+         score += external_rsig;
+   }
+
+   return score / _sampleCount;
+}
+
 double ActorCriticTrainer2::sim_critic(EnvironmentSimulator* _env,
       unsigned int _sampleCount)
 {
@@ -170,6 +202,98 @@ double ActorCriticTrainer2::sim_critic(EnvironmentSimulator* _env,
           */
          ac_out = actor_critic_model(state);
 
+         if (step > 0)
+         {
+            external_rsig = _env->get_reinforcement(external_rflag);
+
+            if (!_env->is_terminal_state(state))
+               training_rsig =
+                     (external_rflag) ? external_rsig : ac_out.reinforcement();
+            else
+               training_rsig = external_rsig;
+
+            if (predict_mode == FINAL_COST)
+            {
+               tgt_patt[0] = training_rsig;
+               error_func(patt_sse, egradient, prev_opatt, tgt_patt);
+            }
+            else if (predict_mode == CUMULATIVE_COST)
+            {
+               if (_env->is_terminal_state(state))
+                  patt_err = -(external_rsig - ac_out.reinforcement());
+               else
+                  patt_err = -(0.95 * ac_out.reinforcement() + external_rsig
+                        - prev_opatt.at(0));
+
+               patt_sse = 0.5 * (patt_err * patt_err);
+            }
+
+            trial_mse += patt_sse;
+         }
+
+         step++;
+
+      } while (!_env->is_terminal_state(state));
+
+      trial_mse = trial_mse / (step - 1);
+      mse += trial_mse;
+   }
+
+   mse = mse / _sampleCount;
+   return mse;
+}
+
+double ActorCriticTrainer2::sim_critic2(EnvironmentSimulator* _env,
+      unsigned int _sampleCount)
+{
+   unsigned int step = 0;
+   Pattern state;
+   Action action;
+   ActorCriticOutput ac_out, prev_ac_out;
+
+   // Flag whether there was external reinforcement available
+   bool external_rflag;
+
+   // External reinforcement signal
+   double external_rsig;
+
+   double patt_err;
+   double patt_sse;
+   double sse = 0, mse = 0, trial_mse = 0;
+   double training_rsig;
+
+   vector<double> ugradient(1, 1.0);
+
+   vector<double> egradient(1);
+   vector<double> prev_opatt(1);
+   vector<double> tgt_patt(1);
+
+   for (unsigned int i = 0; i < _sampleCount; i++)
+   {
+      trial_mse = 0;
+
+      state = _env->reset();
+      ac_out = actor_critic_model(state, _env->hint());
+
+      step = 1;
+      do
+      {
+
+         /*
+          * Update state and get external reinforcement, if any
+          */
+         state = _env->next_state(ac_out.action());
+
+         /*
+          * Save previous output and reinforcement
+          */
+         prev_ac_out = ac_out;
+         prev_opatt[0] = prev_ac_out.reinforcement();
+
+         /*
+          * Get next action and predicted reinforcement
+          */
+         ac_out = actor_critic_model(state, _env->hint());
 
          if (step > 0)
          {
@@ -323,7 +447,9 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
 
    init_train();
 
-   save_weights(best_weights_id);
+   cout << "init train complete" << endl;
+
+   // save_weights(best_weights_id);
 
    for (unsigned int epoch = 0; epoch < max_training_epochs; epoch++)
    {
@@ -343,8 +469,10 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
 
       //if (is_online_mode())
       {
-         if (!update_actor_flag)
+
          {
+            // cout << endl << "----- updating critic weight -----" << endl;
+
             //apply_delta_network_weights();
 
             apply_delta_network_weights(
@@ -355,9 +483,9 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
             zero_network_eligibility_trace(critic);
          }
 
-         else
+         if (update_actor_flag)
          {
-            cout << endl << "----- updating actor weight -----" << endl;
+            // cout << endl << "----- updating actor weight -----" << endl;
 
             apply_delta_network_weights(*actor_critic_model.get_actor());
             zero_delta_network_weights(*actor_critic_model.get_actor());
@@ -376,11 +504,202 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
       global_performance = sim_critic(_trainingEnv, 1000);
       score = sim(_trainingEnv, 1000);
 
-      if (is_verbose_mode() && epoch > 0)
+      if (is_verbose_mode()
+            && (epoch < 20 || epoch % report_freq == 0))
          cout << "global perf(" << epoch << ") = " << global_performance
                << "; score = " << score << endl;
 
       if (update_actor_flag)
+      {
+         if ((score - prev_score) / prev_score < -0.05)
+         {
+            cout << "fail back weights because of large decrease in score. "
+                  << prev_score << " => " << score << endl;
+
+            consecutive_failback_count++;
+            if (consecutive_failback_count > 25)
+            {
+               cout << "Max consecutive failbacks exceeded --- EXIT" << endl;
+               break;
+            }
+
+            restore_weights(failback_weights_id);
+            //restore_weights(failback_weights_id, *actor_critic_model.get_actor());
+            //reduce_learning_rates(0.4);
+            /*
+            if (network_learning_rates_map.find(actor.name())
+                  != network_learning_rates_map.end())
+               network_learning_rates_map[actor.name()]->reduce_learning_rate(
+                     0.4);
+                     */
+
+            continue;
+         }
+         else
+         {
+            /*
+             if (network_learning_rates_map.find(actor.name())
+             != network_learning_rates_map.end())
+             network_learning_rates_map[actor.name()]->apply_learning_rate_adjustments();
+             */
+
+            prev_score = score;
+            prev_global_performance = global_performance;
+            consecutive_failback_count = 0;
+         }
+
+         if (score > best_score)
+         {
+            best_epoch = epoch;
+            best_score = score;
+            save_weights(best_weights_id);
+         }
+      }
+
+      //else // update critic
+      {
+
+          if ((global_performance - prev_global_performance)
+          / prev_global_performance > 0.08)
+          /*
+         if ((global_performance - prev_global_performance)
+               / prev_global_performance > 0.05)
+
+                */
+         {
+            cout
+                  << "fail back weights because of large increase in critic error. "
+                  << prev_global_performance << " => " << global_performance
+                  << endl;
+
+            consecutive_failback_count++;
+            if (consecutive_failback_count > 25)
+            {
+               cout << "Max consecutive failbacks exceeded --- EXIT" << endl;
+               //break;
+               consecutive_failback_count = 0;
+               continue;
+            }
+
+            restore_weights(failback_weights_id);
+            //reduce_learning_rates(0.4);
+            /*
+            if (network_learning_rates_map.find(critic.name())
+                  != network_learning_rates_map.end())
+               network_learning_rates_map[critic.name()]->reduce_learning_rate(
+                     0.4);
+                     */
+            continue;
+         }
+         else
+         {
+/*
+            if (network_learning_rates_map.find(critic.name())
+                  != network_learning_rates_map.end())
+               network_learning_rates_map[critic.name()]->apply_learning_rate_adjustments();
+*/
+            prev_global_performance = global_performance;
+            //prev_score = score;
+            consecutive_failback_count = 0;
+         }
+
+         if (global_performance < best_perf)
+         {
+            best_epoch = epoch;
+            best_perf = global_performance;
+            save_weights(best_weights_id);
+         }
+      }
+
+   }
+
+// Restore weights to the best training epoch
+   //restore_weights(best_weights_id);
+   cout << ">>> best epoch = " << best_epoch << endl;
+}
+
+
+void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv, EnvironmentSimulator* _testEnv,
+      double _objVal)
+{
+   double perf;
+   double global_performance = 0.5, prev_global_performance = 9999999.0;
+   double best_global_performance = 0;
+   double score, prev_score = 0;
+   double best_score = 0;
+   double best_perf = 100.0;
+   unsigned int best_epoch = 0;
+
+   bool update_actor_flag = false;
+
+   int consecutive_failback_count = 0;
+
+   const BaseNeuralNet& actor = *actor_critic_model.get_actor();
+   const BaseNeuralNet& critic = *actor_critic_model.get_adaptive_critic();
+
+   init_train();
+
+   save_weights(best_weights_id);
+
+   for (unsigned int epoch = 0; epoch < max_training_epochs; epoch++)
+   {
+      init_training_epoch();
+
+      if (actor_batch_size > 0)
+         update_actor_flag =
+               (epoch % actor_batch_size == 0
+                     || epoch == max_training_epochs - 1) ? true : false;
+      else
+         update_actor_flag = false;
+
+      perf = train_exemplar2(_trainingEnv, _objVal, update_actor_flag);
+
+      //double alpha = 0.25;
+      //global_performance = alpha * perf + (1 - alpha) * global_performance;
+
+      //if (is_online_mode())
+      {
+
+         {
+            // cout << endl << "----- updating critic weight -----" << endl;
+
+            //apply_delta_network_weights();
+
+            apply_delta_network_weights(
+                  *actor_critic_model.get_adaptive_critic());
+            zero_delta_network_weights(
+                  *actor_critic_model.get_adaptive_critic());
+
+            zero_network_eligibility_trace(critic);
+         }
+
+         if (update_actor_flag)
+         {
+            // cout << endl << "----- updating actor weight -----" << endl;
+
+            apply_delta_network_weights(*actor_critic_model.get_actor());
+            zero_delta_network_weights(*actor_critic_model.get_actor());
+
+            // Here or outside the if?
+            zero_network_eligibility_trace(actor);
+         }
+
+         //zero_delta_network_weights();
+         //zero_network_eligibility_trace();
+      }
+
+      /*
+       * Get the performance of the critic network
+       */
+      global_performance = sim_critic2(_testEnv, 1000);
+      score = sim2(_testEnv, 1000);
+
+      if (is_verbose_mode() && epoch > 0
+            && (epoch < 20 || epoch % report_freq == 0))
+         cout << "global perf(" << epoch << ") = " << global_performance
+               << "; score = " << score << endl;
+
+      if (update_actor_flag && false)
       {
          if ((score - prev_score) / prev_score < -0.2)
          {
@@ -424,10 +743,15 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
             save_weights(best_weights_id);
          }
       }
-      else // update critic
+
+      //else // update critic
       {
+         /*
+          if ((global_performance - prev_global_performance)
+          / prev_global_performance > 0.2)
+          */
          if ((global_performance - prev_global_performance)
-               / prev_global_performance > 0.2)
+               / prev_global_performance > 0.05)
          {
             cout
                   << "fail back weights because of large increase in critic error. "
@@ -453,11 +777,10 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
          }
          else
          {
-            /*
-             if (network_learning_rates_map.find(critic.name())
-             != network_learning_rates_map.end())
-             network_learning_rates_map[critic.name()]->apply_learning_rate_adjustments();
-             */
+
+            if (network_learning_rates_map.find(critic.name())
+                  != network_learning_rates_map.end())
+               network_learning_rates_map[critic.name()]->apply_learning_rate_adjustments();
 
             prev_global_performance = global_performance;
             prev_score = score;
@@ -475,7 +798,7 @@ void ActorCriticTrainer2::train(EnvironmentSimulator* _trainingEnv,
    }
 
 // Restore weights to the best training epoch
-   restore_weights(best_weights_id);
+   //restore_weights(best_weights_id);
    cout << ">>> best epoch = " << best_epoch << endl;
 }
 
@@ -495,7 +818,7 @@ void ActorCriticTrainer2::train2(EnvironmentSimulator* _trainingEnv,
    for (unsigned int epoch = 0; epoch < max_training_epochs; epoch++)
    {
       cout << " -------- epoch " << epoch << " --------" << endl;
-      train_critic(_trainingEnv, 10 * actor_batch_size);
+      train_critic(_trainingEnv, critic_batch_size);
       train_actor(_trainingEnv, _objVal, actor_batch_size);
    }
 
@@ -515,17 +838,18 @@ void ActorCriticTrainer2::train3(EnvironmentSimulator* _trainingEnv,
 
    init_train();
 
-   save_weights(best_weights_id);
+   //save_weights(best_weights_id);
 
    for (unsigned int epoch = 0; epoch < max_training_epochs; epoch++)
    {
       cout << " -------- epoch " << epoch << " --------" << endl;
-      train_actor(_trainingEnv, _objVal, actor_batch_size);
+      score = train_actor(_trainingEnv, _objVal, actor_batch_size);
+      cout << "   " << score << endl;
    }
 
 // Restore weights to the best training epoch
-   restore_weights(best_weights_id);
-   cout << ">>> best epoch = " << best_epoch << endl;
+   //restore_weights(best_weights_id);
+   //cout << ">>> best epoch = " << best_epoch << endl;
 }
 
 /*
@@ -609,7 +933,7 @@ double ActorCriticTrainer2::train_critic(EnvironmentSimulator* _trainingEnv,
          cout << "CRITIC: critic perf(" << epoch << ") = " << perf
                << "; score = " << score << endl;
 
-      if ((perf - prev_perf) / prev_perf > 0.2)
+      if ((perf - prev_perf) / prev_perf > 0.1)
       {
          cout << "fail back weights because of large increase in critic error. "
                << prev_perf << " => " << perf << endl;
@@ -625,10 +949,12 @@ double ActorCriticTrainer2::train_critic(EnvironmentSimulator* _trainingEnv,
 
          restore_weights(failback_weights_id);
          //reduce_learning_rates(0.4);
+         /*
          if (network_learning_rates_map.find(critic.name())
                != network_learning_rates_map.end())
             network_learning_rates_map[critic.name()]->reduce_learning_rate(
                   0.4);
+                  */
          continue;
       }
       else
@@ -659,7 +985,8 @@ double ActorCriticTrainer2::train_actor(EnvironmentSimulator* _trainingEnv,
       double _objVal, unsigned int _batchSize)
 {
    double perf = 0, prev_perf = 99999;
-   double score, prev_score = 0;
+   double score;
+   static double prev_score = 0;
    unsigned int best_epoch = 0;
 
    int consecutive_failback_count = 0;
@@ -690,7 +1017,7 @@ double ActorCriticTrainer2::train_actor(EnvironmentSimulator* _trainingEnv,
          cout << "ACTOR: critic perf(" << epoch << ") = " << perf
                << "; score = " << score << endl;
 
-      if ((score - prev_score) / prev_score < -0.2)
+      if ((score - prev_score) / prev_score < -0.05)
       {
          cout << "fail back weights because of large decrease in score. "
                << prev_score << " => " << score << endl;
@@ -705,10 +1032,11 @@ double ActorCriticTrainer2::train_actor(EnvironmentSimulator* _trainingEnv,
          restore_weights(failback_weights_id);
          //restore_weights(failback_weights_id, *actor_critic_model.get_actor());
          //reduce_learning_rates(0.4);
+         /*
          if (network_learning_rates_map.find(actor.name())
                != network_learning_rates_map.end())
             network_learning_rates_map[actor.name()]->reduce_learning_rate(0.4);
-
+          */
          continue;
       }
       else
@@ -919,6 +1247,257 @@ double ActorCriticTrainer2::train_exemplar(EnvironmentSimulator * _env,
          {
             tgt_patt[0] = training_rsig;
             error_func(patt_sse, egradient, prev_opatt, tgt_patt);
+
+            if (print_gradient)
+            {
+               cout << "tgt patt = " << tgt_patt[0] << endl;
+               cout << "prev opatt = " << prev_opatt[0] << endl;
+            }
+         }
+         else if (predict_mode == CUMULATIVE_COST)
+         {
+
+            if (_env->is_terminal_state(state))
+               patt_err = -(external_rsig - ac_out.reinforcement());
+            else
+               patt_err = -(0.95 * ac_out.reinforcement() + external_rsig
+                     - prev_opatt.at(0));
+
+            //egradient[0] = patt_err - 0.95 * prev_patt_err;
+            egradient[0] = patt_err;
+            patt_sse = 0.5 * (patt_err * patt_err);
+         }
+         //seq_sse += patt_sse;
+
+         network_learning_rates_map.at(
+               actor_critic_model.get_adaptive_critic()->name())->update_learning_rate_adjustments(
+               1);
+
+         calc_network_adj(*actor_critic_model.get_adaptive_critic(), egradient);
+
+         if (print_gradient)
+            cout << "critic egradient = " << egradient[0] << endl;
+
+         // !!!!! Oooops. Actor can only learn after the 1st step as well???
+         //if (_updateActorFlag && _env->is_terminal_state(state))
+         if (_updateActorFlag)
+         {
+            prev_opatt[0] = prev_ac_out.reinforcement();
+
+            /*
+             * Use the ultimate objective value to calculate the error gradient
+             * we will backprop through the actor-critic network in order to train
+             * the actor network
+             */
+            tgt_patt[0] = _objVal;
+            error_func(patt_sse, egradient, prev_opatt, tgt_patt);
+
+            if (print_gradient)
+               cout << "actor egradient = " << egradient[0] << endl;
+
+            /*
+             network_learning_rates_map.at(actor_critic_model.get_actor()->name())->update_learning_rate_adjustments();
+             */
+
+            calc_network_adj(*actor_critic_model.get_actor(), egradient);
+         }
+      }
+
+      step_no++;
+
+   } while (!_env->is_terminal_state(state));
+//seq_sse = (step_no > 0) ? seq_sse / step_no : 0;
+   seq_sse = external_rsig;
+
+// Restore model stochastic action flag setting
+   actor_critic_model.set_stochastic_action(saved_stochastic_flag);
+   actor_critic_model.get_actor()->set_stochastic_action_gain(saved_gain);
+
+   return seq_sse;
+}
+
+/**
+ * Train one sequence/game until a terminal state is reached
+ */
+double ActorCriticTrainer2::train_exemplar2(EnvironmentSimulator * _env,
+      double _objVal, bool _updateActorFlag)
+{
+   Pattern actor_opatt;
+
+   unsigned int step_no = 0;
+   Pattern state, prev_state, next_state;
+   ActorCriticOutput ac_out, prev_ac_out;
+
+// Flag whether there was external reinforcement available
+   bool external_rflag;
+
+// External reinforcement signal
+   double external_rsig;
+
+// Reinforcement signal to use for training
+   double training_rsig;
+
+// Performance variables
+   double patt_sse;
+   double patt_err, prev_patt_err = 0;
+   double seq_sse = 0;
+
+   vector<double> ugradient(1, 1.0);
+
+   vector<double> egradient(1);
+   vector<double> prev_opatt(1);
+   vector<double> tgt_patt(1);
+
+   bool saved_stochastic_flag = actor_critic_model.get_stochastic_action();
+   double saved_gain =
+         actor_critic_model.get_actor()->get_stochastic_action_gain();
+
+   //actor_critic_model.get_actor()->set_stochastic_action_gain(4.0);
+
+   /******************************************************************
+    * Set up model, state, and training data on initial state for
+    * training on subsequent states
+    *
+    */
+
+// Don't use stochastic activation if we are training the actor
+//   if (_updateActorFlag)
+//      actor_critic_model.set_stochastic_action(false);
+// Reset the environment to start a new "game"
+   state = _env->reset();
+
+// Initial activation of the model with the start state
+   ac_out = actor_critic_model(state, _env->hint());
+
+   if (print_gradient)
+   {
+      cout << "***** initial activation *****" << endl;
+      for (unsigned int i = 0; i < state().size(); i++)
+         cout << state().at(i) << " ";
+      cout << " => ";
+      cout << "critic rsig " << ac_out.reinforcement() << endl;
+
+      cout << "\nactor net raw output" << endl;
+      actor_opatt = actor_critic_model.get_actor()->raw();
+      for (unsigned int i = 0; i < actor_opatt().size(); i++)
+         cout << actor_opatt().at(i) << " ";
+      cout << " =>  " << ac_out.action().name() << endl;
+   }
+
+   /*
+    * Temporal difference learning needs to save the old network
+    * weight gradients and add the new weight gradients to the
+    * discounted sum of the weight gradients
+    */
+   save_network_eligibility_trace();
+
+   actor_critic_model.clear_error();
+   actor_critic_model.set_print_gradient(print_gradient);
+   actor_critic_model.backprop(ugradient);
+   actor_critic_model.set_print_gradient(false);
+   update_network_eligibility_trace();
+
+   step_no++;
+
+   /***************************************************
+    * Train on subsequent states
+    */
+   do
+   {
+      // Save current input
+      prev_state = state;
+
+      // Update the environment with the recommended action
+      state = _env->next_state(ac_out.action());
+
+      // Check for external reinforcement signal
+      external_rsig = _env->get_reinforcement(external_rflag);
+
+      // Activate the model with the current state vector
+      prev_ac_out = ac_out;
+
+      // TD2Trainer presents the next state even if it's terminal
+      // Dunno why but try it here
+      ac_out = actor_critic_model(state, _env->hint());
+
+      if (!_env->is_terminal_state(state))
+      {
+         //ac_out = actor_critic_model(state);
+
+         if (print_gradient)
+         {
+            cout << "***** next activation *****" << endl;
+            for (unsigned int i = 0; i < state().size(); i++)
+               cout << state().at(i) << " ";
+            cout << " => ";
+            cout << "critic rsig " << ac_out.reinforcement() << endl;
+
+            cout << "actor net raw output" << endl;
+            actor_opatt = actor_critic_model.get_actor()->raw();
+            for (unsigned int i = 0; i < actor_opatt().size(); i++)
+               cout << actor_opatt().at(i) << " ";
+            cout << " =>  " << ac_out.action().name() << endl;
+         }
+
+         /*
+          * Use the external or internal reinforcement signal to calculate
+          * the error gradient we will backprop through the actor-critic
+          * network in order to train the critic
+          */
+         training_rsig =
+               (external_rflag) ? external_rsig : ac_out.reinforcement();
+
+         if (print_gradient)
+            if (external_rflag)
+               cout << "tsig = external non-term " << training_rsig << endl;
+            else
+               cout << "tsig = internal non-term " << training_rsig << endl;
+      }
+      else
+      {
+
+         training_rsig = external_rsig;
+
+         if (print_gradient)
+         {
+            cout << "***** terminal *****" << endl;
+            for (unsigned int i = 0; i < state().size(); i++)
+               cout << state().at(i) << " ";
+            cout << endl;
+            cout << "tsig = external terminal " << training_rsig << endl;
+         }
+      }
+
+      /*
+       * Temporal difference learning needs to save the old network
+       * weight gradients and add the new weight gradients to the
+       * discounted sum of the weight gradients
+       */
+      save_network_eligibility_trace();
+
+      actor_critic_model.clear_error();
+      actor_critic_model.set_print_gradient(print_gradient);
+      actor_critic_model.backprop(ugradient);
+      actor_critic_model.set_print_gradient(false);
+      update_network_eligibility_trace();
+
+      // Adaptive critic can only learn after the first step
+      if (step_no > 0)
+      {
+         // TODO - activate network for previous input state
+         //prev_ac_out = actor_critic_model(prev_state);
+         prev_opatt[0] = prev_ac_out.reinforcement();
+
+         if (predict_mode == FINAL_COST)
+         {
+            tgt_patt[0] = training_rsig;
+            error_func(patt_sse, egradient, prev_opatt, tgt_patt);
+
+            if (print_gradient)
+            {
+               cout << "tgt patt = " << tgt_patt[0] << endl;
+               cout << "prev opatt = " << prev_opatt[0] << endl;
+            }
          }
          else if (predict_mode == CUMULATIVE_COST)
          {
@@ -1179,6 +1758,10 @@ void ActorCriticTrainer2::apply_delta_network_weights()
 
 void ActorCriticTrainer2::apply_delta_network_weights(BaseNeuralNet& _net)
 {
+
+   if (print_gradient)
+      cout << " *** apply delta weights *****" << endl;
+
    NetworkWeightsData& delta_network_weights = get_cached_network_weights(
          delta_network_weights_id, _net);
    NetworkWeightsData& prev_delta_network_weights = get_cached_network_weights(
@@ -1192,6 +1775,10 @@ void ActorCriticTrainer2::apply_delta_network_weights(BaseNeuralNet& _net)
       BaseLayer& layer = *network_layers[ndx];
       string name = layer.name();
 
+      if (print_gradient)
+         cout << "============= " << _net.name() << " " << layer.name()
+               << " ==============" << endl;
+
       const LayerWeightsData& delta_layer_weights_data =
             delta_network_weights.layer_weights(name);
       const LayerWeightsData& prev_delta_layer_weights_data =
@@ -1204,10 +1791,24 @@ void ActorCriticTrainer2::apply_delta_network_weights(BaseNeuralNet& _net)
             prev_delta_layer_weights_data.biases;
       vector<double>& adjusted_layer_biases = adjusted_layer_weights_data.biases;
 
+      if (print_gradient)
+         cout << "   biases : " << endl;
+
       adjusted_layer_biases = layer.get_biases();
       for (unsigned int ndx = 0; ndx < adjusted_layer_biases.size(); ndx++)
+      {
          adjusted_layer_biases.at(ndx) += learning_momentum
                * prev_delta_layer_biases.at(ndx) + delta_layer_biases.at(ndx);
+
+         if (print_gradient)
+         {
+            if (ndx > 0)
+               cout << ", ";
+            cout << delta_layer_biases.at(ndx);
+         }
+      }
+      if (print_gradient)
+         cout << endl << "-------------" << endl;
 
       if (layer.is_learn_biases())
          layer.set_biases(adjusted_layer_biases);
@@ -1224,6 +1825,9 @@ void ActorCriticTrainer2::apply_delta_network_weights(BaseNeuralNet& _net)
       unsigned int row_sz = adjusted_layer_weights.rowDim();
       unsigned int col_sz = adjusted_layer_weights.colDim();
 
+      if (print_gradient)
+         cout << "   weights : " << endl;
+
       for (unsigned int row = 0; row < row_sz; row++)
       {
          for (unsigned int col = 0; col < col_sz; col++)
@@ -1231,12 +1835,25 @@ void ActorCriticTrainer2::apply_delta_network_weights(BaseNeuralNet& _net)
             adjusted_layer_weights.at(row, col) += learning_momentum
                   * prev_delta_layer_weights.at(row, col)
                   + delta_layer_weights.at(row, col);
+
+            if (print_gradient)
+            {
+               if (col > 0)
+                  cout << ", ";
+               cout << delta_layer_weights.at(row, col);
+            }
          }
+
+         if (print_gradient)
+            cout << endl;
       }
 
       if (layer.is_learn_weights())
          layer.set_weights(adjusted_layer_weights);
    }
+
+   if (print_gradient)
+      cout << "-------------" << endl;
 
 // TODO - decide if we should save off the current delta weights here
    prev_delta_network_weights = delta_network_weights;
@@ -1353,6 +1970,9 @@ void ActorCriticTrainer2::update_network_eligibility_trace(
 {
    string key;
 
+   if (print_gradient)
+      cout << " *** Update network eligibility trace *****" << endl;
+
    const vector<BaseLayer*> network_layers = _net.get_network_layers();
    for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
    {
@@ -1361,18 +1981,33 @@ void ActorCriticTrainer2::update_network_eligibility_trace(
 
       key = genkey(_net, name);
 
+      if (print_gradient)
+         cout << "============= " << key << " ==============" << endl;
+
       double prev_sum;
       double temp = 0;
 
       Array<double>& etrace_dAdB = etrace_dAdB_map[key];
       const vector<double>& dEdB = layer.get_dEdB();
 
+      if (print_gradient)
+         cout << "   dAdB : " << endl;
+
       for (unsigned int bias_ndx = 0; bias_ndx < dEdB.size(); bias_ndx++)
       {
          prev_sum = etrace_dAdB.at(bias_ndx, bias_ndx);
          etrace_dAdB.at(bias_ndx, bias_ndx) = dEdB.at(bias_ndx)
                + lambda * prev_sum;
+
+         if (print_gradient)
+         {
+            if (bias_ndx > 0)
+               cout << ", ";
+            cout << etrace_dAdB.at(bias_ndx, bias_ndx);
+         }
       }
+      if (print_gradient)
+         cout << endl << "-------------" << endl;
 
       Array<double>& etrace_dAdW = etrace_dAdW_map[key];
       const Array<double>& dEdW = layer.get_dEdW();
@@ -1382,6 +2017,9 @@ void ActorCriticTrainer2::update_network_eligibility_trace(
       unsigned int layer_size = layer.size();
       unsigned int layer_input_size = layer.input_size();
 
+      if (print_gradient)
+         cout << "   dAdW : " << endl;
+
       for (unsigned int out_ndx = 0; out_ndx < layer.size(); out_ndx++)
       {
          for (unsigned int in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
@@ -1389,8 +2027,19 @@ void ActorCriticTrainer2::update_network_eligibility_trace(
             prev_sum = etrace_dAdW.at(out_ndx, in_ndx);
             etrace_dAdW.at(out_ndx, in_ndx) = dEdW.at(out_ndx, in_ndx)
                   + lambda * prev_sum;
+
+            if (print_gradient)
+            {
+               if (in_ndx > 0)
+                  cout << ", ";
+               cout << etrace_dAdW.at(out_ndx, in_ndx);
+            }
          }
+         if (print_gradient)
+            cout << endl;
       }
+      if (print_gradient)
+         cout << "-------------" << endl;
 
       /*
        for (unsigned int netin_ndx = 0; netin_ndx < layer_size; netin_ndx++)
@@ -1431,6 +2080,9 @@ void ActorCriticTrainer2::update_network_eligibility_trace(
        }
        }
        */
+
+      if (print_gradient)
+         cout << "==========================" << endl;
    }
 }
 
@@ -1473,12 +2125,12 @@ void ActorCriticTrainer2::alloc_network_learning_rates()
 
    if (network_learning_rates_map.find(actor.name())
          == network_learning_rates_map.end())
-      network_learning_rates_map[actor.name()] = new DeltaBarDeltaLearningRate(
+      network_learning_rates_map[actor.name()] = new ConstantLearningRate(
             actor);
 
    if (network_learning_rates_map.find(critic.name())
          == network_learning_rates_map.end())
-      network_learning_rates_map[critic.name()] = new DeltaBarDeltaLearningRate(
+      network_learning_rates_map[critic.name()] = new ConstantLearningRate(
             critic);
 }
 

@@ -42,10 +42,13 @@ public:
    const Pattern& operator()();
    const Pattern& raw();
 
+   const Action& get_action_by_index(unsigned int _aNdx);
+   unsigned int get_action_index(const vector<double>& _actionProbVec);
+   unsigned int get_stochastic_action_index(const vector<double>& _actionProbVec);
+
 protected:
    void init_actions(const set<string>& _actionSet);
 
-   unsigned int get_stochastic_action_index(const vector<double>& _actionProbVec);
    double urand();
    double nrand(double mean, double stdev);
 

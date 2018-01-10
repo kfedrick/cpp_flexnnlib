@@ -60,16 +60,59 @@ const ActorCriticOutput& ActorCriticNet2::operator()(const Pattern& ipattern,
    actor_opatt = (*actor)();
 
    /*
-   if (print_gradient)
-   {
-      printf( "actor opatt = %f\n", actor_opatt().at(0));
-   }
-   */
+    if (print_gradient)
+    {
+    printf( "actor opatt = %f\n", actor_opatt().at(0));
+    }
+    */
 
    // Activate adaptive critic and get output (reinforcement, rflag)
    rsig = adaptive_critic->get_reinforcement(ipattern, actor_opatt, recurStep);
 
    // Set local cached value for actor-critic model output
+   last_actor_critic_output.set(actor_action, rsig, true);
+
+   return last_actor_critic_output;
+}
+
+const ActorCriticOutput& ActorCriticNet2::operator()(const Pattern& ipattern,
+      const Pattern& apattern, unsigned int recurStep)
+{
+   Pattern actor_opatt = apattern;
+   Action actor_action;
+
+   Pattern adaptive_critic_opatt;
+   double rsig;
+
+   /*
+    * Activate actor and get corresponding action using the
+    * ActorNetwork operator(). Then get the raw actor output
+    * pattern from the last activation using the native NeuralNet
+    * operator() method so we can pass it to the actor-critic.
+    */
+   if (stochastic_action)
+      actor_action = actor->get_stochastic_action(ipattern, recurStep);
+   else
+      actor_action = actor->get_action(ipattern, recurStep);
+
+   // actor_opatt = (*actor)();
+
+   /*
+    if (print_gradient)
+    {
+    printf( "actor opatt = %f\n", actor_opatt().at(0));
+    }
+    */
+
+   // Activate adaptive critic and get output (reinforcement, rflag)
+   rsig = adaptive_critic->get_reinforcement(ipattern, actor_opatt, recurStep);
+
+   // Set local cached value for actor-critic model output
+   double rval = actor_opatt().at(0);
+   vector<double> rvec = { rval };
+   unsigned int action_ndx = actor->get_action_index(rvec);
+   actor_action = actor->get_action_by_index(action_ndx);
+
    last_actor_critic_output.set(actor_action, rsig, true);
 
    return last_actor_critic_output;
@@ -87,7 +130,8 @@ void ActorCriticNet2::backprop(const vector<double>& _eVec,
    adaptive_critic->backprop(_eVec, timeStep);
    //const vector<BaseLayer*> layers = actor->get_network_layers();
 
-   const vector<BaseLayer*> network_layers = adaptive_critic->get_network_layers();
+   const vector<BaseLayer*> network_layers =
+         adaptive_critic->get_network_layers();
    BaseLayer& layer = *network_layers[0];
    string name = layer.name();
    const Array<double>& dAdN = layer.get_dAdN();
@@ -116,7 +160,6 @@ void ActorCriticNet2::backprop(const vector<double>& _eVec,
       cout << "----------------" << endl;
    }
 
-
    const vector<vector<double> >& critic_bp_errvec =
          adaptive_critic->get_input_error();
 
@@ -143,50 +186,50 @@ void ActorCriticNet2::backprop(const vector<double>& _eVec,
    actor->backprop(net_bp_errorv, timeStep);
 
    /*
-   cout << "----- actor out dAdN -----" << endl;
-   int oindx = actor->get_network_layers().size();
-   const Array<double>& dAdN = actor->layer(oindx-1).get_dAdN();
-   for (unsigned int i=0; i<dAdN.rowDim(); i++)
-   {
-      for (unsigned int j=0; j<dAdN.colDim(); j++)
-      {
-         cout << dAdN.at(i,j) << " ";
-      }
-      cout << endl;
-   }
-   cout << "-----------------------" << endl;
+    cout << "----- actor out dAdN -----" << endl;
+    int oindx = actor->get_network_layers().size();
+    const Array<double>& dAdN = actor->layer(oindx-1).get_dAdN();
+    for (unsigned int i=0; i<dAdN.rowDim(); i++)
+    {
+    for (unsigned int j=0; j<dAdN.colDim(); j++)
+    {
+    cout << dAdN.at(i,j) << " ";
+    }
+    cout << endl;
+    }
+    cout << "-----------------------" << endl;
 
-   cout << "----- actor out dEdW -----" << endl;
-   const Array<double>& dEdW = actor->layer(oindx-1).get_dEdW();
-   for (unsigned int i=0; i<dEdW.rowDim(); i++)
-   {
-      for (unsigned int j=0; j<dEdW.colDim(); j++)
-      {
-         cout << dEdW.at(i,j) << " ";
-      }
-      cout << endl;
-   }
-   cout << "-----------------------" << endl;
+    cout << "----- actor out dEdW -----" << endl;
+    const Array<double>& dEdW = actor->layer(oindx-1).get_dEdW();
+    for (unsigned int i=0; i<dEdW.rowDim(); i++)
+    {
+    for (unsigned int j=0; j<dEdW.colDim(); j++)
+    {
+    cout << dEdW.at(i,j) << " ";
+    }
+    cout << endl;
+    }
+    cout << "-----------------------" << endl;
 
-   cout << "----- actor out dNdW -----" << endl;
-   const Array<double>& dNdW = actor->layer(oindx-1).get_dNdW();
-   for (unsigned int i=0; i<dNdW.rowDim(); i++)
-   {
-      for (unsigned int j=0; j<dNdW.colDim(); j++)
-      {
-         cout << dNdW.at(i,j) << " ";
-      }
-      cout << endl;
-   }
-   cout << "-----------------------" << endl;
+    cout << "----- actor out dNdW -----" << endl;
+    const Array<double>& dNdW = actor->layer(oindx-1).get_dNdW();
+    for (unsigned int i=0; i<dNdW.rowDim(); i++)
+    {
+    for (unsigned int j=0; j<dNdW.colDim(); j++)
+    {
+    cout << dNdW.at(i,j) << " ";
+    }
+    cout << endl;
+    }
+    cout << "-----------------------" << endl;
 
-   cout << "----- actor out input err -----" << endl;
-   const vector<double>& inerr = actor->layer(oindx-1).get_input_error();
-   for (unsigned int i=0; i<inerr.size(); i++)
-      cout << inerr.at(i) << " ";
-   cout << endl;
-   cout << "-----------------------" << endl;
-   */
+    cout << "----- actor out input err -----" << endl;
+    const vector<double>& inerr = actor->layer(oindx-1).get_input_error();
+    for (unsigned int i=0; i<inerr.size(); i++)
+    cout << inerr.at(i) << " ";
+    cout << endl;
+    cout << "-----------------------" << endl;
+    */
 }
 
 } /* namespace flex_neuralnet */

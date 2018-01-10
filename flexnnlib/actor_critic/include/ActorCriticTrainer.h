@@ -85,6 +85,7 @@ public:
 
    virtual void train(EnvironmentSimulator* _trainingEnvSet, double _objVal);
    virtual void train2(EnvironmentSimulator* _trainingEnvSet, double _objVal);
+   virtual void train3(EnvironmentSimulator* _trainingEnvSet, double _objVal);
 
    virtual double train_critic(EnvironmentSimulator* _trainingEnvSet, unsigned int _batchSize);
    virtual double train_actor(EnvironmentSimulator* _trainingEnvSet, double _objVal, unsigned int _batchSize);

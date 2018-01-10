@@ -34,6 +34,7 @@ public:
    bool get_stochastic_action();
 
    const ActorCriticOutput& operator()(const Pattern& ipattern, unsigned int recurStep = 1);
+   const ActorCriticOutput& operator()(const Pattern& ipattern, const Pattern& apattern, unsigned int recurStep = 1);
 
    void clear_error(unsigned int timeStep = 1);
    void backprop(const vector<double>& _eVec, unsigned int timeStep = 1);

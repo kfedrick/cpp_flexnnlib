@@ -83,9 +83,9 @@ public:
 
    const vector<BaseLayer*> get_network_layers() const;
 
-   const NetworkWeightsData& get_network_weights();
+   NetworkWeightsData& get_network_weights();
 
-   const vector< vector<double> >& get_input_error(unsigned int timeStep = 1) const;
+   vector< vector<double> >& get_input_error(unsigned int timeStep = 1);
 
    void backprop(const vector<double>& isse, unsigned int timeStep = 1);
    void backprop_scatter(BaseLayer& layer, unsigned int timeStep = 1, unsigned int closedLoopStep = 0);
@@ -93,8 +93,6 @@ public:
    const vector<BaseLayer*>& get_layer_activation_order();
    ConnectionMap& get_network_output_connection_map();
    ConnectionMap* get_layer_connection_map(const BaseLayer& layer);
-
-   vector< vector<double> >& get_network_input_error();
 
    void clear_error(unsigned int timeStep = 1);
 
@@ -225,12 +223,6 @@ inline
 const vector<BaseLayer*>& BaseNeuralNet::get_layer_activation_order()
 {
    return layer_activation_order;
-}
-
-inline
-vector< vector<double> >& BaseNeuralNet::get_network_input_error()
-{
-   return network_input_error;
 }
 
 } /* namespace flex_neuralnet */

@@ -379,13 +379,13 @@ void BaseNeuralNet::clear_error(unsigned int timeStep)
    }
 }
 
-const vector<vector<double> >& BaseNeuralNet::get_input_error(
-      unsigned int timeStep) const
+vector<vector<double> >& BaseNeuralNet::get_input_error(
+      unsigned int timeStep)
 {
    return network_input_error;
 }
 
-const NetworkWeightsData& BaseNeuralNet::get_network_weights()
+NetworkWeightsData& BaseNeuralNet::get_network_weights()
 {
    for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
    {

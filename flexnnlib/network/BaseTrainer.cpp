@@ -240,6 +240,8 @@ void BaseTrainer::alloc_network_weights_cache_entry(const string& _id)
 
 void BaseTrainer::apply_delta_network_weights()
 {
+   //cout << " *** apply delta weights *****" << endl;
+
    NetworkWeightsData& delta_network_weights = get_cached_network_weights(
          delta_network_weights_id);
    NetworkWeightsData& prev_delta_network_weights = get_cached_network_weights(
@@ -254,6 +256,9 @@ void BaseTrainer::apply_delta_network_weights()
       BaseLayer& layer = *network_layers[ndx];
       string name = layer.name();
 
+         //cout << "============= " << layer.name()
+         //      << " ==============" << endl;
+
       const LayerWeightsData& delta_layer_weights_data =
             delta_network_weights.layer_weights(name);
       const LayerWeightsData& prev_delta_layer_weights_data =
@@ -266,11 +271,19 @@ void BaseTrainer::apply_delta_network_weights()
             prev_delta_layer_weights_data.biases;
       vector<double>& adjusted_layer_biases = adjusted_layer_weights_data.biases;
 
+      //cout << "   biases : " << endl;
+
       adjusted_layer_biases = layer.get_biases();
       for (unsigned int ndx = 0; ndx < adjusted_layer_biases.size(); ndx++)
+      {
          adjusted_layer_biases.at(ndx) += learning_momentum
                * prev_delta_layer_biases.at(ndx) + delta_layer_biases.at(ndx);
 
+         //if (ndx > 0)
+          //  cout << ", ";
+         //cout << delta_layer_biases.at(ndx);
+      }
+      //cout << endl << "-------------" << endl;
       if (layer.is_learn_biases())
          layer.set_biases(adjusted_layer_biases);
 
@@ -286,15 +299,27 @@ void BaseTrainer::apply_delta_network_weights()
       unsigned int row_sz = adjusted_layer_weights.rowDim();
       unsigned int col_sz = adjusted_layer_weights.colDim();
 
+      //cout << "   weights : " << endl;
+
       for (unsigned int row = 0; row < row_sz; row++)
+      {
          for (unsigned int col = 0; col < col_sz; col++)
+         {
             adjusted_layer_weights.at(row, col) += learning_momentum
                   * prev_delta_layer_weights.at(row, col)
                   + delta_layer_weights.at(row, col);
 
+            //if (col > 0)
+            //   cout << ", ";
+            //cout << delta_layer_weights.at(row, col);
+         }
+         //cout << endl;
+      }
+
       if (layer.is_learn_weights())
          layer.set_weights(adjusted_layer_weights);
    }
+   //cout << "-------------" << endl;
 
    // TODO - decide if we should save off the current delta weights here
    prev_delta_network_weights = delta_network_weights;

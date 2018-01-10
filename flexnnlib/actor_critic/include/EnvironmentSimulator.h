@@ -25,7 +25,19 @@ public:
    virtual const Pattern& next_state(const Action& _action) = 0;
    virtual bool is_terminal_state(const Pattern& _state) const = 0;
    virtual double get_reinforcement(bool& _rflag) = 0;
+
+   // Provide hint for best action
+   virtual const Pattern& hint();
+
+protected:
+   Pattern default_action;
 };
+
+inline
+const Pattern& EnvironmentSimulator::hint(void)
+{
+   return default_action;
+}
 
 } /* namespace flex_neuralnet */
 

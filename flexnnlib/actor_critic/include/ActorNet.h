@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <cstdlib>
+#include <cmath>
 
 #include "BaseNeuralNet.h"
 #include "Action.h"
@@ -46,6 +47,7 @@ protected:
 
    unsigned int get_stochastic_action_index(const vector<double>& _actionProbVec);
    double urand();
+   double nrand(double mean, double stdev);
 
    double stochastic_action_gain;
 
@@ -53,6 +55,7 @@ private:
    vector<Action> action_list;
    Action last_action;
    Pattern best_actor_pattern;
+   Pattern urand_raw_pattern;
 };
 
 inline
@@ -73,6 +76,16 @@ inline
 double ActorNet::urand()
 {
    return rand() / double(RAND_MAX);
+}
+
+inline
+double ActorNet::nrand(double mean, double stdev)
+{
+   double pi = 3.1415926535897;
+   double r1, r2;
+   r1 = urand();
+   r2 = urand();
+   return mean + stdev * sqrt(-2 * log(r1)) * cos(2 * pi * r2);
 }
 
 inline

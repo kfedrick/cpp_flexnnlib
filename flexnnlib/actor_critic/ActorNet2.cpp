@@ -46,7 +46,6 @@ ActorNet2::~ActorNet2()
 const Action& ActorNet2::get_action(const Pattern& _stateVec,
       unsigned int _recurStep)
 {
-   /*
    BaseNeuralNet* net = dynamic_cast<BaseNeuralNet*>(this);
    static Pattern actor_opatt;
 
@@ -56,6 +55,10 @@ const Action& ActorNet2::get_action(const Pattern& _stateVec,
       return ActorNet2::DEFAULT_ACTION;
 
    double aval = actor_opatt().at(0);
+
+   vector<double> rvec = {aval};
+   urand_raw_pattern = rvec;
+
 
    unsigned int sz = action_list.size();
    double delta = 2.0 / sz;
@@ -67,8 +70,10 @@ const Action& ActorNet2::get_action(const Pattern& _stateVec,
    last_action = action_list.at(ndx);
 
    return last_action;
-   */
+
+   /*
    get_stochastic_action(_stateVec, _recurStep);
+   */
 }
 
 const Action& ActorNet2::get_stochastic_action(const Pattern& _stateVec, unsigned int _recurStep)
@@ -123,6 +128,11 @@ void ActorNet2::init_actions(const set<string>& _actionSet)
    }
 }
 
+const Action& ActorNet2::get_action_by_index(unsigned int _aNdx)
+{
+   return action_list.at(_aNdx);
+}
+
 unsigned int ActorNet2::get_stochastic_action_index(const vector<double>& _actionProbVec)
 {
    double threshold = 0;
@@ -139,6 +149,19 @@ unsigned int ActorNet2::get_stochastic_action_index(const vector<double>& _actio
    }
 
    return ndx-1;
+}
+
+unsigned int ActorNet2::get_action_index(const vector<double>& _actionProbVec)
+{
+   unsigned int sz = action_list.size();
+   double delta = 2.0 / sz;
+   double bound = -1.0 + delta;
+   unsigned int ndx;
+
+   double aval = _actionProbVec.at(0);
+   for (ndx = 0; ndx<sz-1 && aval > bound; ndx++, bound+=delta);
+
+   return ndx;
 }
 
 const Pattern& ActorNet2::operator()()
