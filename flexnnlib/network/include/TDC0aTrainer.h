@@ -1,42 +1,36 @@
 /*
- * TD2Trainer.h
+ * TDC0aTrainer.h
  *
  *  Created on: Feb 26, 2014
  *      Author: kfedrick
  *
- *  Temporal difference trainer using modification
- *  of original Sutton formula for the cost-to-go
- *  forecasting task. The error term is modified
- *  to match the actual derivative of the global
- *  objective function for a sequence relative to
- *  the prediction at time t. It takes both terms
- *  in which that prediction occurs into account,
- *  the one where it is the target and the one where
- *  it is the prediction.
- *
- *  This has the effect of allowing the global objective
- *  function to be used for early stopping since it now
- *  actually tracks the system performance.
+ *  Temporal difference with gradient correction trainer
+ *  Sutton 2009 formula.
  */
 
-#ifndef FLEX_NEURALNET_TD2TRAINER_H_
-#define FLEX_NEURALNET_TD2TRAINER_H_
+#ifndef FLEX_NEURALNET_TDC0ATRAINER_H_
+#define FLEX_NEURALNET_TDC0ATRAINER_H_
 
 #include "BaseTrainer.h"
 #include <cfloat>
+
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 namespace flex_neuralnet
 {
 
 template<class EFunc, class LRPolicy>
-class TD2Trainer: public BaseTrainer
+class TDC0aTrainer: public BaseTrainer
 {
 public:
-   TD2Trainer(BaseNeuralNet& _net);
-   virtual ~TD2Trainer();
+   TDC0aTrainer(BaseNeuralNet& _net);
+   virtual ~TDC0aTrainer();
 
    void alloc_network_learning_rates();
 
+   void set_slow_learning_rate_multiplier(double _val);
    LRPolicy& get_learning_rates();
 
    void set_predict_final_cost();
@@ -62,6 +56,12 @@ public:
 
    double sim(
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _dataset);
+
+   bool InvertMatrix(const boost::numeric::ublas::matrix<double>& input, boost::numeric::ublas::matrix<double>& inverse);
+
+   double sim2(
+         const DataSet<Exemplar<PatternSequence, PatternSequence> >& _dataset);
+
    TrainingRecord::Entry& calc_performance_data(unsigned int _epoch,
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _trnset,
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _vldset =
@@ -87,14 +87,10 @@ protected:
    EFunc& get_errorfunc();
 
 private:
-   void save_eligibility_trace();
-   void update_eligibility_trace();
-   void zero_eligibility_trace();
 
-   void calc_layer_bias_adj(const BaseLayer& layer, unsigned int timeStep,
-         vector<double>& biasDelta, const vector<double>& errorv);
    void calc_layer_weight_adj(const BaseLayer& layer, unsigned int timeStep,
-         Array<double>& weightDelta, const vector<double>& errorv);
+         vector<double>& biasDelta, Array<double>& weightDelta, double td_error,
+         const vector<double>& dEdB, const Array<double>& dEdW);
 
 private:
    enum Prediction_Mode
@@ -115,16 +111,22 @@ private:
    /* ***********************************************
     *    Learning rate parameters
     */
+   double slow_lr_multiplier;
    double lambda;
    double gamma;
 
    Prediction_Mode predict_mode;
 
-   map<string, Array<double> > etrace_dAdB_map;
-   map<string, Array<double> > etrace_dAdW_map;
+   double wb;
+   double prev_wb;
+   vector<double> w;
+   vector<double> prev_w;
 
-   map<string, Array<double> > prev_etrace_dAdB_map;
-   map<string, Array<double> > prev_etrace_dAdW_map;
+   Array<double> prev_dEdW;
+   vector<double> prev_dEdB;
+
+   vector<double> gE_td_phi;
+
 
    unsigned int pattern_no;
 
@@ -132,7 +134,7 @@ private:
 };
 
 template<class EFunc, class LRPolicy>
-TD2Trainer<EFunc, LRPolicy>::TD2Trainer(BaseNeuralNet& _net) :
+TDC0aTrainer<EFunc, LRPolicy>::TDC0aTrainer(BaseNeuralNet& _net) :
       neural_network(_net), BaseTrainer(_net)
 {
    set_batch_mode();
@@ -140,73 +142,81 @@ TD2Trainer<EFunc, LRPolicy>::TD2Trainer(BaseNeuralNet& _net) :
    set_random_order_mode(true);
    set_verbose(false);
    set_global_learning_rate(0.05);
-   set_lambda(0.5);
+   set_slow_learning_rate_multiplier(2.0);
+   set_lambda(0.0);
 }
 
 template<class EFunc, class LRPolicy>
-TD2Trainer<EFunc, LRPolicy>::~TD2Trainer()
+TDC0aTrainer<EFunc, LRPolicy>::~TDC0aTrainer()
 {
    // TODO Auto-generated destructor stub
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::alloc_network_learning_rates()
+void TDC0aTrainer<EFunc, LRPolicy>::alloc_network_learning_rates()
 {
    if (network_learning_rates == NULL)
       network_learning_rates = new LRPolicy(neural_network);
 }
 
 template<class EFunc, class LRPolicy>
-BaseNeuralNet& TD2Trainer<EFunc, LRPolicy>::get_neuralnet()
+BaseNeuralNet& TDC0aTrainer<EFunc, LRPolicy>::get_neuralnet()
 {
    return neural_network;
 }
 
 template<class EFunc, class LRPolicy>
-EFunc& TD2Trainer<EFunc, LRPolicy>::get_errorfunc()
+EFunc& TDC0aTrainer<EFunc, LRPolicy>::get_errorfunc()
 {
    return error_func;
 }
 
 template<class EFunc, class LRPolicy>
-LRPolicy& TD2Trainer<EFunc, LRPolicy>::get_learning_rates()
+void TDC0aTrainer<EFunc, LRPolicy>::set_slow_learning_rate_multiplier(
+      double _val)
+{
+   slow_lr_multiplier = _val;
+}
+
+template<class EFunc, class LRPolicy>
+LRPolicy& TDC0aTrainer<EFunc, LRPolicy>::get_learning_rates()
 {
    LRPolicy* learning_rates = dynamic_cast<LRPolicy*>(network_learning_rates);
    return *learning_rates;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::set_lambda(double l)
+void TDC0aTrainer<EFunc, LRPolicy>::set_lambda(double l)
 {
    lambda = l;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::set_gamma(double g)
+void TDC0aTrainer<EFunc, LRPolicy>::set_gamma(double g)
 {
    gamma = g;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::set_predict_final_cost()
+void TDC0aTrainer<EFunc, LRPolicy>::set_predict_final_cost()
 {
    predict_mode = FINAL_COST;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::set_predict_cumulative_cost()
+void TDC0aTrainer<EFunc, LRPolicy>::set_predict_cumulative_cost()
 {
    predict_mode = CUMULATIVE_COST;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::set_print_gradient(bool _val)
+void TDC0aTrainer<EFunc, LRPolicy>::set_print_gradient(bool _val)
 {
    print_gradient = _val;
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::train(
+void TDC0aTrainer<EFunc, LRPolicy>::train(
       const DataSet<Exemplar<Pattern, Pattern> >& trnset,
       const DataSet<Exemplar<Pattern, Pattern> >& vldset,
       const DataSet<Exemplar<Pattern, Pattern> >& tstset)
@@ -215,7 +225,7 @@ void TD2Trainer<EFunc, LRPolicy>::train(
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::train(
+void TDC0aTrainer<EFunc, LRPolicy>::train(
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _trnset,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _vldset,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _tstset)
@@ -240,6 +250,20 @@ void TD2Trainer<EFunc, LRPolicy>::train(
    init_train(_trnset, _vldset, _tstset);
    initialize_presentation_order(presentation_order);
 
+   unsigned int norm_size = 0;
+   unsigned int insize;
+
+   for (trainset_ndx = 0; trainset_ndx < _trnset.size(); trainset_ndx++)
+   {
+      const Exemplar<PatternSequence, PatternSequence>& exemplar = _trnset.at(trainset_ndx);
+      PatternSequence ipattseq = exemplar.input();
+      const Pattern& ipatt = ipattseq.at(0);
+
+      norm_size += ipattseq.size();
+
+      insize = ipatt().size();
+   }
+
    for (epoch_no = 0; stop_status == TRAINING; epoch_no++)
    {
       global_performance = 0;
@@ -262,7 +286,6 @@ void TD2Trainer<EFunc, LRPolicy>::train(
          {
             apply_delta_network_weights();
             zero_delta_network_weights();
-            zero_eligibility_trace();
          }
       }
       global_performance /= _trnset.size();
@@ -270,7 +293,21 @@ void TD2Trainer<EFunc, LRPolicy>::train(
       network_learning_rates->apply_learning_rate_adjustments();
 
       if (is_batch_mode())
+      {
          apply_delta_network_weights();
+         zero_delta_network_weights();
+
+         for (unsigned int i=0; i<insize+1; i++)
+            gE_td_phi.at(i) /= norm_size;
+
+         perf = 0;
+         for (unsigned int i=0; i<insize+1; i++)
+            perf += gE_td_phi.at(i) * w.at(i);
+
+         perf = sqrt(perf);
+
+         cout << "perf " << perf << endl;
+      }
 
       if (is_verbose_mode())
          cout << "global perf(" << epoch_no << ") = " << global_performance
@@ -330,7 +367,7 @@ void TD2Trainer<EFunc, LRPolicy>::train(
 }
 
 template<class EFunc, class LRPolicy>
-double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
+double TDC0aTrainer<EFunc, LRPolicy>::train_exemplar(
       const Exemplar<PatternSequence, PatternSequence>& exemplar)
 {
    vector<double> egradient(neural_network.get_output_size());
@@ -346,8 +383,8 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
          delta_network_weights_id);
 
    neural_network.clear_error();
-   zero_eligibility_trace();
 
+   double td_error;
    double patt_err = 0;
    double prev_patt_err = 0;
 
@@ -356,9 +393,20 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
    unsigned int pattern_ndx;
    Pattern prev_ipatt;
 
+   unsigned int insize = 0;
+   vector<vector<double> > inerr = neural_network.get_input_error();
+   for (unsigned int i = 0; i < inerr.size(); i++)
+      insize += inerr.at(i).size();
+
+   vector<double> quasi(insize, 0.0);
+   vector<double> prev_quasi(insize, 0.0);
+
    vector<double> cum_tgt_vec(neural_network.get_output_size());
    vector<double> pred_vec(neural_network.get_output_size());
    Pattern cum_tgtpatt;
+
+   vector<double> dEdB;
+   Array<double> dEdW(1,insize);
 
    //cout << "********************" << endl;
    for (pattern_ndx = 0; pattern_ndx < ipattseq.size(); pattern_ndx++)
@@ -366,18 +414,28 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
       const Pattern& ipatt = ipattseq.at(pattern_ndx);
       const Pattern& tgtpatt = tgtpattseq.at(pattern_ndx);
 
-      // Present input pattern and get output
+      prev_dEdB = dEdB;
+      prev_dEdW = dEdW;
 
+      // Present input pattern and get output
       const Pattern& netout = neural_network(ipatt);
       opatt = netout;
 
-      // Save network gradients before accumulating new gradient
-      save_eligibility_trace();
-
       neural_network.clear_error();
       neural_network.backprop(ugradient);
+      const vector<BaseLayer*> network_layers =
+            neural_network.get_network_layers();
 
-      update_eligibility_trace();
+      for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
+      {
+         BaseLayer& layer = *network_layers[ndx];
+         const string& name = layer.name();
+
+         LayerWeightsData& layer_deltas = network_deltas.layer_weights(name);
+
+         dEdB = layer.get_dEdB();
+         dEdW = layer.get_dEdW();
+      }
 
       // The first pattern can't learn anything
       if (pattern_ndx == 0)
@@ -389,45 +447,25 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
       {
          prev_opatt = neural_network(prev_ipatt);
 
-         if (predict_mode == FINAL_COST)
+
+         if (pattern_ndx < ipattseq.size() - 1)
+            td_error = tgtpatt().at(0) + gamma * opatt().at(0)
+                  - prev_opatt().at(0);
+         else
          {
-            if (tgtpatt().size() > 0)
-            {
-               error_func(patt_sse, egradient, prev_opatt, tgtpatt);
-            }
-            else
-            {
-               error_func(patt_sse, egradient, prev_opatt, opatt);
-            }
-         }
-         else if (predict_mode == CUMULATIVE_COST)
-         {
-            for (unsigned int i = 0; i < prev_opatt().size(); i++)
-               pred_vec[i] = prev_opatt().at(i);
-
-            prev_patt_err = patt_err;
-
-            if (pattern_ndx < ipattseq.size() - 1)
-               patt_err =
-                  -((gamma * opatt().at(0) + tgtpatt().at(0)) - pred_vec[0]);
-            else
-               patt_err = -(tgtpatt().at(0) - pred_vec[0]);
-
-            //cout << pattern_ndx << ">" << patt_err - gamma * prev_patt_err << endl;
-
-            //egradient[0] = patt_err;
-            //if (tgtpatt().at(0) == 0.0)
-            //   egradient[0] = -(tgtpatt().at(0) - pred_vec[0]);
-            //else
-               //egradient[0] = patt_err - (1 - lambda) * gamma * prev_patt_err;
-               egradient[0] = patt_err - gamma * prev_patt_err;
-
-            patt_sse = 0.5 * (patt_err * patt_err);
+            td_error = tgtpatt().at(0) - prev_opatt().at(0);
+            //cout << "tderr " << td_error << " : tgt " << tgtpatt().at(0) << endl;
          }
 
-         seq_sse += patt_sse;
+         gE_td_phi.at(0) += td_error;
+         for (unsigned int i=0; i<insize; i++)
+            gE_td_phi.at(i+1) += td_error * prev_ipatt().at(i);
 
-         network_learning_rates->update_learning_rate_adjustments(1);
+         egradient[0] = td_error;
+
+         seq_sse += td_error * td_error;
+
+         // network_learning_rates->update_learning_rate_adjustments(1);
 
          /*
           * Calculate the weight updates for the PREVIOUS network activation
@@ -441,8 +479,8 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
 
             LayerWeightsData& layer_deltas = network_deltas.layer_weights(name);
 
-            calc_layer_bias_adj(layer, 1, layer_deltas.biases, egradient);
-            calc_layer_weight_adj(layer, 1, layer_deltas.weights, egradient);
+            calc_layer_weight_adj(layer, (unsigned int) 1, layer_deltas.biases,
+                  layer_deltas.weights, td_error, dEdB, dEdW);
          }
       }
 
@@ -461,129 +499,14 @@ double TD2Trainer<EFunc, LRPolicy>::train_exemplar(
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::save_eligibility_trace()
+void TDC0aTrainer<EFunc, LRPolicy>::calc_layer_weight_adj(const BaseLayer& layer,
+      unsigned int timeStep, vector<double>& biasDelta,
+      Array<double>& weightDelta, double td_error,
+      const vector<double>& dEdB, const Array<double>& dEdW)
 {
-   const vector<BaseLayer*> network_layers =
-         neural_network.get_network_layers();
-   for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
-   {
-      BaseLayer& layer = *network_layers[ndx];
-      string name = layer.name();
-
-      // Save eligibility dAdB
-      Array<double>& etrace_dAdB = etrace_dAdB_map[name];
-      Array<double>& prev_etrace_dAdB = prev_etrace_dAdB_map[name];
-
-      prev_etrace_dAdB = etrace_dAdB;
-
-      // Save eligibility dAdW
-      Array<double>& etrace_dAdW = etrace_dAdW_map[name];
-      Array<double>& prev_etrace_dAdW = prev_etrace_dAdW_map[name];
-
-      prev_etrace_dAdW = etrace_dAdW;
-   }
-}
-
-template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::update_eligibility_trace()
-{
-
-   if (print_gradient)
-      cout << " *** Update network eligibility trace *****" << endl;
-
-   const vector<BaseLayer*> network_layers =
-         neural_network.get_network_layers();
-   for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
-   {
-      BaseLayer& layer = *network_layers[ndx];
-      string name = layer.name();
-
-      if (print_gradient)
-         cout << "============= " << name << " ==============" << endl;
-
-      double prev_sum;
-      double temp = 0;
-
-      Array<double>& etrace_dAdB = etrace_dAdB_map[name];
-      const vector<double>& dEdB = layer.get_dEdB();
-
-      if (print_gradient)
-         cout << "   dAdB : " << endl;
-
-      for (unsigned int bias_ndx = 0; bias_ndx < dEdB.size(); bias_ndx++)
-      {
-         prev_sum = etrace_dAdB.at(bias_ndx, bias_ndx);
-         etrace_dAdB.at(bias_ndx, bias_ndx) = dEdB.at(bias_ndx)
-               + lambda * prev_sum;
-
-         if (print_gradient)
-         {
-            if (bias_ndx > 0)
-               cout << ", ";
-            cout << etrace_dAdB.at(bias_ndx, bias_ndx);
-         }
-      }
-      if (print_gradient)
-         cout << endl << "-------------" << endl;
-
-      Array<double>& etrace_dAdW = etrace_dAdW_map[name];
-      const Array<double>& dEdW = layer.get_dEdW();
-
-      if (print_gradient)
-         cout << "   dAdW : " << endl;
-
-      unsigned int layer_input_size = layer.input_size();
-      for (unsigned int out_ndx = 0; out_ndx < layer.size(); out_ndx++)
-      {
-         for (unsigned int in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
-         {
-            prev_sum = etrace_dAdW.at(out_ndx, in_ndx);
-            etrace_dAdW.at(out_ndx, in_ndx) = dEdW.at(out_ndx, in_ndx)
-                  + lambda * prev_sum;
-
-
-            if (print_gradient)
-            {
-               if (in_ndx > 0)
-                  cout << ", ";
-               cout << etrace_dAdW.at(out_ndx, in_ndx);
-            }
-         }
-         if (print_gradient)
-            cout << endl;
-      }
-      if (print_gradient)
-         cout << "-------------" << endl;
-   }
-   if (print_gradient)
-      cout << "==========================" << endl;
-}
-
-template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::calc_layer_bias_adj(
-      const BaseLayer& layer, unsigned int timeStep, vector<double>& biasDelta,
-      const vector<double>& errorv)
-{
-   Array<double>& etrace_dAdB = prev_etrace_dAdB_map[layer.name()];
-
    // Get the learning rates for the biases
    vector<double> layer_bias_lr =
          network_learning_rates->get_bias_learning_rates().at(layer.name());
-
-   for (unsigned int bias_ndx = 0; bias_ndx < biasDelta.size(); bias_ndx++)
-   {
-      for (unsigned int err_ndx = 0; err_ndx < errorv.size(); err_ndx++)
-         biasDelta.at(bias_ndx) += -layer_bias_lr[bias_ndx] * errorv.at(err_ndx)
-               * etrace_dAdB.at(bias_ndx, bias_ndx);
-   }
-}
-
-template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::calc_layer_weight_adj(
-      const BaseLayer& layer, unsigned int timeStep, Array<double>& weightDelta,
-      const vector<double>& errorv)
-{
-   Array<double>& etrace_dAdW = prev_etrace_dAdW_map[layer.name()];
 
    // Get the learning rates for the weights
    Array<double> layer_weights_lr =
@@ -592,12 +515,48 @@ void TD2Trainer<EFunc, LRPolicy>::calc_layer_weight_adj(
    unsigned int layer_size = layer.size();
    unsigned int layer_input_size = layer.input_size();
 
-   for (unsigned int out_ndx = 0; out_ndx < layer_size; out_ndx++)
-      for (unsigned int in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
-         for (unsigned int err_ndx = 0; err_ndx < errorv.size(); err_ndx++)
-            weightDelta.at(out_ndx, in_ndx) += -layer_weights_lr.at(out_ndx,
-                  in_ndx) * errorv.at(err_ndx)
-                  * etrace_dAdW.at(out_ndx, in_ndx);
+   // Calc phi~ * w for vector phi and prev_w
+   double phi_w = w.at(0); // this is for bias
+   //cout << "[";
+   for (unsigned int in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
+   {
+      //cout << " " << prevS.at(in_ndx);
+      // phi_w += prev_dEdW.at(0, in_ndx) * prev_w.at(in_ndx+1);
+      phi_w += prev_dEdW.at(0, in_ndx) * w.at(in_ndx + 1);
+   }
+   //cout << "]" << endl;
+
+   double theta_p_b;
+   vector<double> theta_p(layer_input_size);
+
+   prev_w = w;
+   prev_wb = wb;
+
+   w.at(0) = prev_w.at(0)
+         + slow_lr_multiplier * layer_weights_lr.at(0, 0) * (td_error - phi_w)  * prev_dEdB.at(0);
+   for (unsigned int in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
+   {
+      /*
+       w.at(in_ndx+1) = prev_w.at(in_ndx+1) + layer_weights_lr.at(0, in_ndx) * (td_error - phi_w)
+       * prev_dEdW.at(0, in_ndx);
+       *
+       theta_p.at(in_ndx) = td_error * prev_dEdW.at(0, in_ndx)
+       - gamma * dEdW.at(0, in_ndx) * phi_w;
+       */
+
+      w.at(in_ndx + 1) = prev_w.at(in_ndx + 1)
+            + slow_lr_multiplier * layer_weights_lr.at(0, in_ndx)
+                  * (td_error - phi_w) * prev_dEdW.at(0, in_ndx);
+
+      theta_p.at(in_ndx) = td_error * prev_dEdW.at(0, in_ndx)
+            - gamma * dEdW.at(0, in_ndx) * phi_w;
+
+      weightDelta.at(0, in_ndx) += layer_weights_lr.at(0, in_ndx)
+            * theta_p.at(in_ndx);
+   }
+
+   theta_p_b = td_error - gamma * phi_w;
+   biasDelta.at(0) += layer_bias_lr.at(0) * theta_p_b;
 }
 
 /*
@@ -605,7 +564,7 @@ void TD2Trainer<EFunc, LRPolicy>::calc_layer_weight_adj(
  * For example structures to hold and accumulate the weight and bias deltas.
  */
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::init_train(
+void TDC0aTrainer<EFunc, LRPolicy>::init_train(
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _trnset,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _vldset,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _tstset)
@@ -615,13 +574,9 @@ void TD2Trainer<EFunc, LRPolicy>::init_train(
 
    network_learning_rates->reset();
 
-   TrainingRecord::Entry& entry = calc_performance_data(0, _trnset, _vldset,
-         _tstset);
-
    clear_training_record();
    unsigned int epoch = 0;
    unsigned int stop_sig = BaseTrainer::TRAINING;
-   update_training_record(epoch, stop_sig, entry);
 
    save_weights(failback_weights_id);
    save_weights(best_weights_id);
@@ -635,17 +590,18 @@ void TD2Trainer<EFunc, LRPolicy>::init_train(
       unsigned int output_sz = layer.size();
       unsigned int input_sz = layer.input_size();
 
-      etrace_dAdB_map[name] = Array<double>();
-      etrace_dAdB_map[name].resize(output_sz, output_sz);
+      wb = 0;
+      prev_wb = 0;
+      w.resize(input_sz + 1, 0.0);
+      w.assign(input_sz+1, 0.0);
+      prev_w.resize(input_sz + 1, 0.0);
+      prev_w.assign(input_sz+1, 0.0);
 
-      etrace_dAdW_map[name] = Array<double>();
-      etrace_dAdW_map[name].resize(output_sz, input_sz);
+      prev_dEdB.resize(output_sz);
+      prev_dEdW.resize(output_sz, input_sz);
 
-      prev_etrace_dAdB_map[name] = Array<double>();
-      prev_etrace_dAdB_map[name].resize(output_sz, output_sz);
-
-      prev_etrace_dAdW_map[name] = Array<double>();
-      prev_etrace_dAdW_map[name].resize(output_sz, input_sz);
+      gE_td_phi.resize(input_sz + 1, 0.0);
+      gE_td_phi.assign(input_sz+1, 0.0);
    }
 
    //   prev_outputv.resize(neural_network.get_output_size());
@@ -657,37 +613,15 @@ void TD2Trainer<EFunc, LRPolicy>::init_train(
  * and bias deltas and etc.
  */
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::init_training_epoch()
+void TDC0aTrainer<EFunc, LRPolicy>::init_training_epoch()
 {
    neural_network.clear_error();
    zero_delta_network_weights();
-   zero_eligibility_trace();
    save_weights(failback_weights_id);
 }
 
 template<class EFunc, class LRPolicy>
-void TD2Trainer<EFunc, LRPolicy>::zero_eligibility_trace()
-{
-   /* ******************************************
-    *    Zero bias and weight deltas
-    */
-   const vector<BaseLayer*> network_layers =
-         neural_network.get_network_layers();
-   for (unsigned int ndx = 0; ndx < network_layers.size(); ndx++)
-   {
-      BaseLayer& layer = *network_layers[ndx];
-      const string& name = layer.name();
-
-      Array<double>& etrace_dAdB = etrace_dAdB_map[name];
-      Array<double>& etrace_dAdW = etrace_dAdW_map[name];
-
-      etrace_dAdB = 0;
-      etrace_dAdW = 0;
-   }
-}
-
-template<class EFunc, class LRPolicy>
-TrainingRecord::Entry& TD2Trainer<EFunc, LRPolicy>::calc_performance_data(
+TrainingRecord::Entry& TDC0aTrainer<EFunc, LRPolicy>::calc_performance_data(
       unsigned int _epoch,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _trnset,
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _vldset,
@@ -698,18 +632,18 @@ TrainingRecord::Entry& TD2Trainer<EFunc, LRPolicy>::calc_performance_data(
 
    entry.set_epoch(_epoch);
 
-   perf = sim(_trnset);
+   perf = sim2(_trnset);
    entry.set_training_perf(perf);
 
    if (_vldset.size() > 0)
    {
-      perf = sim(_vldset);
+      perf = sim2(_vldset);
       entry.set_validation_perf(perf);
    }
 
    if (_tstset.size() > 0)
    {
-      perf = sim(_tstset);
+      perf = sim2(_tstset);
       entry.set_test_perf(perf);
    }
 
@@ -717,7 +651,7 @@ TrainingRecord::Entry& TD2Trainer<EFunc, LRPolicy>::calc_performance_data(
 }
 
 template<class EFunc, class LRPolicy>
-double TD2Trainer<EFunc, LRPolicy>::sim(
+double TDC0aTrainer<EFunc, LRPolicy>::sim(
       const DataSet<Exemplar<PatternSequence, PatternSequence> >& _dataset)
 {
    long epoch_no;
@@ -772,10 +706,10 @@ double TD2Trainer<EFunc, LRPolicy>::sim(
                   pred_vec[i] = prev_opatt().at(i);
 
                if (pattern_ndx < ipattseq.size() - 1)
-                  patt_err =
-                     -((gamma * opatt().at(0) + tgtpatt().at(0)) - pred_vec[0]);
+                  patt_err = tgtpatt().at(0) + gamma * opatt().at(0)
+                        - pred_vec[0];
                else
-                  patt_err = -(tgtpatt().at(0) - pred_vec[0]);
+                  patt_err = tgtpatt().at(0) - pred_vec[0];
 
                patt_sse = 0.5 * (patt_err * patt_err);
             }
@@ -798,6 +732,141 @@ double TD2Trainer<EFunc, LRPolicy>::sim(
    return global_performance;
 }
 
+
+/* Matrix inversion routine.
+ Uses lu_factorize and lu_substitute in uBLAS to invert a matrix */
+template<class EFunc, class LRPolicy>
+bool TDC0aTrainer<EFunc, LRPolicy>::InvertMatrix(const boost::numeric::ublas::matrix<double>& input, boost::numeric::ublas::matrix<double>& inverse)
+{
+    typedef boost::numeric::ublas::permutation_matrix<std::size_t> pmatrix;
+
+    // create a working copy of the input
+    boost::numeric::ublas::matrix<double> A(input);
+
+    // create a permutation matrix for the LU-factorization
+    pmatrix pm(A.size1());
+
+    // perform LU-factorization
+    int res = boost::numeric::ublas::lu_factorize(A, pm);
+    if (res != 0)
+        return false;
+
+    // create identity matrix of "inverse"
+    inverse.assign(boost::numeric::ublas::identity_matrix<double> (A.size1()));
+
+    // backsubstitute to get the inverse
+    boost::numeric::ublas::lu_substitute(A, pm, inverse);
+
+    return true;
+}
+
+template<class EFunc, class LRPolicy>
+double TDC0aTrainer<EFunc, LRPolicy>::sim2(
+      const DataSet<Exemplar<PatternSequence, PatternSequence> >& _dataset)
+{
+   long epoch_no;
+   unsigned int trainset_ndx;
+   double perf;
+   unsigned int sample_count = 0;
+
+   vector<double> gradient(neural_network.get_output_size());
+   Pattern prev_opatt = vector<double>(neural_network.get_output_size());
+   Pattern prev_ipatt;
+
+   vector<double> cum_tgt_vec(neural_network.get_output_size());
+   vector<double> pred_vec(neural_network.get_output_size());
+   Pattern cum_tgtpatt;
+
+   double global_performance = 0;
+
+   const Exemplar<PatternSequence, PatternSequence>& temp_exemplar =
+         _dataset.at(0);
+
+   PatternSequence temp_ipattseq = temp_exemplar.input();
+
+
+   const Pattern& temp_ipatt = temp_ipattseq.at(0);
+   unsigned int ipatt_size = temp_ipatt().size();
+
+   vector<double> E_td_phi(ipatt_size, 0.0);
+   vector<double> w(ipatt_size, 0.0);
+   boost::numeric::ublas::matrix<double> E_cov_phi(ipatt_size, ipatt_size);
+   boost::numeric::ublas::matrix<double> Inv_E_cov_phi(ipatt_size, ipatt_size);
+
+   for (unsigned int i = 0; i < ipatt_size; i++)
+      for (unsigned int j = 0; j < ipatt_size; j++)
+         E_cov_phi(i, j) = 0.0;
+
+   for (trainset_ndx = 0; trainset_ndx < _dataset.size(); trainset_ndx++)
+   {
+      const Exemplar<PatternSequence, PatternSequence>& exemplar = _dataset.at(
+            trainset_ndx);
+
+      PatternSequence ipattseq = exemplar.input();
+      PatternSequence tgtpattseq = exemplar.target_output();
+
+      double td_err = 0;
+      double td_patt_err = 0;
+
+      double patt_sse = 0;
+      double seq_sse = 0;
+      for (unsigned int pattern_ndx = 0; pattern_ndx < ipattseq.size();
+            pattern_ndx++)
+      {
+         const Pattern& ipatt = ipattseq.at(pattern_ndx);
+         const Pattern& tgtpatt = tgtpattseq.at(pattern_ndx);
+
+         // Present input pattern and get output
+         const Pattern& opatt = neural_network(ipatt);
+
+         if (pattern_ndx > 0)
+         {
+            if (pattern_ndx < ipattseq.size() - 1)
+               td_err = tgtpatt().at(0) + gamma * opatt().at(0)
+                     - prev_opatt().at(0);
+            else
+               td_err = tgtpatt().at(0) - prev_opatt().at(0);
+
+            for (unsigned in_ndx = 0; in_ndx < prev_ipatt().size(); in_ndx++)
+               E_td_phi.at(in_ndx) += td_err * prev_ipatt().at(in_ndx);
+
+            for (unsigned int i = 0; i < ipatt_size; i++)
+               for (unsigned int j = 0; j < ipatt_size; j++)
+                   E_cov_phi(i, j) += prev_ipatt().at(i) * prev_ipatt().at(j);
+
+
+            sample_count++;
+         }
+
+         prev_opatt = opatt;
+         prev_ipatt = ipatt;
+      }
+   }
+
+   if (sample_count > 0)
+   {
+      for (unsigned in_ndx = 0; in_ndx < ipatt_size; in_ndx++)
+         E_td_phi.at(in_ndx) /= sample_count;
+
+      for (unsigned int i = 0; i < ipatt_size; i++)
+         for (unsigned int j = 0; j < ipatt_size; j++)
+            E_cov_phi(i, j) /= sample_count;
+
+      InvertMatrix(E_cov_phi, Inv_E_cov_phi);
+
+      for (unsigned int i = 0; i < ipatt_size; i++)
+         for (unsigned int j = 0; j < ipatt_size; j++)
+            w.at(i) += Inv_E_cov_phi(i,j) * E_td_phi.at(j);
+
+      for (unsigned int i = 0; i < ipatt_size; i++)
+         global_performance += E_td_phi.at(i) * w.at(i);
+
+      global_performance = sqrt(global_performance);
+   }
+
+   return global_performance;
+}
+
 } /* namespace flex_neuralnet */
 
-#endif /* FLEX_NEURALNET_TD2TRAINER_H_ */
+#endif /* FLEX_NEURALNET_TDCTRAINER_H_ */

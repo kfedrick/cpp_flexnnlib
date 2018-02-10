@@ -1,16 +1,18 @@
 /*
- * ConnectionMap.h
+ * HvMap.h
  *
  *  Created on: Jan 31, 2014
  *      Author: kfedrick
  */
 
-#ifndef FLEX_NEURALNET_CONNECTIONMAP_H_
-#define FLEX_NEURALNET_CONNECTIONMAP_H_
+#ifndef FLEX_NEURALNET_HVMAP_H_
+#define FLEX_NEURALNET_HVMAP_H_
 
+#include "ConnectionMap.h"
 #include "BaseLayer.h"
 #include "Pattern.h"
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -18,49 +20,7 @@ namespace flex_neuralnet
 {
 
 
-class ConnectionEntry
-{
-public:
-   ConnectionEntry(BaseLayer& from, bool recurrent=false);
-   ConnectionEntry(unsigned int ndx, const vector<double>& inputv);
-   virtual ~ConnectionEntry();
-
-   bool is_input_connection() const;
-   bool is_recurrent() const;
-
-   unsigned int get_input_pattern_index() const;
-   unsigned int get_input_vector_size() const;
-   BaseLayer& get_input_layer() const;
-
-   void set_recurrent(bool val);
-
-private:
-   BaseLayer* input_layer;
-
-   /*
-    * This flag indicates that the connection is from the network input
-    */
-   bool input_connection_flag;
-
-   /*
-    * Index into the network input pattern for this connection
-    */
-   unsigned int input_pattern_index;
-
-   /*
-    * Size of the network input vector
-    */
-   unsigned int input_vector_size;
-
-   /*
-    * This must be mutable so we can reassign this flag as we add
-    * new connections.
-    */
-   mutable bool recurrent_connection_flag;
-};
-
-
-class ConnectionMap
+class HvMap
 {
 
 public:
@@ -69,9 +29,9 @@ public:
     *    Constructors, Destructors
     * **********************************************************************
     */
-   ConnectionMap();
-   ConnectionMap(BaseLayer& target);
-   virtual ~ConnectionMap();
+
+   HvMap(const ConnectionMap& _connMap, const map<string, vector<double>>& _ryMap);
+   virtual ~HvMap();
 
    /* ***********************************************************************
     *    Accessor functons
@@ -88,7 +48,7 @@ public:
     */
    int input_map_size() const;
 
-   const vector<double>& operator()(const Pattern& inpattern, unsigned int timeStep = 1, unsigned int closedLoopStep = 0);
+   const vector<double>& operator()();
 
    const vector< vector<double> >& get_error(const vector<double>& errorv);
 
@@ -107,13 +67,12 @@ public:
    void connect(BaseLayer& layer, bool recurrent = false);
    void connect(const Pattern& ipattern, unsigned int patternNdx);
 
-   const vector<ConnectionEntry>& get_input_connections() const;
    vector<ConnectionEntry>& get_input_connections();
 
 private:
 
    /* ***********************************************************************
-    *    Activation functons
+    *    Activation functions
     * ***********************************************************************
     */
 
@@ -142,9 +101,11 @@ private:
     * Local vector to hold the backpropogated error vector for each input layer
     */
    vector< vector<double> > backprop_error_vector;
+
+   const map<string, vector<double>>& Ry_map;
 };
 
 
 } /* namespace flex_neuralnet */
 
-#endif /* FLEX_NEURALNET_CONNECTIONMAP_H_ */
+#endif /* FLEX_NEURALNET_HVMAP_H_ */

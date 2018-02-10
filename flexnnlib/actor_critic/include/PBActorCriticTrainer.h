@@ -1,17 +1,17 @@
 /*
- * ActorCriticTrainer.h
+ * PBActorCriticTrainer.h
  *
  *  Created on: Mar 22, 2015
  *      Author: kfedrick
  */
 
-#ifndef FLEX_NEURALNET_ACTORCRITIC_TRAINER_H_
-#define FLEX_NEURALNET_ACTORCRITIC_TRAINER_H_
+#ifndef FLEX_NEURALNET_PBACTORCRITIC_TRAINER_H_
+#define FLEX_NEURALNET_PBACTORCRITIC_TRAINER_H_
 
 #include <vector>
 #include <string>
 
-#include "ActorCriticNet.h"
+#include "PBActorCriticNet.h"
 #include "EnvironmentSimulator.h"
 #include "TrainingRecord.h"
 #include "NetworkWeightsData.h"
@@ -23,18 +23,20 @@ using namespace std;
 namespace flex_neuralnet
 {
 
-class ActorCriticTrainer
+class PBActorCriticTrainer
 {
 public:
-   ActorCriticTrainer(ActorCriticNet& _model);
-   virtual ~ActorCriticTrainer();
+   PBActorCriticTrainer(PBActorCriticNet& _model);
+   virtual ~PBActorCriticTrainer();
 
    /* ***************************************************
     *    Public setter methods
     */
    void set_max_epochs(long _epochs);
    void set_lambda(double l);
+   void set_gamma(double l);
    void set_global_learning_rate(double _rate);
+   void set_slow_learning_rate_multiplier(double _val);
    void set_actor_learning_rate(double _rate);
    void set_critic_learning_rate(double _rate);
    void set_learning_momentum(double _rate);
@@ -45,6 +47,9 @@ public:
    void set_batch_mode();
    void set_minibatch_mode(unsigned int _size);
    void set_online_mode();
+
+   void set_predict_final_cost();
+   void set_predict_cumulative_cost();
 
    void set_random_order_mode(bool _val);
    void set_report_frequency(int _freq);
@@ -83,50 +88,40 @@ public:
    virtual double sim(EnvironmentSimulator* _env, unsigned int _sampleCount);
    virtual double sim_critic(EnvironmentSimulator* _env, unsigned int _sampleCount);
 
+   virtual double sim2(EnvironmentSimulator* _env, unsigned int _sampleCount);
+   virtual double sim_critic2(EnvironmentSimulator* _env, unsigned int _sampleCount);
+
    virtual void train(EnvironmentSimulator* _trainingEnvSet, double _objVal);
-   virtual void train2(EnvironmentSimulator* _trainingEnvSet, double _objVal);
-   virtual void train3(EnvironmentSimulator* _trainingEnvSet, double _objVal);
-
-   virtual double train_critic(EnvironmentSimulator* _trainingEnvSet, unsigned int _batchSize);
-   virtual double train_actor(EnvironmentSimulator* _trainingEnvSet, double _objVal, unsigned int _batchSize);
-
+   virtual void train(EnvironmentSimulator* _trainingEnvSet, EnvironmentSimulator* _testEnvSet, double _objVal);
 
 private:
    void init_train();
    void init_training_epoch();
    virtual double train_exemplar(EnvironmentSimulator* _trainingEnv, double _objVal, bool _updateActorFlag);
+   virtual double train_exemplar2(EnvironmentSimulator* _trainingEnv, double _objVal, bool _updateActorFlag);
 
-   virtual void calc_network_adj(const BaseNeuralNet& _net, const vector<double>& errorv);
-
-   void calc_layer_bias_adj(const BaseNeuralNet& _net, const BaseLayer& layer, unsigned int timeStep,
-         vector<double>& biasDelta, const vector<double>& errorv);
-   void calc_layer_weight_adj(const BaseNeuralNet& _net, const BaseLayer& layer, unsigned int timeStep,
-         Array<double>& weightDelta, const vector<double>& errorv);
-
+   virtual void calc_critic_adj(const TDCNeuralNet& _net, double _tdError);
+   virtual void calc_actor_adj(const TDCNeuralNet& _net, double _tdErr);
+   virtual void calc_actor_adj2(const TDCNeuralNet& _net, double _Err);
    virtual void activate_actor_critic(const Pattern& _currStateVec, const Pattern& _actionVec);
-
-   void save_network_eligibility_trace();
-   void save_network_eligibility_trace(const BaseNeuralNet& _net);
-
-   void update_network_eligibility_trace();
-   void update_network_eligibility_trace(const BaseNeuralNet& _net);
-
-   void zero_network_eligibility_trace();
-   void zero_network_eligibility_trace(const BaseNeuralNet& _net);
 
    void reduce_learning_rates(double val);
 
 protected:
+
+   // Save gradient info for critic and actor networks
+      void save_critic_gradient();
+      void save_actor_gradient();
 
    /* ****************************************************
     *    Protected methods to save and restore network
     *    network weights
     */
    void save_weights(const string& _id);
-   void save_weights(const string& _id, const BaseNeuralNet& _net);
+   void save_weights(const string& _id, const TDCNeuralNet& _net);
 
    void restore_weights(const string& _id);
-   void restore_weights(const string& _id, const BaseNeuralNet& _net);
+   void restore_weights(const string& _id, const TDCNeuralNet& _net);
 
 
    /* *****************************************************
@@ -134,18 +129,18 @@ protected:
     *    weight training deltas and other weights cache
     */
    bool initialized;
-   NetworkWeightsData& get_cached_network_weights(const string& _id, const BaseNeuralNet& _net);
+   NetworkWeightsData& get_cached_network_weights(const string& _id, const TDCNeuralNet& _net);
 
    void alloc_network_weights_cache_entry(
          const string& _id);
    void alloc_network_weights_cache_entry(
-         const string& _id, const BaseNeuralNet& _net);
+         const string& _id, const TDCNeuralNet& _net);
 
    void apply_delta_network_weights();
-   void apply_delta_network_weights(BaseNeuralNet& _net);
+   void apply_delta_network_weights(TDCNeuralNet& _net);
 
    void zero_delta_network_weights();
-   void zero_delta_network_weights(const BaseNeuralNet& _net);
+   void zero_delta_network_weights(const TDCNeuralNet& _net);
 
    void alloc_network_learning_rates();
 
@@ -160,7 +155,7 @@ protected:
     *    Protected utility functions
     */
    int urand(int n);
-   const string& genkey(const BaseNeuralNet& _net, const string& _id);
+   const string& genkey(const TDCNeuralNet& _net, const string& _id);
 
 protected:
 
@@ -225,7 +220,7 @@ private:
    /* ***********************************************
     *    The actor-critic model
     */
-   ActorCriticNet& actor_critic_model;
+   PBActorCriticNet& actor_critic_model;
 
    /* ***********************************************
     *    Protected working storage data members
@@ -241,38 +236,55 @@ private:
     *   learning rate policy
     */
      //map<string, DeltaBarDeltaLearningRate*> network_learning_rates_map;
-     map<string, DeltaBarDeltaLearningRate*> network_learning_rates_map;
+     map<string, ConstantLearningRate*> network_learning_rates_map;
 
+     double slow_lr_multiplier;
      double lambda;
+     double gamma;
      Prediction_Mode predict_mode;
 
-     map<string, Array<double> > etrace_dAdB_map;
-     map<string, Array<double> > etrace_dAdW_map;
+     map<string, vector<double> > prev_critic_dEdB_map;
+     map<string, Array<double> > prev_critic_dEdW_map;
+     map<string, Array<double> > prev_critic_Hv_map;
 
-     map<string, Array<double> > cumulative_dAdN_map;
-     map<string, Array<double> > cumulative_dNdW_map;
+     map<string, Array<double> > w_critic_map;
 
-     map<string, Array<double> > prev_etrace_dAdB_map;
-     map<string, Array<double> > prev_etrace_dAdW_map;
+     map<string, vector<double> > prev_actor_dEdB_map;
+     map<string, Array<double> > prev_actor_dEdW_map;
+     map<string, Array<double> > prev_actor_Hv_map;
 
-     map<string, Array<double> > prev_cumulative_dAdN_map;
-     map<string, Array<double> > prev_cumulative_dNdW_map;
+     map<string, Array<double> > w_actor_map;
+
+     map<string, Array<double>> gE_td_phi;
+     double gE_norm;
 };
 
 inline
-void ActorCriticTrainer::set_max_epochs(long _epochs)
+void PBActorCriticTrainer::set_max_epochs(long _epochs)
 {
    max_training_epochs = _epochs;
 }
 
 inline
-void ActorCriticTrainer::set_lambda(double l)
+void PBActorCriticTrainer::set_lambda(double l)
 {
    lambda = l;
 }
 
 inline
-void ActorCriticTrainer::set_learning_momentum(double _rate)
+void PBActorCriticTrainer::set_gamma(double g)
+{
+   gamma = g;
+}
+
+inline
+void PBActorCriticTrainer::set_slow_learning_rate_multiplier(double _val)
+{
+   slow_lr_multiplier = _val;
+}
+
+inline
+void PBActorCriticTrainer::set_learning_momentum(double _rate)
 {
    if (_rate < 0)
    {
@@ -286,147 +298,159 @@ void ActorCriticTrainer::set_learning_momentum(double _rate)
 }
 
 inline
-void ActorCriticTrainer::set_performance_goal(double _perf)
+void PBActorCriticTrainer::set_performance_goal(double _perf)
 {
    perf_goal = _perf;
 }
 
 inline
-void ActorCriticTrainer::set_min_gradient(double _min)
+void PBActorCriticTrainer::set_min_gradient(double _min)
 {
    min_perf_gradient = _min;
 }
 
 inline
-void ActorCriticTrainer::set_max_validation_failures(int _count)
+void PBActorCriticTrainer::set_max_validation_failures(int _count)
 {
    max_validation_fail = _count;
 }
 
 inline
-void ActorCriticTrainer::set_batch_mode()
+void PBActorCriticTrainer::set_batch_mode()
 {
    batch_mode = true;
    batch_size = 0;
 }
 
 inline
-void ActorCriticTrainer::set_minibatch_mode(unsigned int _size)
+void PBActorCriticTrainer::set_minibatch_mode(unsigned int _size)
 {
    batch_mode = true;
    batch_size = _size;
 }
 
 inline
-void ActorCriticTrainer::set_online_mode()
+void PBActorCriticTrainer::set_online_mode()
 {
    batch_mode = false;
 }
 
 inline
-void ActorCriticTrainer::set_random_order_mode(bool _val)
+void PBActorCriticTrainer::set_predict_final_cost()
+{
+   predict_mode = FINAL_COST;
+}
+
+inline
+void PBActorCriticTrainer::set_predict_cumulative_cost()
+{
+   predict_mode = CUMULATIVE_COST;
+}
+
+inline
+void PBActorCriticTrainer::set_random_order_mode(bool _val)
 {
    random_order_mode = _val;
 }
 
 inline
-void ActorCriticTrainer::set_verbose(bool _mode)
+void PBActorCriticTrainer::set_verbose(bool _mode)
 {
    verbose_mode = _mode;
 }
 
 inline
-void ActorCriticTrainer::set_print_gradient(bool _val)
+void PBActorCriticTrainer::set_print_gradient(bool _val)
 {
    print_gradient = _val;
 }
 
 inline
-void ActorCriticTrainer::set_report_frequency(int _freq)
+void PBActorCriticTrainer::set_report_frequency(int _freq)
 {
    report_freq = _freq;
 }
 
 inline
-void ActorCriticTrainer::set_critic_batch_size(unsigned int _sz)
+void PBActorCriticTrainer::set_critic_batch_size(unsigned int _sz)
 {
    critic_batch_size = _sz;
 }
 
 inline
-void ActorCriticTrainer::set_actor_batch_size(unsigned int _sz)
+void PBActorCriticTrainer::set_actor_batch_size(unsigned int _sz)
 {
    actor_batch_size = _sz;
 }
 
 inline
-long ActorCriticTrainer::max_epochs()
+long PBActorCriticTrainer::max_epochs()
 {
    return max_training_epochs;
 }
 
 inline
-double ActorCriticTrainer::performance_goal()
+double PBActorCriticTrainer::performance_goal()
 {
    return perf_goal;
 }
 
 inline
-double ActorCriticTrainer::min_gradient()
+double PBActorCriticTrainer::min_gradient()
 {
    return min_perf_gradient;
 }
 
 inline
-int ActorCriticTrainer::max_validation_failures()
+int PBActorCriticTrainer::max_validation_failures()
 {
    return max_validation_fail;
 }
 
 inline
-bool ActorCriticTrainer::is_batch_mode()
+bool PBActorCriticTrainer::is_batch_mode()
 {
    return batch_mode && (batch_size == 0);
 }
 
 inline
-bool ActorCriticTrainer::is_minibatch_mode()
+bool PBActorCriticTrainer::is_minibatch_mode()
 {
    return batch_mode && (batch_size > 0);
 }
 
 inline
-bool ActorCriticTrainer::is_online_mode()
+bool PBActorCriticTrainer::is_online_mode()
 {
    return !batch_mode;
 }
 
 inline
-unsigned int ActorCriticTrainer::minibatch_size()
+unsigned int PBActorCriticTrainer::minibatch_size()
 {
    return batch_size;
 }
 
 inline
-bool ActorCriticTrainer::is_random_order_mode()
+bool PBActorCriticTrainer::is_random_order_mode()
 {
    return random_order_mode;
 }
 
 inline
-bool ActorCriticTrainer::is_verbose_mode()
+bool PBActorCriticTrainer::is_verbose_mode()
 {
    return verbose_mode;
 }
 
 inline
-int ActorCriticTrainer::report_frequency()
+int PBActorCriticTrainer::report_frequency()
 {
    return report_freq;
 }
 
 inline
-double ActorCriticTrainer::global_perf()
+double PBActorCriticTrainer::global_perf()
 {
    return last_training_record.best_training_perf();
 }
@@ -434,19 +458,19 @@ double ActorCriticTrainer::global_perf()
 
 
 inline
-const TrainingRecord& ActorCriticTrainer::training_record()
+const TrainingRecord& PBActorCriticTrainer::training_record()
 {
    return last_training_record;
 }
 
 inline
-void ActorCriticTrainer::clear_training_record()
+void PBActorCriticTrainer::clear_training_record()
 {
    last_training_record.clear();
 }
 
 inline
-const string& ActorCriticTrainer::genkey(const BaseNeuralNet& _net, const string& _id)
+const string& PBActorCriticTrainer::genkey(const TDCNeuralNet& _net, const string& _id)
 {
    static string key;
 
@@ -455,7 +479,7 @@ const string& ActorCriticTrainer::genkey(const BaseNeuralNet& _net, const string
 }
 
 inline
-void ActorCriticTrainer::activate_actor_critic(const Pattern& _currStateVec, const Pattern& _actionVec)
+void PBActorCriticTrainer::activate_actor_critic(const Pattern& _currStateVec, const Pattern& _actionVec)
 {
 
 }
@@ -463,4 +487,4 @@ void ActorCriticTrainer::activate_actor_critic(const Pattern& _currStateVec, con
 
 } /* namespace flex_neuralnet */
 
-#endif /* FLEX_NEURALNET_ACTORCRITIC_TRAINER_H_ */
+#endif /* FLEX_NEURALNET_PBACTORCRITIC_TRAINER_H_ */

@@ -55,6 +55,7 @@ public:
 
    double sim(
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _dataset);
+
    TrainingRecord::Entry& calc_performance_data(unsigned int _epoch,
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _trnset,
          const DataSet<Exemplar<PatternSequence, PatternSequence> >& _vldset =

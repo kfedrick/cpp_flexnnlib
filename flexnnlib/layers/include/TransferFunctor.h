@@ -24,7 +24,7 @@ public:
    TransferFunctor(const char* name) : NamedObject(name) {}
    virtual ~TransferFunctor() {}
 
-   virtual void operator()(vector<double>& transVec, Array<double>& dAdN,
+   virtual void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
          Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const = 0;
 
    virtual TransferFunctor* clone() const = 0;

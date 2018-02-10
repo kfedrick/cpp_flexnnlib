@@ -18,7 +18,7 @@ class PureLin : public TransferFunctor
 public:
    PureLin();
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN,
+   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
          Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
 
    PureLin* clone() const;

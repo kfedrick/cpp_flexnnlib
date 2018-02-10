@@ -23,7 +23,7 @@ public:
    double get_gain() const;
    void set_gain(double val);
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN,
+   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
          Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
 
    virtual LogSig* clone() const;

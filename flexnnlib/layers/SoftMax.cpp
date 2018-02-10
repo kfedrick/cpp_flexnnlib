@@ -50,7 +50,7 @@ void SoftMax::set_output_range(double lower, double upper)
    output_range = upper_bound - lower_bound;
 }
 
-void SoftMax::operator()(vector<double>& transVec, Array<double>& dAdN,
+void SoftMax::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
       Array<double>& dAdB, const vector<double>& netInVec,
       const vector<double>& biasVec) const
 {

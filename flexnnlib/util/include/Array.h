@@ -207,6 +207,7 @@ public:
     */
    void set(T val = T());
    void set(const Array<T>& arr);
+   void set(const vector< vector<T> >& arr);
 
    Array<T>& operator=(const T& val);
    Array<T>& operator=(const Array<T>& arr);
@@ -288,6 +289,23 @@ void Array<T>::set(const Array<T>& arr)
 }
 
 template<class T> inline
+void Array<T>::set(const vector< vector<T> >& arr)
+{
+   unsigned int src_row_dim = arr.size();
+   unsigned int src_col_dim = 0;
+
+   if (src_row_dim > 0)
+      src_col_dim = arr[0].size();
+
+   if (src_row_dim != row_dim || src_col_dim != col_dim)
+      resize(src_row_dim, src_col_dim);
+
+   for (unsigned int row_ndx = 0; row_ndx < row_dim; row_ndx++)
+      for (unsigned int col_ndx = 0; col_ndx < col_dim; col_ndx++)
+         this->at(row_ndx, col_ndx) = arr[row_ndx][col_ndx];
+}
+
+template<class T> inline
 void Array<T>::resize(unsigned int rows, unsigned int cols, T fill)
 {
    if ((rows == 0 && cols > 0) || (rows > 0 && cols == 0))
@@ -339,6 +357,10 @@ template<class T> inline Array<T>& Array<T>::operator=(const Array<T>& arr)
    copy(arr);
    return *this;
 }
+
+
+
+
 
 /**
  * Array<T>::copy(const Array<T>& arr)

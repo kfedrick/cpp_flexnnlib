@@ -14,7 +14,7 @@ PureLin::PureLin() : TransferFunctor("PureLin")
 {
 }
 
-void PureLin::operator()(vector<double>& transVec, Array<double>& dAdN,
+void PureLin::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
       Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biasVec) const
 {
    dAdN = 0;
@@ -24,6 +24,8 @@ void PureLin::operator()(vector<double>& transVec, Array<double>& dAdN,
       transVec[i] = biasVec[i] + netInVec[i];
       dAdN[i][i] = 1;
       dAdB[i][i] = 1;
+
+      d2AdN[i] = 0;
    }
 }
 

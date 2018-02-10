@@ -15,7 +15,7 @@ RadBas::RadBas() : TransferFunctor("RadBas")
 {
 }
 
-void RadBas::operator()(vector<double>& transVec, Array<double>& dAdN,
+void RadBas::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
       Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biasVec) const
 {
    dAdN = 0;

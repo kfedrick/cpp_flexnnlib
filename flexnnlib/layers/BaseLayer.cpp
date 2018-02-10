@@ -113,6 +113,9 @@ void BaseLayer::resize_history(unsigned int sz)
    dEdW.resize(sz);
    dEdB.resize(sz);
 
+   d2AdB.resize(sz);
+   d2AdN.resize(sz);
+
    realloc_history();
 }
 
@@ -131,6 +134,9 @@ void BaseLayer::realloc_history()
 
       dAdN.at(i).resize(size(), size());
       dAdB.at(i).resize(size(), size());
+
+      d2AdB.at(i).resize(size(), size());
+      d2AdN.at(i).resize(size(), size());
 
 
       layer_output_error.at(i).resize(size(), 0.0);
@@ -178,6 +184,11 @@ const vector<double>& BaseLayer::operator()(unsigned int timeStep) const
 const vector<double>& BaseLayer::get_error(unsigned int timeStep) const
 {
    return layer_output_error.at(timeStep);
+}
+
+const vector<double>& BaseLayer::get_input() const
+{
+   return raw_input;
 }
 
 const vector<double>& BaseLayer::get_net_input(unsigned int timeStep) const
@@ -230,6 +241,11 @@ const Array<double>& BaseLayer::get_dEdW(unsigned int timeStep) const
    return dEdW.at(timeStep);
 }
 
+const vector<double>& BaseLayer::get_d2AdN(unsigned int timeStep) const
+{
+   return d2AdN.at(timeStep);
+}
+
 NetInputFunctor* BaseLayer::get_netinput_functor()
 {
    return net_input_functor_ptr;
@@ -245,12 +261,14 @@ TransferFunctor* BaseLayer::get_transfer_functor()
  */
 void BaseLayer::activate(const vector<double>& inputVec, unsigned int timeStep)
 {
+   raw_input = inputVec;
+
    // Calculate net input into transfer function (e.g. weighted sum of input vector over weight matrix)
    (*net_input_functor_ptr)(net_input[timeStep], dNdW[timeStep], dNdI[timeStep],
          inputVec, layer_weights);
 
    // Calculate the layer output using the transfer function
-   (*transfer_functor_ptr)(layer_output[timeStep], dAdN[timeStep],
+   (*transfer_functor_ptr)(layer_output[timeStep], dAdN[timeStep], d2AdN[timeStep],
          dAdB[timeStep], net_input[timeStep], layer_biases);
 }
 

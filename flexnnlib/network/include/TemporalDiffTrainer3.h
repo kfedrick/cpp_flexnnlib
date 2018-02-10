@@ -697,7 +697,7 @@ void TemporalDiffTrainer3<EFunc, LRPolicy>::backprop_scatter(
          layer_input->get_input_connections();
 
    vector<vector<double> >& network_input_error =
-         neural_network.get_network_input_error();
+         neural_network.get_input_error();
 
    for (unsigned int conn_ndx = 0; conn_ndx < connvec.size(); conn_ndx++)
    {

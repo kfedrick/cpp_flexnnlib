@@ -1,5 +1,5 @@
 /*
- * ActorNet2.cpp
+ * ActorNet3.cpp
  *
  *  Created on: Mar 22, 2015
  *      Author: kfedrick
@@ -8,26 +8,26 @@
 #include <limits>
 #include <NetSum.h>
 #include <SoftMax.h>
-#include <ActorNet2.h>
+#include <ActorNet3.h>
 
 using namespace std;
 
 namespace flex_neuralnet
 {
 
-const Action ActorNet2::DEFAULT_ACTION;
-const vector<double> ActorNet2::DEFAULT_ACTION_PARAMS;
+const Action ActorNet3::DEFAULT_ACTION;
+const vector<double> ActorNet3::DEFAULT_ACTION_PARAMS;
 
-ActorNet2::ActorNet2() : BaseNeuralNet("actor")
+ActorNet3::ActorNet3() : TDCNeuralNet("actor")
 {
    set<string> default_action_set;
    default_action_set.insert("DO_NOTHING");
 
-   set_stochastic_action_gain(1.0);
+   set_stochastic_action_var(1.0);
    init_actions(default_action_set);
 }
 
-ActorNet2::ActorNet2(const set<string>& _actionSet) : BaseNeuralNet("actor")
+ActorNet3::ActorNet3(const set<string>& _actionSet) : TDCNeuralNet("actor")
 {
    /*
    Layer<NetSum, SoftMax>& outputlayer =
@@ -35,26 +35,28 @@ ActorNet2::ActorNet2(const set<string>& _actionSet) : BaseNeuralNet("actor")
                "actor-output");
                */
 
-   set_stochastic_action_gain(1.0);
+   set_stochastic_action_var(1.0);
    init_actions(_actionSet);
 }
 
-ActorNet2::~ActorNet2()
+ActorNet3::~ActorNet3()
 {
 }
 
-const Action& ActorNet2::get_action(const Pattern& _stateVec,
+const Action& ActorNet3::get_action(const Pattern& _stateVec,
       unsigned int _recurStep)
 {
-   BaseNeuralNet* net = dynamic_cast<BaseNeuralNet*>(this);
+   TDCNeuralNet* net = dynamic_cast<TDCNeuralNet*>(this);
    static Pattern actor_opatt;
 
    actor_opatt = (*net)(_stateVec, _recurStep);
 
    if (actor_opatt.size() == 0)
-      return ActorNet2::DEFAULT_ACTION;
+      return ActorNet3::DEFAULT_ACTION;
 
    double aval = actor_opatt().at(0);
+
+   //cout << "actor out " << aval << endl;
 
    vector<double> rvec = {aval};
    urand_raw_pattern = rvec;
@@ -76,18 +78,19 @@ const Action& ActorNet2::get_action(const Pattern& _stateVec,
    */
 }
 
-const Action& ActorNet2::get_stochastic_action(const Pattern& _stateVec, unsigned int _recurStep)
+const Action& ActorNet3::get_stochastic_action(const Pattern& _stateVec, unsigned int _recurStep)
 {
-   BaseNeuralNet* net = dynamic_cast<BaseNeuralNet*>(this);
+   TDCNeuralNet* net = dynamic_cast<TDCNeuralNet*>(this);
    static Pattern actor_opatt;
 
    actor_opatt = (*net)(_stateVec, _recurStep);
 
    if (actor_opatt.size() == 0)
-      return ActorNet2::DEFAULT_ACTION;
+      return ActorNet3::DEFAULT_ACTION;
 
    double aval = actor_opatt().at(0);
 
+   //cout << "actor out " << aval << endl;
 
    unsigned int sz = action_list.size();
    double delta = 2.0 / sz;
@@ -96,12 +99,17 @@ const Action& ActorNet2::get_stochastic_action(const Pattern& _stateVec, unsigne
 
    // get gaussian random variable with mean aval and 2 stddev
    // as the bin width
-   // double rval = nrand(aval, delta);
+   double rval = nrand(aval, stochastic_action_var * delta);
 
+   vector<double> rvec = {rval};
+   urand_raw_pattern = rvec;
+
+   /*
    // Uniform random will result in completely random moves
    double rval = 2.0 * urand() - 1.0;
    vector<double> rvec = {rval};
    urand_raw_pattern = rvec;
+   */
 
    for (ndx = 0; ndx<sz-1 && rval > bound; ndx++, bound+=delta);
 
@@ -112,7 +120,7 @@ const Action& ActorNet2::get_stochastic_action(const Pattern& _stateVec, unsigne
 
 
 
-void ActorNet2::init_actions(const set<string>& _actionSet)
+void ActorNet3::init_actions(const set<string>& _actionSet)
 {
    action_list.clear();
 
@@ -128,12 +136,12 @@ void ActorNet2::init_actions(const set<string>& _actionSet)
    }
 }
 
-const Action& ActorNet2::get_action_by_index(unsigned int _aNdx)
+const Action& ActorNet3::get_action_by_index(unsigned int _aNdx)
 {
    return action_list.at(_aNdx);
 }
 
-unsigned int ActorNet2::get_stochastic_action_index(const vector<double>& _actionProbVec)
+unsigned int ActorNet3::get_stochastic_action_index(const vector<double>& _actionProbVec)
 {
    double threshold = 0;
    double rval = urand();
@@ -151,7 +159,7 @@ unsigned int ActorNet2::get_stochastic_action_index(const vector<double>& _actio
    return ndx-1;
 }
 
-unsigned int ActorNet2::get_action_index(const vector<double>& _actionProbVec)
+unsigned int ActorNet3::get_action_index(const vector<double>& _actionProbVec)
 {
    unsigned int sz = action_list.size();
    double delta = 2.0 / sz;
@@ -164,16 +172,19 @@ unsigned int ActorNet2::get_action_index(const vector<double>& _actionProbVec)
    return ndx;
 }
 
-const Pattern& ActorNet2::operator()()
+
+const Pattern& ActorNet3::operator()()
 {
-   return raw();
+   //return raw();
+   return urand_raw_pattern;
 }
 
 
-const Pattern& ActorNet2::raw()
+const Pattern& ActorNet3::raw()
 {
    //BaseNeuralNet* ptr = dynamic_cast<BaseNeuralNet*>(this);
    //return (*ptr)();
+
    return urand_raw_pattern;
 }
 

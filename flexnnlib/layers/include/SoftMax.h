@@ -26,7 +26,7 @@ public:
    void set_gain(double val);
    void set_output_range(double lower, double upper);
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN,
+   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
          Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
 
    virtual SoftMax* clone() const;

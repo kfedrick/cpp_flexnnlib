@@ -83,7 +83,12 @@ public:
    virtual double sim(EnvironmentSimulator* _env, unsigned int _sampleCount);
    virtual double sim_critic(EnvironmentSimulator* _env, unsigned int _sampleCount);
 
+   virtual double sim2(EnvironmentSimulator* _env, unsigned int _sampleCount);
+   virtual double sim_critic2(EnvironmentSimulator* _env, unsigned int _sampleCount);
+
    virtual void train(EnvironmentSimulator* _trainingEnvSet, double _objVal);
+   virtual void train(EnvironmentSimulator* _trainingEnvSet, EnvironmentSimulator* _testEnvSet, double _objVal);
+
    virtual void train2(EnvironmentSimulator* _trainingEnvSet, double _objVal);
    virtual void train3(EnvironmentSimulator* _trainingEnvSet, double _objVal);
 
@@ -95,6 +100,7 @@ private:
    void init_train();
    void init_training_epoch();
    virtual double train_exemplar(EnvironmentSimulator* _trainingEnv, double _objVal, bool _updateActorFlag);
+   virtual double train_exemplar2(EnvironmentSimulator* _trainingEnv, double _objVal, bool _updateActorFlag);
 
    virtual void calc_network_adj(const BaseNeuralNet& _net, const vector<double>& errorv);
 
@@ -241,7 +247,7 @@ private:
     *   learning rate policy
     */
      //map<string, DeltaBarDeltaLearningRate*> network_learning_rates_map;
-     map<string, DeltaBarDeltaLearningRate*> network_learning_rates_map;
+     map<string, ConstantLearningRate*> network_learning_rates_map;
 
      double lambda;
      Prediction_Mode predict_mode;
