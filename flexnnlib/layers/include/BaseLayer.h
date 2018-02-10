@@ -84,6 +84,8 @@ public:
     */
    virtual const vector<double>& operator()(unsigned int timeStep = 1) const;
 
+   virtual const vector<double>& get_input() const;
+
    virtual const vector<double>& get_net_input(unsigned int timeStep = 1) const;
 
    /*
@@ -113,6 +115,8 @@ public:
 
    const Array<double>& get_dEdW(unsigned int timeStep = 1) const;
 
+   const vector<double>& get_d2AdB(unsigned int timeStep = 1) const;
+   const vector<double>& get_d2AdN(unsigned int timeStep = 1) const;
 
    NetInputFunctor* get_netinput_functor();
    TransferFunctor* get_transfer_functor();
@@ -143,6 +147,7 @@ public:
    virtual void adjust_weights(const Array<double>& deltaW);
 
    virtual void clear_error(unsigned int timeStep = 1);
+
 
    /* ********************************************************************
     *    Housekeeping functions
@@ -229,6 +234,8 @@ private:
    // History of layer value vectors (for recurrent networks)
    vector< vector<double> > layer_output;
 
+   vector<double> raw_input;
+
    // History of layer net input vectors (for recurrent networks)
    vector< vector<double> > net_input;
 
@@ -257,6 +264,10 @@ private:
 
    // History of the derivative of the layer output vector with respect to W(i,j)
    vector< Array<double> > dEdW;
+
+   // The 2nd derivative of the transfer function output with respect to the net input history
+   vector< vector<double> > d2AdB;
+   vector< vector<double> > d2AdN;
 };
 
 } /* namespace flex_neuralnet */

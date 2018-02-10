@@ -1,11 +1,11 @@
 /*
- * ConnectionMap.cpp
+ * HvMap.cpp
  *
  *  Created on: Jan 31, 2014
  *      Author: kfedrick
  */
 
-#include "ConnectionMap.h"
+#include "HvMap.h"
 
 #include <iostream>
 
@@ -14,82 +14,27 @@ using namespace std;
 namespace flex_neuralnet
 {
 
-ConnectionEntry::ConnectionEntry(BaseLayer& from, bool recurrent)
-{
-   input_connection_flag = false;
 
-   input_layer = &from;
-   recurrent_connection_flag = recurrent;
+
+HvMap::HvMap(const ConnectionMap& _connMap, const map<string, vector<double>>& _ryMap) : Ry_map(_ryMap)
+{
+   const vector<ConnectionEntry>& conne = _connMap.get_input_connections();
+
+   layer_input_map = conne;
 }
 
-ConnectionEntry::ConnectionEntry(unsigned int ndx, const vector<double>& inputv)
+HvMap::~HvMap()
 {
-   input_connection_flag = true;
-   input_layer = 0;
-   input_vector_size = inputv.size();
-   input_pattern_index = ndx;
-}
-
-ConnectionEntry::~ConnectionEntry()
-{
-   // TODO Auto-generated destructor stub
-}
-
-bool ConnectionEntry::is_input_connection() const
-{
-   return input_connection_flag;
-}
-
-bool ConnectionEntry::is_recurrent() const
-{
-   return recurrent_connection_flag;
-}
-
-unsigned int ConnectionEntry::get_input_pattern_index() const
-{
-   return input_pattern_index;
-}
-
-unsigned int ConnectionEntry::get_input_vector_size() const
-{
-   return input_vector_size;
-}
-
-BaseLayer& ConnectionEntry::get_input_layer() const
-{
-   return *input_layer;
-}
-
-void ConnectionEntry::set_recurrent(bool val)
-{
-   recurrent_connection_flag = val;
-}
-
-
-
-
-ConnectionMap::ConnectionMap()
-{
-   target_layer = 0;
-}
-
-ConnectionMap::ConnectionMap(BaseLayer& target)
-{
-   target_layer = &target;
-}
-
-ConnectionMap::~ConnectionMap()
-{
-//   cout << "ConnectionMap::~ConnectionMap()" << endl;
+//   cout << "HvMap::~HvMap()" << endl;
    //layer_input_map.clear();
 }
 
-int ConnectionMap::size() const
+int HvMap::size() const
 {
    return virtual_input_vector.size();
 }
 
-const vector<double>& ConnectionMap::operator()(const Pattern& inpattern, unsigned int timeStep, unsigned int closedLoopStep)
+const vector<double>& HvMap::operator()()
 {
    int sz = virtual_input_vector.size();
 
@@ -100,33 +45,30 @@ const vector<double>& ConnectionMap::operator()(const Pattern& inpattern, unsign
 
       if (conn.is_input_connection())
       {
-         const vector<double>& inputv = inpattern.at(conn.get_input_pattern_index());
+         vector<double> inputv(conn.get_input_vector_size(), 1.0);
          virtual_ndx = append_virtual_vector( virtual_ndx, inputv );
       }
       else
       {
          const BaseLayer& in_layer = conn.get_input_layer();
+         const string& aname = in_layer.name();
 
-         unsigned int ilayer_timestep = timeStep;
-         if (conn.is_recurrent() && closedLoopStep == 0)
-            ilayer_timestep--;
-
-         const vector<double>& layer_outputv = in_layer(ilayer_timestep);
-         virtual_ndx = append_virtual_vector( virtual_ndx, layer_outputv );
+         const vector<double>& Ry = Ry_map.at(aname);
+         virtual_ndx = append_virtual_vector( virtual_ndx, Ry);
       }
    }
 
    return virtual_input_vector;
 }
 
-const vector< vector<double> >& ConnectionMap::get_error(const vector<double>& errorv)
+const vector< vector<double> >& HvMap::get_error(const vector<double>& errorv)
 {
    this->backprop_scatter(errorv);
 
    return backprop_error_vector;
 }
 
-const vector< vector<double> >& ConnectionMap::get_error(unsigned int timeStep)
+const vector< vector<double> >& HvMap::get_error(unsigned int timeStep)
 {
    const vector<double>& errorv = target_layer->get_input_error(timeStep);
    this->backprop_scatter(errorv);
@@ -137,7 +79,7 @@ const vector< vector<double> >& ConnectionMap::get_error(unsigned int timeStep)
 /*
  * Scatters the coalesced backprop error vector into sub-vectors for each input layer.
  */
-void ConnectionMap::backprop_scatter(const vector<double>& errorv)
+void HvMap::backprop_scatter(const vector<double>& errorv)
 {
    unsigned int sz = errorv.size();
 
@@ -161,7 +103,7 @@ void ConnectionMap::backprop_scatter(const vector<double>& errorv)
    }
 }
 
-void ConnectionMap::clear_error()
+void HvMap::clear_error()
 {
    for (int map_ndx = 0; map_ndx < layer_input_map.size(); map_ndx++)
    {
@@ -171,37 +113,31 @@ void ConnectionMap::clear_error()
    }
 }
 
-
-const vector<ConnectionEntry>& ConnectionMap::get_input_connections() const
+vector<ConnectionEntry>& HvMap::get_input_connections()
 {
    return layer_input_map;
 }
 
-vector<ConnectionEntry>& ConnectionMap::get_input_connections()
-{
-   return layer_input_map;
-}
-
-int ConnectionMap::input_map_size() const
+int HvMap::input_map_size() const
 {
    return layer_input_map.size();
 }
 
-void ConnectionMap::connect(BaseLayer& layer, bool recurrent)
+void HvMap::connect(BaseLayer& layer, bool recurrent)
 {
    layer_input_map.push_back( ConnectionEntry(layer, recurrent) );
    virtual_input_vector.resize( virtual_input_vector.size() + layer.size() );
    backprop_error_vector.push_back(vector<double>(layer.size()));
 }
 
-void ConnectionMap::connect(const Pattern& ipattern, unsigned int patternNdx)
+void HvMap::connect(const Pattern& ipattern, unsigned int patternNdx)
 {
    layer_input_map.push_back( ConnectionEntry(patternNdx, ipattern.at(patternNdx)) );
    virtual_input_vector.resize( virtual_input_vector.size() + ipattern.at(patternNdx).size() );
    backprop_error_vector.push_back(vector<double>(ipattern.at(patternNdx).size()));
 }
 
-unsigned int ConnectionMap::append_virtual_vector(unsigned int start_ndx, const vector<double>& vec)
+unsigned int HvMap::append_virtual_vector(unsigned int start_ndx, const vector<double>& vec)
 {
    unsigned int virtual_ndx = start_ndx;
    for (unsigned int ndx = 0; ndx < vec.size(); ndx++)

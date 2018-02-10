@@ -131,7 +131,7 @@ void LearningRatePolicy::set_global_learning_rate(double _rate)
       BaseLayer& layer = *network_layers[ndx];
       string name = layer.name();
 
-      layer_bias_learning_rates_map[name].assign(layer_bias_learning_rates_map.size(),
+      layer_bias_learning_rates_map[name].assign(layer_bias_learning_rates_map[name].size(),
             _rate);
       layer_weight_learning_rates_map[name] = _rate;
    }

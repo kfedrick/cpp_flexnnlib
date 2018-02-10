@@ -28,7 +28,7 @@ void TanSig::set_gain(double val)
    gain = val;
 }
 
-void TanSig::operator()(vector<double>& transVec, Array<double>& dAdN,
+void TanSig::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
       Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biasVec) const
 {
    for (unsigned int i=0; i<transVec.size(); i++)
@@ -36,7 +36,10 @@ void TanSig::operator()(vector<double>& transVec, Array<double>& dAdN,
 
    dAdN = 0;
    for (unsigned int i=0; i<transVec.size(); i++)
+   {
       dAdN[i][i] = gain * (1 - transVec[i] * transVec[i]);
+      d2AdN[i] = -transVec[i] * (1 - transVec[i] * transVec[i]);
+   }
 
    dAdB = 0;
    for (unsigned int i=0; i<transVec.size(); i++)

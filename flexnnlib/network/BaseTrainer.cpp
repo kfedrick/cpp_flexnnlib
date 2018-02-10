@@ -256,8 +256,8 @@ void BaseTrainer::apply_delta_network_weights()
       BaseLayer& layer = *network_layers[ndx];
       string name = layer.name();
 
-         //cout << "============= " << layer.name()
-         //      << " ==============" << endl;
+      //cout << "============= " << layer.name()
+      //      << " ==============" << endl;
 
       const LayerWeightsData& delta_layer_weights_data =
             delta_network_weights.layer_weights(name);
@@ -280,7 +280,7 @@ void BaseTrainer::apply_delta_network_weights()
                * prev_delta_layer_biases.at(ndx) + delta_layer_biases.at(ndx);
 
          //if (ndx > 0)
-          //  cout << ", ";
+         //   cout << ", ";
          //cout << delta_layer_biases.at(ndx);
       }
       //cout << endl << "-------------" << endl;

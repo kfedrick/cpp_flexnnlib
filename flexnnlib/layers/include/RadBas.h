@@ -18,7 +18,7 @@ class RadBas: public TransferFunctor
 public:
    RadBas();
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN,
+   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
          Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
 
    RadBas* clone() const;

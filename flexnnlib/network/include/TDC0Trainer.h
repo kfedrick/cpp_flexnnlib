@@ -757,6 +757,7 @@ double TDC0Trainer<EFunc, LRPolicy>::sim2(
    unsigned int sample_count = 0;
 
    vector<double> gradient(neural_network.get_output_size());
+
    Pattern prev_opatt = vector<double>(neural_network.get_output_size());
    Pattern prev_ipatt;
 

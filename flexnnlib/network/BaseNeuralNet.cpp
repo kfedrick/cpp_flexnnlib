@@ -189,7 +189,7 @@ const Pattern& BaseNeuralNet::operator()(const Pattern& ipattern,
                layer_input_conn_map.find(layer);
          ConnectionMap* layer_input = map_entry->second;
 
-         // Activate the network layer with the raw input from it's layer input connection map
+         // Activate the network layer with the raw input from its layer input connection map
          const vector<double>& invec = (*layer_input)(ipattern, timeStep,
                closed_loop_step);
 

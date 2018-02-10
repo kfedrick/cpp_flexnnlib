@@ -31,7 +31,7 @@ void LogSig::set_gain(double val)
 }
 
 
-void LogSig::operator()(vector<double>& transVec, Array<double>& dAdN,
+void LogSig::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
       Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biasVec) const
 {
    for (unsigned int i=0; i<transVec.size(); i++)
@@ -39,7 +39,10 @@ void LogSig::operator()(vector<double>& transVec, Array<double>& dAdN,
 
    dAdN = 0;
    for (unsigned int i=0; i<transVec.size(); i++)
+   {
       dAdN[i][i] = gain * transVec[i] * (1 - transVec[i]);
+      d2AdN[i] = transVec[i] * (1 - transVec[i]) * (1 - 2 * transVec[i]);
+   }
 
    dAdB = 0;
    for (unsigned int i=0; i<transVec.size(); i++)
