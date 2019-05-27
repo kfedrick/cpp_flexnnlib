@@ -10,27 +10,29 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-OutputErrorFunctor::OutputErrorFunctor()
-{
-   // TODO Auto-generated constructor stub
-}
+   OutputErrorFunctor::OutputErrorFunctor ()
+   {
+      // TODO Auto-generated constructor stub
+   }
 
-OutputErrorFunctor::~OutputErrorFunctor()
-{
-   // TODO Auto-generated destructor stub
-}
+   OutputErrorFunctor::~OutputErrorFunctor ()
+   {
+      // TODO Auto-generated destructor stub
+   }
 
-void OutputErrorFunctor::operator()(double& error, vector<double>& gradient, const vector<double>& outVec, const vector<double>& targetVec)
-{
+   void
+   OutputErrorFunctor::operator() (double &error, vector<double> &gradient, const vector<double> &outVec, const vector<
+      double> &targetVec)
+   {
 
-}
+   }
 
-OutputErrorFunctor* OutputErrorFunctor::clone() const
-{
-   return new OutputErrorFunctor(*this);
-}
+   OutputErrorFunctor *OutputErrorFunctor::clone () const
+   {
+      return new OutputErrorFunctor (*this);
+   }
 
 }

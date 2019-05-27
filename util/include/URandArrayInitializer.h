@@ -14,27 +14,27 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class URandArrayInitializer: public ArrayInitializer
-{
-public:
-   URandArrayInitializer(double lower = -1.0, double upper = 1.0);
-   virtual ~URandArrayInitializer();
+   class URandArrayInitializer : public ArrayInitializer
+   {
+   public:
+      URandArrayInitializer (double lower = -1.0, double upper = 1.0);
+      virtual ~URandArrayInitializer ();
 
-   void operator()(Array<double>& arr) const;
+      void operator() (Array<double> &arr) const;
 
-   URandArrayInitializer* clone() const;
+      URandArrayInitializer *clone () const;
 
-private:
-   double urand() const;
-   double urand(double a, double b) const;
+   private:
+      double urand () const;
+      double urand (double a, double b) const;
 
-   double lower_bound;
-   double upper_bound;
-};
+      double lower_bound;
+      double upper_bound;
+   };
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_URANDARRAYINIT_H_ */

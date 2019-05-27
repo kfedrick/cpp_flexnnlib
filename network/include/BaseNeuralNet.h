@@ -15,7 +15,6 @@
 
 #include "Array.h"
 #include "BaseLayer.h"
-#include "Layer.h"
 #include "ConnectionMap.h"
 #include "Pattern.h"
 #include "PatternSequence.h"
@@ -26,216 +25,217 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class BaseNeuralNet: public flex_neuralnet::NamedObject
-{
+   class BaseNeuralNet : public flexnnet::NamedObject
+   {
 
-public:
-   BaseNeuralNet(const char* _name = "BaseNeuralNet");
-   BaseNeuralNet(const string& _name);
-   virtual ~BaseNeuralNet();
+   public:
+      BaseNeuralNet (const char *_name = "BaseNeuralNet");
+      BaseNeuralNet (const string &_name);
+      virtual ~BaseNeuralNet ();
 
-   /*
-    * Resize the activation history capacity for the network
-    */
-   virtual void resize_history(unsigned int sz = 2);
+      /*
+       * Resize the activation history capacity for the network
+       */
+      virtual void resize_history (unsigned int sz = 2);
 
-   void set_max_closedloop_steps(unsigned int steps);
+      void set_max_closedloop_steps (unsigned int steps);
 
-   /* *********************************************
-    *    Network factory methods
-    * *********************************************
-    */
+      /* *********************************************
+       *    Network factory methods
+       * *********************************************
+       */
 
-   /*
-    * Add a new hidden layer with net input function _NetInFunc and transfer function _TransFunc
-    */
+      /*
+       * Add a new hidden layer with net input function _NetInFunc and transfer function _TransferFunction
+       */
 
-   template<class _NetInFunc, class _TransFunc>
-   Layer<_NetInFunc, _TransFunc>& new_hidden_layer(unsigned int sz,
-         const char* name = 0);
+      template<class _NetInFunc, class _TransFunc>
+      BaseLayer &new_hidden_layer (unsigned int sz, const char *name = 0);
 
-   template<class _NetInFunc, class _TransFunc>
-   Layer<_NetInFunc, _TransFunc>& new_output_layer(unsigned int sz,
-         const char* name = 0);
+      template<class _NetInFunc, class _TransFunc>
+      BaseLayer &new_output_layer (unsigned int sz, const char *name = 0);
 
-   void connect(BaseLayer& from, BaseLayer& to);
-   void connect(const Pattern& ipattern, unsigned int patternNdx,
-         BaseLayer& to);
+      void connect (BaseLayer &from, BaseLayer &to);
+      void connect (const Pattern &ipattern, unsigned int patternNdx,
+                    BaseLayer &to);
 
-   /* *********************************************
-    *    Network accessor functions
-    * *********************************************
-    */
-   const BaseLayer& layer(int ndx);
+      /* *********************************************
+       *    Network accessor functions
+       * *********************************************
+       */
+      const BaseLayer &layer (int ndx);
 
-   unsigned int get_output_size() const;
+      unsigned int get_output_size () const;
 
-   /* *********************************************
-    *    Network simulation functions
-    * *********************************************
-    */
+      /* *********************************************
+       *    Network simulation functions
+       * *********************************************
+       */
 
-   virtual const Pattern& operator()();
-   virtual const Pattern& operator()(const Pattern& ipattern,
-         unsigned int recurStep = 1);
-   virtual const PatternSequence& operator()(const PatternSequence& ipattern,
-         unsigned int recurStep = 1);
+      virtual const Pattern &operator() ();
+      virtual const Pattern &operator() (const Pattern &ipattern,
+                                         unsigned int recurStep = 1);
+      virtual const PatternSequence &operator() (const PatternSequence &ipattern,
+                                                 unsigned int recurStep = 1);
 
-   const vector<BaseLayer*> get_network_layers() const;
+      const vector<BaseLayer *> get_network_layers () const;
 
-   NetworkWeightsData& get_network_weights();
+      NetworkWeightsData &get_network_weights ();
 
-   vector<vector<double> >& get_input_error(unsigned int timeStep = 1);
+      vector<vector<double> > &get_input_error (unsigned int timeStep = 1);
 
-   virtual void backprop(const vector<double>& isse, unsigned int timeStep = 1);
-   virtual void backprop_scatter(BaseLayer& layer, unsigned int timeStep = 1,
-         unsigned int closedLoopStep = 0);
+      virtual void backprop (const vector<double> &isse, unsigned int timeStep = 1);
+      virtual void backprop_scatter (BaseLayer &layer, unsigned int timeStep = 1,
+                                     unsigned int closedLoopStep = 0);
 
-   const vector<BaseLayer*>& get_layer_activation_order();
-   ConnectionMap& get_network_output_connection_map();
-   ConnectionMap* get_layer_connection_map(const BaseLayer& layer);
+      const vector<BaseLayer *> &get_layer_activation_order ();
+      ConnectionMap &get_network_output_connection_map ();
+      ConnectionMap *get_layer_connection_map (const BaseLayer &layer);
 
-   virtual void clear_error(unsigned int timeStep = 1);
+      virtual void clear_error (unsigned int timeStep = 1);
 
-protected:
+   protected:
 
-   vector<BaseLayer*> layer_activation_order;
+      vector<BaseLayer *> layer_activation_order;
 
-   /* *********************************************
-    *    Network objects
-    * *********************************************
-    */
-   vector<BaseLayer*> network_layers;
-   vector<BaseLayer*> output_layers;
+      /* *********************************************
+       *    Network objects
+       * *********************************************
+       */
+      vector<BaseLayer *> network_layers;
+      vector<BaseLayer *> output_layers;
 
-   /* *********************************************
-    *    Network topology
-    * *********************************************
-    */
-   bool recurrent_network_flag;
 
-   vector<vector<double> > network_input_error;
+      /* *********************************************
+       *    Network topology
+       * *********************************************
+       */
+      bool recurrent_network_flag;
 
-   /*
-    * The ConnectionMap to coalesce all output layers in the network
-    */
-   ConnectionMap network_output_map;
-   Pattern network_output_pattern;
-   PatternSequence network_output_patternseq;
+      vector<vector<double> > network_input_error;
 
-   map<const BaseLayer*, ConnectionMap*> layer_input_conn_map;
+      /*
+       * The ConnectionMap to coalesce all output layers in the network
+       */
+      ConnectionMap network_output_map;
+      Pattern network_output_pattern;
+      PatternSequence network_output_patternseq;
 
-   map<const BaseLayer*, set<const BaseLayer*> > layer_input_dependency_map;
+      map<const BaseLayer *, ConnectionMap *> layer_input_conn_map;
 
-   OutputErrorFunctor* oerr;
+      map<const BaseLayer *, set<const BaseLayer *> > layer_input_dependency_map;
 
-   unsigned int recur_history_size;
+      OutputErrorFunctor *oerr;
 
-   /* **********************************************
-    *    Activation state information
-    */
-   bool topology_initialized_flag;
+      unsigned int recur_history_size;
 
-   unsigned int max_closed_loop_steps;
-   vector<unsigned int> closed_loop_steps;
+      /* **********************************************
+       *    Activation state information
+       */
+      bool topology_initialized_flag;
 
-   unsigned int last_activation_recur_steps;
+      unsigned int max_closed_loop_steps;
+      vector<unsigned int> closed_loop_steps;
 
-   NetworkWeightsData network_weights_data;
+      unsigned int last_activation_recur_steps;
 
-protected:
+      NetworkWeightsData network_weights_data;
 
-   map<const BaseLayer*, ConnectionMap*>& get_connection_map();
+   protected:
 
-   void install_hidden_layer(BaseLayer* layer);
-   void install_output_layer(BaseLayer* layer);
+      map<const BaseLayer *, ConnectionMap *> &get_connection_map ();
 
-   void update_topology();
+      void install_hidden_layer (BaseLayer *layer);
+      void install_output_layer (BaseLayer *layer);
 
-   void update_layer_input_dependencies();
+      void update_topology ();
 
-   void calc_layer_input_dependencies(set<const BaseLayer*>& dependencies,
-         const BaseLayer* layer);
+      void update_layer_input_dependencies ();
 
-   void update_recurrent_connection_flags();
+      void calc_layer_input_dependencies (set<const BaseLayer *> &dependencies,
+                                          const BaseLayer *layer);
 
-   void update_activation_order();
+      void update_recurrent_connection_flags ();
 
-   /*
-    * Returns true of layer1 has a non-recursive dependency on layer2. This
-    * indicates that layer2 must be activated before layer1.
-    */
-   bool requires(const BaseLayer* layer1, const BaseLayer* layer2);
+      void update_activation_order ();
 
-   /*
-    * Returns an ordered vector of all the layers that are in the specified layers
-    * direct dependency tree (i.e. all layers in the activation chain that provide
-    * input to the specified layer)
-    */
-   void calc_layer_feedforward_dependencies(set<const BaseLayer*>& dependencies,
-         const BaseLayer* layer);
-};
+      /*
+       * Returns true of layer1 has a non-recursive dependency on layer2. This
+       * indicates that layer2 must be activated before layer1.
+       */
+      bool requires (const BaseLayer *layer1, const BaseLayer *layer2);
 
-template<class _NetInFunc, class _TransFunc> inline Layer<_NetInFunc, _TransFunc>& BaseNeuralNet::new_hidden_layer(
-      unsigned int _sz, const char* _name)
-{
-   stringstream layer_name;
-   if (_name == 0)
-      layer_name << "hidden-layer-" << network_layers.size();
-   else
-      layer_name << _name;
+      /*
+       * Returns an ordered vector of all the layers that are in the specified layers
+       * direct dependency tree (i.e. all layers in the activation chain that provide
+       * input to the specified layer)
+       */
+      void calc_layer_feedforward_dependencies (set<const BaseLayer *> &dependencies,
+                                                const BaseLayer *layer);
+   };
 
-   Layer<_NetInFunc, _TransFunc>* layer = new Layer<_NetInFunc, _TransFunc>(_sz,
-         layer_name.str());
-   install_hidden_layer(layer);
+   template<class _NetInFunc, class _TransFunc> inline BaseLayer &BaseNeuralNet::new_hidden_layer (
+      unsigned int _sz, const char *_name)
+   {
+      stringstream layer_name;
+      if (_name == 0)
+         layer_name << "hidden-layer-" << network_layers.size ();
+      else
+         layer_name << _name;
 
-   return *layer;
-}
+      // Needs to be ...
+      // BaseLayer *layer = new BaseLayer(BaseLayer::create<_NetInFunc, _TransferFunction> (_sz, layer_name.str ()));
+      BaseLayer *layer = new BaseLayer(BaseLayer::create<_NetInFunc, _TransFunc>(_sz));
+      install_hidden_layer (layer);
 
-template<class _NetInFunc, class _TransFunc> inline Layer<_NetInFunc, _TransFunc>& BaseNeuralNet::new_output_layer(
-      unsigned int _sz, const char* _name)
-{
-   stringstream layer_name;
-   if (_name == 0)
-      layer_name << "output-layer-" << output_layers.size();
-   else
-      layer_name << _name;
+      return *layer;
+   }
 
-   Layer<_NetInFunc, _TransFunc>* layer = new Layer<_NetInFunc, _TransFunc>(_sz,
-         layer_name.str());
-   install_output_layer(layer);
+   template<class _NetInFunc, class _TransFunc> inline BaseLayer &BaseNeuralNet::new_output_layer (
+      unsigned int _sz, const char *_name)
+   {
+      stringstream layer_name;
+      if (_name == 0)
+         layer_name << "output-layer-" << output_layers.size ();
+      else
+         layer_name << _name;
 
-   return *layer;
-}
+      // Needs to be ...
+      // BaseLayer *layer = new BaseLayer(BaseLayer::create<_NetInFunc, _TransferFunction> (_sz, layer_name.str()));
+      BaseLayer *layer = new BaseLayer(BaseLayer::create<_NetInFunc, _TransFunc> (_sz));
+      install_output_layer (layer);
 
-inline map<const BaseLayer*, ConnectionMap*>& BaseNeuralNet::get_connection_map()
-{
-   return layer_input_conn_map;
-}
+      return *layer;
+   }
 
-inline ConnectionMap& BaseNeuralNet::get_network_output_connection_map()
-{
-   return network_output_map;
-}
+   inline map<const BaseLayer *, ConnectionMap *> &BaseNeuralNet::get_connection_map ()
+   {
+      return layer_input_conn_map;
+   }
 
-inline ConnectionMap* BaseNeuralNet::get_layer_connection_map(
-   const BaseLayer& layer)
-{
-   map<const BaseLayer*, ConnectionMap*>::iterator map_entry =
-         layer_input_conn_map.find(&layer);
-   ConnectionMap* layer_input = map_entry->second;
+   inline ConnectionMap &BaseNeuralNet::get_network_output_connection_map ()
+   {
+      return network_output_map;
+   }
 
-   return layer_input;
-}
+   inline ConnectionMap *BaseNeuralNet::get_layer_connection_map (
+      const BaseLayer &layer)
+   {
+      map<const BaseLayer *, ConnectionMap *>::iterator map_entry =
+         layer_input_conn_map.find (&layer);
+      ConnectionMap *layer_input = map_entry->second;
 
-inline const vector<BaseLayer*>& BaseNeuralNet::get_layer_activation_order()
-{
-   return layer_activation_order;
-}
+      return layer_input;
+   }
 
-} /* namespace flex_neuralnet */
+   inline const vector<BaseLayer *> &BaseNeuralNet::get_layer_activation_order ()
+   {
+      return layer_activation_order;
+   }
+
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_BASENET_H_ */

@@ -9,25 +9,35 @@
 #define FLEX_NEURALNET_RADBAS_H_
 
 #include "TransferFunctor.h"
+#include "NetDist.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class RadBas: public TransferFunctor
-{
-public:
-   RadBas();
+   class RadBas : public TransferFunctor, public NetDist
+   {
+   public:
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
-         Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
+      /*
+       * Return transfer function type for default object name creation.
+       */
+      static string type()
+      {
+         return "RadBas";
+      }
 
-   RadBas* clone() const;
+      RadBas ();
 
-private:
-   mutable double spread;
-   mutable double sqr_dist;
-};
+      void operator() (vector<double> &transVec, Array<double> &dAdN, vector<double> &d2AdN,
+                       Array<double> &dAdB, const vector<double> &netInVec, const vector<double> &biases) const;
 
-} /* namespace flex_neuralnet */
+      RadBas *clone () const;
+
+   private:
+      mutable double spread;
+      mutable double sqr_dist;
+   };
+
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_RADBAS_H_ */

@@ -10,26 +10,46 @@
 
 #include <string>
 
-using namespace std;
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class NamedObject
-{
-public:
+   class NamedObject
+   {
+   public:
 
-   NamedObject(const char* _name  = "NamedObject");
-   NamedObject(const string& _name);
+      NamedObject (const char *_name = "NamedObject");
+      NamedObject (const std::string &_name);
 
-   const string& name() const;
+      const std::string &name () const;
 
-protected:
-   void copy(const NamedObject& _namedObj);
+   protected:
+      void copy (const NamedObject &_namedObj);
 
-private:
-   string myname;
-};
+   private:
+      std::string myname;
+   };
 
-} /* namespace flex_neuralnet */
+   inline NamedObject::NamedObject (const std::string &_name)
+   {
+      myname = _name;
+   }
+
+   inline NamedObject::NamedObject (const char *_name)
+   {
+      myname = _name;
+   }
+
+   inline const std::string &NamedObject::name () const
+   {
+      return myname;
+   }
+
+   inline void NamedObject::copy (const NamedObject &_namedObj)
+   {
+      myname = _namedObj.myname;
+   }
+
+
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_NAMEDOBJECT_H_ */

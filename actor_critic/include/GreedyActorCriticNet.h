@@ -17,41 +17,40 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class GreedyActorCriticNet
-{
-public:
-   GreedyActorCriticNet(const Pattern& stateVec, const set<string>& _actionSet, AdaptiveCriticNet* _adaptCritic);
-   virtual ~GreedyActorCriticNet();
+   class GreedyActorCriticNet
+   {
+   public:
+      GreedyActorCriticNet (const Pattern &stateVec, const set<string> &_actionSet, AdaptiveCriticNet *_adaptCritic);
+      virtual ~GreedyActorCriticNet ();
 
+      void set_stochastic_action (bool _val);
 
-   void set_stochastic_action(bool _val);
+      ActorNet *get_actor ();
+      AdaptiveCriticNet *get_adaptive_critic ();
 
-   ActorNet* get_actor();
-   AdaptiveCriticNet* get_adaptive_critic();
+      const ActorCriticOutput &operator() (const Pattern &ipattern, unsigned int recurStep = 1);
 
-   const ActorCriticOutput& operator()(const Pattern& ipattern, unsigned int recurStep = 1);
+      void clear_error (unsigned int timeStep = 1);
+      void backprop (const vector<double> &_eVec, unsigned int timeStep = 1);
 
-   void clear_error(unsigned int timeStep = 1);
-   void backprop(const vector<double>& _eVec, unsigned int timeStep = 1);
+   private:
+      GreedyActorNet *actor;
+      AdaptiveCriticNet *adaptive_critic;
 
-private:
-   GreedyActorNet* actor;
-   AdaptiveCriticNet* adaptive_critic;
+      ActorCriticOutput last_actor_critic_output;
 
-   ActorCriticOutput last_actor_critic_output;
+      bool stochastic_action;
+   };
 
-   bool stochastic_action;
-};
+   inline
+   void GreedyActorCriticNet::set_stochastic_action (bool _val)
+   {
+      stochastic_action = _val;
+   }
 
-inline
-void GreedyActorCriticNet::set_stochastic_action(bool _val)
-{
-   stochastic_action = _val;
-}
-
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_GREEDYACTORCRITIC_NET_H_ */

@@ -7,51 +7,50 @@
 
 #include "LogSig.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-LogSig::LogSig()
-{
-   gain = 1.0;
-}
-
-LogSig::~LogSig()
-{
-   // TODO Auto-generated destructor stub
-}
-
-double LogSig::get_gain() const
-{
-   return gain;
-}
-
-void LogSig::set_gain(double val)
-{
-   gain = val;
-}
-
-
-void LogSig::operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
-      Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biasVec) const
-{
-   for (unsigned int i=0; i<transVec.size(); i++)
-      transVec[i] = 1.0 / (1.0 + exp( -gain * (biasVec[i] + netInVec[i]) ));
-
-   dAdN = 0;
-   for (unsigned int i=0; i<transVec.size(); i++)
+   LogSig::LogSig ()
    {
-      dAdN[i][i] = gain * transVec[i] * (1 - transVec[i]);
-      d2AdN[i] = transVec[i] * (1 - transVec[i]) * (1 - 2 * transVec[i]);
+      gain = 1.0;
    }
 
-   dAdB = 0;
-   for (unsigned int i=0; i<transVec.size(); i++)
-      dAdB[i][i] = gain * transVec[i] * (1 - transVec[i]);
-}
+   LogSig::~LogSig ()
+   {
+      // TODO Auto-generated destructor stub
+   }
 
-LogSig* LogSig::clone() const
-{
-   return new LogSig(*this);
-}
+   double LogSig::get_gain () const
+   {
+      return gain;
+   }
 
-} /* namespace flex_neuralnet */
+   void LogSig::set_gain (double val)
+   {
+      gain = val;
+   }
+
+   void LogSig::operator() (vector<double> &transVec, Array<double> &dAdN, vector<double> &d2AdN,
+                            Array<double> &dAdB, const vector<double> &netInVec, const vector<double> &biasVec) const
+   {
+      for (unsigned int i = 0; i < transVec.size (); i++)
+         transVec[i] = 1.0 / (1.0 + exp (-gain * (biasVec[i] + netInVec[i])));
+
+      dAdN = 0;
+      for (unsigned int i = 0; i < transVec.size (); i++)
+      {
+         dAdN[i][i] = gain * transVec[i] * (1 - transVec[i]);
+         d2AdN[i] = transVec[i] * (1 - transVec[i]) * (1 - 2 * transVec[i]);
+      }
+
+      dAdB = 0;
+      for (unsigned int i = 0; i < transVec.size (); i++)
+         dAdB[i][i] = gain * transVec[i] * (1 - transVec[i]);
+   }
+
+   LogSig *LogSig::clone () const
+   {
+      return new LogSig (*this);
+   }
+
+} /* namespace flexnnet */

@@ -10,20 +10,20 @@
 
 #include <Array.h>
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class ArrayInitializer
-{
-public:
+   class ArrayInitializer
+   {
+   public:
 
-   virtual ~ArrayInitializer();
+      virtual ~ArrayInitializer ();
 
-   virtual void operator()(Array<double>& arr) const;
+      virtual void operator() (Array<double> &arr) const;
 
-   virtual ArrayInitializer* clone() const;
-};
+      virtual ArrayInitializer *clone () const;
+   };
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_ARRAYINITI_H_ */

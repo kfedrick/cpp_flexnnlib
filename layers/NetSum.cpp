@@ -12,12 +12,12 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-NetSum::NetSum() : NetInputFunctor("NetSum")
-{
-}
+   NetSum::NetSum () : NetInputFunctor ("NetSum")
+   {
+   }
 
 /*
  * Calculate the net input and gradients given the raw input and weight array using a weighted the weighted
@@ -40,43 +40,43 @@ NetSum::NetSum() : NetInputFunctor("NetSum")
  *
  * 3. The array dNdI has the same dimensionality as the weight array.
  */
-void NetSum::operator()(vector<double>& netInVec, Array<double>& dNdW, Array<double>& dNdI,
-      const vector<double>& rawInVec, const Array<double>& weights) const
-{
-
-   if (rawInVec.size() != weights.colDim())
-      throw invalid_argument("input vector size doesn't match column dimension in weight array");
-
-   if (netInVec.size() != weights.rowDim())
-      throw invalid_argument("net input vector size doesn't match row dimension in weight array");
-
-   if (dNdW.rowDim() != weights.rowDim() || dNdW.colDim() != weights.colDim())
-      throw invalid_argument("dNdW array dimensionality doesn't match weight array");
-
-   if (dNdI.rowDim() != weights.rowDim() || dNdI.colDim() != weights.colDim())
-      throw invalid_argument("dNdI array dimensionality doesn't match weight array");
-
-
-   for (unsigned int netInNdx = 0; netInNdx < netInVec.size(); netInNdx++)
+   void NetSum::operator() (vector<double> &netInVec, Array<double> &dNdW, Array<double> &dNdI,
+                            const vector<double> &rawInVec, const Array<double> &weights) const
    {
-      netInVec.at(netInNdx) = 0;
-      for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size(); rawInNdx++)
-          netInVec.at(netInNdx) += rawInVec.at(rawInNdx) * weights[netInNdx][rawInNdx];
+
+      if (rawInVec.size () != weights.colDim ())
+         throw invalid_argument ("input vector size doesn't match column dimension in weight array");
+
+      if (netInVec.size () != weights.rowDim ())
+         throw invalid_argument ("net input vector size doesn't match row dimension in weight array");
+
+      if (dNdW.rowDim () != weights.rowDim () || dNdW.colDim () != weights.colDim ())
+         throw invalid_argument ("dNdW array dimensionality doesn't match weight array");
+
+      if (dNdI.rowDim () != weights.rowDim () || dNdI.colDim () != weights.colDim ())
+         throw invalid_argument ("dNdI array dimensionality doesn't match weight array");
+
+      unsigned int bias_ndx = netInVec.size();
+      for (unsigned int netInNdx = 0; netInNdx < netInVec.size (); netInNdx++)
+      {
+         netInVec.at (netInNdx) = 0;
+         for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size (); rawInNdx++)
+            netInVec.at (netInNdx) += rawInVec.at (rawInNdx) * weights[netInNdx][rawInNdx];
+      }
+
+      for (unsigned int out_ndx = 0; out_ndx < dNdW.rowDim (); out_ndx++)
+         for (unsigned int in_ndx = 0; in_ndx < rawInVec.size (); in_ndx++)
+            dNdW[out_ndx][in_ndx] = rawInVec.at (in_ndx);
+
+      for (unsigned int out_ndx = 0; out_ndx < dNdI.rowDim (); out_ndx++)
+         for (unsigned int in_ndx = 0; in_ndx < rawInVec.size (); in_ndx++)
+            dNdI[out_ndx][in_ndx] = weights[out_ndx][in_ndx];
+
    }
 
-   for (unsigned int out_ndx=0; out_ndx<dNdW.rowDim(); out_ndx++)
-       for (unsigned int in_ndx=0; in_ndx<rawInVec.size(); in_ndx++)
-           dNdW[out_ndx][in_ndx] = rawInVec.at(in_ndx);
+   NetSum *NetSum::clone () const
+   {
+      return new NetSum (*this);
+   }
 
-   for (unsigned int out_ndx=0; out_ndx<dNdI.rowDim(); out_ndx++)
-      for (unsigned int in_ndx=0; in_ndx<rawInVec.size(); in_ndx++)
-         dNdI[out_ndx][in_ndx] = weights[out_ndx][in_ndx];
-
-}
-
-NetSum* NetSum::clone() const
-{
-   return new NetSum(*this);
-}
-
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */

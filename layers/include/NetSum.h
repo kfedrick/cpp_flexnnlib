@@ -10,25 +10,25 @@
 
 #include "NetInputFunctor.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class NetSum: public NetInputFunctor
-{
-public:
+   class NetSum : public NetInputFunctor
+   {
+   public:
 
-   NetSum();
+      NetSum ();
 
-   /*
-    * Calculate the net input value based on the raw input vector and weights specified in the
-    * argument list and copies it into the netInVec argument.
-    */
-   void operator()(vector<double>& netInVec, Array<double>& dNdW, Array<double>& dNdI,
-         const vector<double>& rawInVec, const Array<double>& weights) const;
+      /*
+       * Calculate the net input value based on the raw input vector and weights specified in the
+       * argument list and copies it into the netInVec argument.
+       */
+      void operator() (vector<double> &netInVec, Array<double> &dNdW, Array<double> &dNdI,
+                       const vector<double> &rawInVec, const Array<double> &weights) const;
 
-   NetSum* clone() const;
-};
+      NetSum *clone () const;
+   };
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_NETSUM_H_ */

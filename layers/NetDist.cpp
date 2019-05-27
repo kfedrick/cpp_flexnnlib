@@ -7,12 +7,12 @@
 
 #include "NetDist.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-NetDist::NetDist() : NetInputFunctor("NetDist")
-{
-}
+   NetDist::NetDist () : NetInputFunctor ("NetDist")
+   {
+   }
 
 /*
  * Calculate the net input and gradients given the raw input and weight array using a weighted the weighted
@@ -35,51 +35,51 @@ NetDist::NetDist() : NetInputFunctor("NetDist")
  *
  * 3. The array dNdI has the same dimensionality as the weight array.
  */
-void NetDist::operator()(vector<double>& netInVec, Array<double>& dNdW, Array<double>& dNdI,
-      const vector<double>& rawInVec, const Array<double>& weights) const
-{
-
-   if (rawInVec.size() != weights.colDim())
-      throw invalid_argument("input vector size doesn't match column dimension in weight array");
-
-   if (netInVec.size() != weights.rowDim())
-      throw invalid_argument("net input vector size doesn't match row dimension in weight array");
-
-   if (dNdW.rowDim() != weights.rowDim() || dNdW.colDim() != weights.colDim())
-      throw invalid_argument("dNdW array dimensionality doesn't match weight array");
-
-   if (dNdI.rowDim() != weights.rowDim() || dNdI.colDim() != weights.colDim())
-      throw invalid_argument("dNdI array dimensionality doesn't match weight array");
-
-   for (unsigned int netInNdx = 0; netInNdx < netInVec.size(); netInNdx++)
+   void NetDist::operator() (vector<double> &netInVec, Array<double> &dNdW, Array<double> &dNdI,
+                             const vector<double> &rawInVec, const Array<double> &weights) const
    {
-      /*
-       * Calculate actvity to the netInNdx neuron as the euclidean distance
-       * from the input vector to the vector specified by the weights vector
-       * to the netInNdx neuron
-       */
-      temp_sum = 0;
-      for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size(); rawInNdx++)
-      {
-          temp = rawInVec.at(rawInNdx) - weights[netInNdx][rawInNdx];
-          temp_sum += temp * temp;
-      }
-      netInVec.at(netInNdx) = sqrt(temp_sum);
 
-      for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size(); rawInNdx++)
+      if (rawInVec.size () != weights.colDim ())
+         throw invalid_argument ("input vector size doesn't match column dimension in weight array");
+
+      if (netInVec.size () != weights.rowDim ())
+         throw invalid_argument ("net input vector size doesn't match row dimension in weight array");
+
+      if (dNdW.rowDim () != weights.rowDim () || dNdW.colDim () != weights.colDim ())
+         throw invalid_argument ("dNdW array dimensionality doesn't match weight array");
+
+      if (dNdI.rowDim () != weights.rowDim () || dNdI.colDim () != weights.colDim ())
+         throw invalid_argument ("dNdI array dimensionality doesn't match weight array");
+
+      for (unsigned int netInNdx = 0; netInNdx < netInVec.size (); netInNdx++)
       {
-         temp = rawInVec.at(rawInNdx) - weights[netInNdx][rawInNdx];
-         temp_deriv = -temp / netInVec.at(netInNdx);
-         dNdW[netInNdx][rawInNdx] =  temp_deriv;
-         dNdI[netInNdx][rawInNdx] = -temp_deriv;
+         /*
+          * Calculate actvity to the netInNdx neuron as the euclidean distance
+          * from the input vector to the vector specified by the weights vector
+          * to the netInNdx neuron
+          */
+         temp_sum = 0;
+         for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size (); rawInNdx++)
+         {
+            temp = rawInVec.at (rawInNdx) - weights[netInNdx][rawInNdx];
+            temp_sum += temp * temp;
+         }
+         netInVec.at (netInNdx) = sqrt (temp_sum);
+
+         for (unsigned int rawInNdx = 0; rawInNdx < rawInVec.size (); rawInNdx++)
+         {
+            temp = rawInVec.at (rawInNdx) - weights[netInNdx][rawInNdx];
+            temp_deriv = -temp / netInVec.at (netInNdx);
+            dNdW[netInNdx][rawInNdx] = temp_deriv;
+            dNdI[netInNdx][rawInNdx] = -temp_deriv;
+         }
       }
+
    }
 
-}
-
-NetDist* NetDist::clone() const
-{
-   return new NetDist(*this);
-}
+   NetDist *NetDist::clone () const
+   {
+      return new NetDist (*this);
+   }
 
 }

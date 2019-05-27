@@ -14,137 +14,134 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
+   class ConnectionEntry
+   {
+   public:
+      ConnectionEntry (BaseLayer &from, bool recurrent = false);
+      ConnectionEntry (unsigned int ndx, const vector<double> &inputv);
+      virtual ~ConnectionEntry ();
 
-class ConnectionEntry
-{
-public:
-   ConnectionEntry(BaseLayer& from, bool recurrent=false);
-   ConnectionEntry(unsigned int ndx, const vector<double>& inputv);
-   virtual ~ConnectionEntry();
+      bool is_input_connection () const;
+      bool is_recurrent () const;
 
-   bool is_input_connection() const;
-   bool is_recurrent() const;
+      unsigned int get_input_pattern_index () const;
+      unsigned int get_input_vector_size () const;
+      BaseLayer &get_input_layer () const;
 
-   unsigned int get_input_pattern_index() const;
-   unsigned int get_input_vector_size() const;
-   BaseLayer& get_input_layer() const;
+      void set_recurrent (bool val);
 
-   void set_recurrent(bool val);
+   private:
+      BaseLayer *input_layer;
 
-private:
-   BaseLayer* input_layer;
+      /*
+       * This flag indicates that the connection is from the network input
+       */
+      bool input_connection_flag;
 
-   /*
-    * This flag indicates that the connection is from the network input
-    */
-   bool input_connection_flag;
+      /*
+       * Index into the network input pattern for this connection
+       */
+      unsigned int input_pattern_index;
 
-   /*
-    * Index into the network input pattern for this connection
-    */
-   unsigned int input_pattern_index;
+      /*
+       * Size of the network input vector
+       */
+      unsigned int input_vector_size;
 
-   /*
-    * Size of the network input vector
-    */
-   unsigned int input_vector_size;
+      /*
+       * This must be mutable so we can reassign this flag as we add
+       * new connections.
+       */
+      mutable bool recurrent_connection_flag;
+   };
 
-   /*
-    * This must be mutable so we can reassign this flag as we add
-    * new connections.
-    */
-   mutable bool recurrent_connection_flag;
-};
+   class ConnectionMap
+   {
 
+   public:
 
-class ConnectionMap
-{
+      /* **********************************************************************
+       *    Constructors, Destructors
+       * **********************************************************************
+       */
+      ConnectionMap ();
+      ConnectionMap (BaseLayer &target);
+      virtual ~ConnectionMap ();
 
-public:
+      /* ***********************************************************************
+       *    Accessor functons
+       * ***********************************************************************
+       */
 
-   /* **********************************************************************
-    *    Constructors, Destructors
-    * **********************************************************************
-    */
-   ConnectionMap();
-   ConnectionMap(BaseLayer& target);
-   virtual ~ConnectionMap();
+      /*
+       * Returns the size of the virtual input vector for this layer
+       */
+      int size () const;
 
-   /* ***********************************************************************
-    *    Accessor functons
-    * ***********************************************************************
-    */
+      /*
+       * Returns the number of layers providing input to this layer.
+       */
+      int input_map_size () const;
 
-   /*
-    * Returns the size of the virtual input vector for this layer
-    */
-   int size() const;
+      const vector<double> &
+      operator() (const Pattern &inpattern, unsigned int timeStep = 1, unsigned int closedLoopStep = 0);
 
-   /*
-    * Returns the number of layers providing input to this layer.
-    */
-   int input_map_size() const;
+      const vector<vector<double> > &get_error (const vector<double> &errorv);
 
-   const vector<double>& operator()(const Pattern& inpattern, unsigned int timeStep = 1, unsigned int closedLoopStep = 0);
+      const vector<vector<double> > &get_error (unsigned int timeStep = 1);
 
-   const vector< vector<double> >& get_error(const vector<double>& errorv);
+      /*
+       * Clear the input error vectors
+       */
+      void clear_error ();
 
-   const vector< vector<double> >& get_error(unsigned int timeStep = 1);
+      /* *************************************************************************
+       *    BaseLayer topology management functions
+       * *************************************************************************
+       */
+      void connect (BaseLayer &layer, bool recurrent = false);
+      void connect (const Pattern &ipattern, unsigned int patternNdx);
 
-   /*
-    * Clear the input error vectors
-    */
-   void clear_error();
+      const vector<ConnectionEntry> &get_input_connections () const;
+      vector<ConnectionEntry> &get_input_connections ();
 
+   private:
 
-   /* *************************************************************************
-    *    Layer topology management functions
-    * *************************************************************************
-    */
-   void connect(BaseLayer& layer, bool recurrent = false);
-   void connect(const Pattern& ipattern, unsigned int patternNdx);
+      /* ***********************************************************************
+       *    Activation functons
+       * ***********************************************************************
+       */
 
-   const vector<ConnectionEntry>& get_input_connections() const;
-   vector<ConnectionEntry>& get_input_connections();
+      /*
+       * Scatters the coalesced backprop error vector into sub-vectors for each input layer.
+       * Pull the error vector from the target layer for this map.
+       */
+      void backprop_scatter (const vector<double> &errorv);
 
-private:
+      unsigned int append_virtual_vector (unsigned int start_ndx, const vector<double> &vec);
 
-   /* ***********************************************************************
-    *    Activation functons
-    * ***********************************************************************
-    */
+      BaseLayer *target_layer;
 
-   /*
-    * Scatters the coalesced backprop error vector into sub-vectors for each input layer.
-    * Pull the error vector from the target layer for this map.
-    */
-   void backprop_scatter(const vector<double>& errorv);
+      /*
+       * Contains on ordered list of references to the network layers that provide input this
+       * network layer.
+       */
+      vector<ConnectionEntry> layer_input_map;
 
-   unsigned int append_virtual_vector(unsigned int start_ndx, const vector<double>& vec);
+      /*
+       * Local vector to contain the virtual input vector from the input layers connected to this layer
+       */
+      vector<double> virtual_input_vector;
 
-   BaseLayer* target_layer;
+      /*
+       * Local vector to hold the backpropogated error vector for each input layer
+       */
+      vector<vector<double> > backprop_error_vector;
+   };
 
-   /*
-    * Contains on ordered list of references to the network layers that provide input this
-    * network layer.
-    */
-   vector<ConnectionEntry> layer_input_map;
-
-   /*
-    * Local vector to contain the virtual input vector from the input layers connected to this layer
-    */
-   vector<double> virtual_input_vector;
-
-   /*
-    * Local vector to hold the backpropogated error vector for each input layer
-    */
-   vector< vector<double> > backprop_error_vector;
-};
-
-
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_CONNECTIONMAP_H_ */

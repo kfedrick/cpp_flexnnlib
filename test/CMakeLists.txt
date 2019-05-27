@@ -1,0 +1,12 @@
+include_directories("..")
+
+enable_testing()
+
+add_executable(layer_activation_tests layer_activation_tests/test_layer_activation.cpp ../layers/include/BasicLayer.h layer_activation_tests/LayerActivationTestCase.cpp layer_activation_tests/LayerActivationTestCase.h layer_activation_tests/PureLinActivationTestCase.h layer_activation_tests/PureLinActivationTestCase.cpp)
+target_link_libraries(layer_activation_tests gtest flexneuralnet)
+add_test(NAME layer_activation_tests COMMAND layer_activation_tests)
+
+add_executable(layer_deriv_tests layer_deriv_tests/test_layer_derivatives.cpp layer_deriv_tests/test_layer_derivatives.h layer_deriv_tests/LayerDerivTestCase.cpp layer_deriv_tests/LayerDerivTestCase.h layer_deriv_tests/PureLinDerivTestCase.cpp layer_deriv_tests/PureLinDerivTestCase.h)
+target_link_libraries(layer_deriv_tests gtest flexneuralnet)
+add_test(NAME layer_deriv_tests COMMAND layer_deriv_tests)
+

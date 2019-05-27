@@ -9,23 +9,29 @@
 #define FLEX_NEURALNET_TRANSLIN_H_
 
 #include "TransferFunctor.h"
+#include "NetSum.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class PureLin : public TransferFunctor
-{
-public:
-   PureLin();
+   class PureLin : public TransferFunctor, public NetSum
+   {
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
-         Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
+   public:
+      static string type()
+      {
+         return "PureLin";
+      }
 
-   PureLin* clone() const;
-};
+   public:
+      PureLin ();
 
+      void operator() (vector<double> &transVec, Array<double> &dAdN, vector<double> &d2AdN,
+                       Array<double> &dAdB, const vector<double> &netInVec, const vector<double> &biases) const;
 
+      PureLin *clone () const;
+   };
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_TRANSLIN_H_ */

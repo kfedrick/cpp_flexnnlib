@@ -9,28 +9,38 @@
 #define FLEX_NEURALNET_TANSIG_H_
 
 #include "TransferFunctor.h"
+#include "NetSum.h"
 #include <cmath>
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class TanSig: public TransferFunctor
-{
-public:
-   TanSig();
+   class TanSig : public TransferFunctor, public NetSum
+   {
+   public:
 
-   double get_gain() const;
-   void set_gain(double val);
+      /*
+       * Return transfer function type for default object name creation.
+       */
+      static string type()
+      {
+         return "TanSig";
+      }
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
-         Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
+      TanSig ();
 
-   TanSig* clone() const;
+      double get_gain () const;
+      void set_gain (double val);
 
-private:
-   double gain;
-};
+      void operator() (vector<double> &transVec, Array<double> &dAdN, vector<double> &d2AdN,
+                       Array<double> &dAdB, const vector<double> &netInVec, const vector<double> &biases) const;
 
-} /* namespace flex_neuralnet */
+      TanSig *clone () const;
+
+   private:
+      double gain;
+   };
+
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_TANSIG_H_ */

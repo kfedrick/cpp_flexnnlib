@@ -10,20 +10,20 @@
 
 #include "OutputErrorFunctor.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class SumSquaredError: public flex_neuralnet::OutputErrorFunctor
-{
-public:
-   SumSquaredError();
-   virtual ~SumSquaredError();
+   class SumSquaredError : public flexnnet::OutputErrorFunctor
+   {
+   public:
+      SumSquaredError ();
+      virtual ~SumSquaredError ();
 
-   void operator()(double& error, vector<double>& gradient,
-         const vector<double>& outVec, const vector<double>& targetVec);
+      void operator() (double &error, vector<double> &gradient,
+                       const vector<double> &outVec, const vector<double> &targetVec);
 
-   SumSquaredError* clone() const;
-};
+      SumSquaredError *clone () const;
+   };
 
 }
 

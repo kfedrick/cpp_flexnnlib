@@ -7,61 +7,60 @@
 
 #include <ActorCriticOutput.h>
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-ActorCriticOutput::ActorCriticOutput()
-{
-   reinforcement_signal = 0;
-   reinforcement_estimated_flag = true;
-}
+   ActorCriticOutput::ActorCriticOutput ()
+   {
+      reinforcement_signal = 0;
+      reinforcement_estimated_flag = true;
+   }
 
-ActorCriticOutput::ActorCriticOutput(const Action& _action, double _rSig, bool _estFlag)
-{
-   set(_action, _rSig, _estFlag);
-}
+   ActorCriticOutput::ActorCriticOutput (const Action &_action, double _rSig, bool _estFlag)
+   {
+      set (_action, _rSig, _estFlag);
+   }
 
-ActorCriticOutput::~ActorCriticOutput()
-{
-}
+   ActorCriticOutput::~ActorCriticOutput ()
+   {
+   }
 
-void ActorCriticOutput::set(const Action& _action, double _rSig, bool _estFlag)
-{
-   actor_action = _action;
-   reinforcement_signal = _rSig;
-   reinforcement_estimated_flag = _estFlag;
-}
+   void ActorCriticOutput::set (const Action &_action, double _rSig, bool _estFlag)
+   {
+      actor_action = _action;
+      reinforcement_signal = _rSig;
+      reinforcement_estimated_flag = _estFlag;
+   }
 
-ActorCriticOutput::ActorCriticOutput(const ActorCriticOutput& _acOut)
-{
-   copy(_acOut);
-}
+   ActorCriticOutput::ActorCriticOutput (const ActorCriticOutput &_acOut)
+   {
+      copy (_acOut);
+   }
 
-const Action& ActorCriticOutput::action() const
-{
-   return actor_action;
-}
+   const Action &ActorCriticOutput::action () const
+   {
+      return actor_action;
+   }
 
-const double ActorCriticOutput::reinforcement() const
-{
-   return reinforcement_signal;
-}
+   const double ActorCriticOutput::reinforcement () const
+   {
+      return reinforcement_signal;
+   }
 
-const bool ActorCriticOutput::is_reinforcement_estimated() const
-{
-   return reinforcement_estimated_flag;
-}
+   const bool ActorCriticOutput::is_reinforcement_estimated () const
+   {
+      return reinforcement_estimated_flag;
+   }
 
-ActorCriticOutput& ActorCriticOutput::operator=(const ActorCriticOutput& _acOut)
-{
-   copy(_acOut);
-   return *this;
-}
+   ActorCriticOutput &ActorCriticOutput::operator= (const ActorCriticOutput &_acOut)
+   {
+      copy (_acOut);
+      return *this;
+   }
 
+   void ActorCriticOutput::copy (const ActorCriticOutput &_acOut)
+   {
+      set (_acOut.action (), _acOut.reinforcement (), _acOut.is_reinforcement_estimated ());
+   }
 
-void ActorCriticOutput::copy(const ActorCriticOutput& _acOut)
-{
-   set(_acOut.action(), _acOut.reinforcement(), _acOut.is_reinforcement_estimated());
-}
-
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */

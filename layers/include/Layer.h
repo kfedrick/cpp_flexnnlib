@@ -1,83 +1,83 @@
-/*
- * Layer.h
- *
- *  Created on: Mar 9, 2014
- *      Author: kfedrick
- */
+//
+// Created by kfedrick on 5/9/19.
+//
 
 #ifndef FLEX_NEURALNET_LAYER_H_
 #define FLEX_NEURALNET_LAYER_H_
 
-#include "BaseLayer.h"
+#include "NetworkLayer.h"
+#include "LayerSerializer.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
+   template<class _TransferFunction>
+   class Layer : public NetworkLayer, public _TransferFunction
+   {
 
-template <class _NetInFunc, class _TransFunc>
-class Layer: public flex_neuralnet::BaseLayer
-{
-public:
+   public:
+      static const Layer<_TransferFunction>& parse(const std::string& _json);
 
-   Layer(unsigned int sz, const char* _name = "Layer<_netInFunc, _TransFunc>");
-   Layer(unsigned int sz, const string& _name);
-   ~Layer();
+   public:
+      Layer (unsigned int _sz = 0, const std::string &_name = "");
+      ~Layer ();
 
-   _TransFunc& get_transfer_functor();
-   _NetInFunc& get_netinput_functor();
+      const std::string &name () const;
 
-   operator BaseLayer*();
+   protected:
+      void resize_layer(unsigned int _layer_sz, unsigned int _rawin_sz);
 
-private:
-   void initialize_policy();
-};
+   private:
+      void bind_functions ();
+   };
 
-template <class _NetInFunc, class _TransFunc>
-Layer<_NetInFunc, _TransFunc>::Layer(unsigned int sz, const char* _name) : BaseLayer(sz, _name)
-{
-   initialize_policy();
+   template<class _TransFunc> Layer<_TransFunc>::Layer (unsigned int _sz, const std::string &_name)
+      : NetworkLayer (_sz, _name), _TransFunc (_sz)
+   {
+         bind_functions();
+   }
+
+   template<class _TransFunc> Layer<_TransFunc>::~Layer ()
+   {
+   }
+
+   template<class _TransFunc> const std::string &Layer<_TransFunc>::name () const
+   {
+      NetworkLayer::name ();
+   }
+
+   template<class _TransFunc> void Layer<_TransFunc>::bind_functions ()
+   {
+      using namespace std::placeholders;
+
+      BasicLayer::resize_layer = std::bind (&Layer<_TransFunc>::resize_layer, this, _1, _2);
+
+      BasicLayer::calc_netin = std::bind (&_TransFunc::calc_netin, this, _1, _2);
+      BasicLayer::calc_dNdW = std::bind (&_TransFunc::calc_dNdW, this, _1, _2, _3);
+      BasicLayer::calc_dNdI = std::bind (&_TransFunc::calc_dNdI, this, _1, _2, _3);
+
+      BasicLayer::calc_layer_output = std::bind (&_TransFunc::calc_layer_output, this, _1, _2);
+      BasicLayer::calc_dAdN = std::bind (&_TransFunc::calc_dAdN, this, _1, _2);
+
+      BasicLayer::toJSONString = std::bind (&LayerSerializer< Layer<_TransFunc> >::toJSON, *this);
+   }
+
+   template<class _TransFunc> void Layer<_TransFunc>::resize_layer(unsigned int _layer_sz, unsigned int _rawin_sz)
+   {
+      // Save new layer input size
+      layer_input_size = _rawin_sz;
+
+      // Resize raw input vector cache
+      layer_state.rawinv.resize(_rawin_sz);
+
+      // Resize layer weights and derivatives
+      layer_weights.resize(const_layer_output_size_ref, _rawin_sz);
+      layer_derivatives.resize(const_layer_output_size_ref, const_layer_output_size_ref, _rawin_sz);
+
+      // Resize transfer function data members
+      _TransFunc::resize(_layer_sz, _rawin_sz);
+   }
+
+
 }
 
-template <class _NetInFunc, class _TransFunc>
-Layer<_NetInFunc, _TransFunc>::Layer(unsigned int sz, const string& _name) : BaseLayer(sz, _name)
-{
-   initialize_policy();
-}
-
-template <class _NetInFunc, class _TransFunc>
-Layer<_NetInFunc, _TransFunc>::~Layer()
-{
-
-}
-
-template <class _NetInFunc, class _TransFunc> inline
-void Layer<_NetInFunc, _TransFunc>::initialize_policy()
-{
-   set_netinput_functor(new _NetInFunc());
-   set_transfer_functor(new _TransFunc());
-}
-
-template <class _NetInFunc, class _TransFunc> inline
-_TransFunc& Layer<_NetInFunc, _TransFunc>::get_transfer_functor()
-{
-   BaseLayer* base_layer_ptr = dynamic_cast<BaseLayer*>(this);
-   TransferFunctor* transfunc_ptr = base_layer_ptr->get_transfer_functor();
-   return dynamic_cast<_TransFunc&>(*transfunc_ptr);
-}
-
-template <class _NetInFunc, class _TransFunc> inline
-_NetInFunc& Layer<_NetInFunc, _TransFunc>::get_netinput_functor()
-{
-   BaseLayer* base_layer_ptr = dynamic_cast<BaseLayer*>(this);
-   NetInputFunctor* netinfunc_ptr = base_layer_ptr->get_netinput_functor();
-   return dynamic_cast<_NetInFunc&>(*netinfunc_ptr);
-}
-
-template <class _NetInFunc, class _TransFunc> inline
-Layer<_NetInFunc, _TransFunc>::operator BaseLayer*()
-{
-   return dynamic_cast<BaseLayer>(this);
-}
-
-} /* namespace flex_neuralnet */
-
-#endif /* FLEX_NEURALNET_LAYER_H_ */
+#endif //FLEXNEURALNET_LAYER_H_

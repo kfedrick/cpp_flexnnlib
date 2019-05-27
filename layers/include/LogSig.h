@@ -9,29 +9,39 @@
 #define FLEX_NEURALNET_LOGSIG_H_
 
 #include "TransferFunctor.h"
+#include "NetSum.h"
 #include <cmath>
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class LogSig: public flex_neuralnet::TransferFunctor
-{
-public:
-   LogSig();
-   virtual ~LogSig();
+   class LogSig : public TransferFunctor, public NetSum
+   {
+   public:
 
-   double get_gain() const;
-   void set_gain(double val);
+      /*
+       * Return transfer function type for default object name creation.
+       */
+      static string type()
+      {
+         return "LogSig";
+      }
 
-   void operator()(vector<double>& transVec, Array<double>& dAdN, vector<double>& d2AdN,
-         Array<double>& dAdB, const vector<double>& netInVec, const vector<double>& biases) const;
+      LogSig ();
+      virtual ~LogSig ();
 
-   virtual LogSig* clone() const;
+      double get_gain () const;
+      void set_gain (double val);
 
-private:
-   double gain;
-};
+      void operator() (vector<double> &transVec, Array<double> &dAdN, vector<double> &d2AdN,
+                       Array<double> &dAdB, const vector<double> &netInVec, const vector<double> &biases) const;
 
-} /* namespace flex_neuralnet */
+      virtual LogSig *clone () const;
+
+   private:
+      double gain;
+   };
+
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_LOGSIG_H_ */

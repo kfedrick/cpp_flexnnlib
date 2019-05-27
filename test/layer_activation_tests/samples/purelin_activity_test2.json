@@ -1,0 +1,1 @@
+{"id":{"name":"purelin2","type":"flexnnet::Layer<flexnnet::LogSigTrans>"},"dimensions":{"layer_size":3,"layer_input_size":3},"learning_params":{"weights":[[1.0,0.0,-1.0,0.0],[0.1,-0.3,1.0,0.0],[1.0,0.7,-1.0,0.2]]},"transfer_function_params":{"gain":1.6}, "test_pairs" : [ {"input": [1.0, 2.0, -3.0], "target": [4.0, -3.5,5.6]} ]}

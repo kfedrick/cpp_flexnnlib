@@ -1,22 +1,24 @@
 cmake_minimum_required(VERSION 3.13)
-project(cpp_neuralnetlib)
+project(cpp_flexnnlib)
 
 set(CMAKE_CXX_STANDARD 14)
 
+#include_directories("${PROJECT_SOURCE_DIR}")
+
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
+#configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+#execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#        RESULT_VARIABLE result
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+#if (result)
+#    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+#endif ()
+#execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#        RESULT_VARIABLE result
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+#if (result)
+#    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+#endif ()
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -33,8 +35,7 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 # later. Otherwise we have to add them here ourselves.
 if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
-endif()
-
+endif ()
 
 
 add_library(flexneuralnet
@@ -85,11 +86,10 @@ add_library(flexneuralnet
         datasets/include/PatternSequence.h
         datasets/Pattern.cpp
         datasets/PatternSequence.cpp
-        include/neuralnet.h
+        include/flexneuralnet.h
         layers/include/BaseLayer.h
         layers/include/ConnectionMap.h
         layers/include/HvMap.h
-        layers/include/Layer.h
         layers/include/LogSig.h
         layers/include/NetDist.h
         layers/include/NetInputFunctor.h
@@ -138,13 +138,10 @@ add_library(flexneuralnet
         util/include/ArrayInitializer.h
         util/include/NamedObject.h
         util/include/NetworkWeightsData.h
-        util/include/Parameters.h
         util/include/URandArrayInitializer.h
         util/ArrayInitializer.cpp
-        util/NamedObject.cpp
         util/NetworkWeightsData.cpp
-        util/Parameters.cpp
-        util/URandArrayInitializer.cpp)
+        util/URandArrayInitializer.cpp layers/include/BasicLayer.h layers/BasicLayer.cpp layers/include/Layer.h util/include/Base.h util/include/Funcs.h util/include/Derived.h layers/MyNetSum.cpp layers/include/MyNetSum.h util/LayerWeights.cpp util/include/LayerWeights.h network/BasicNeuralNet.cpp network/include/BasicNeuralNet.h layers/NetworkLayer.cpp layers/include/NetworkLayer.h util/LayerDerivatives.cpp util/include/LayerDerivatives.h util/include/LayerState.h util/include/LayerInfo.h layers/PureLinTrans.cpp layers/include/PureLinTrans.h util/JSONEncoder.cpp util/include/JSONEncoder.h layers/LogSigTrans.cpp layers/include/LogSigTrans.h layers/MyEuclideanDist.cpp layers/include/MyEuclideanDist.h layers/RadialBasisTrans.cpp layers/include/RadialBasisTrans.h layers/TanSigTrans.cpp layers/include/TanSigTrans.h util/include/LayerSerializer.h util/include/PureLinSerializer.h util/NetworkLayerSerializer.cpp util/include/NetworkLayerSerializer.h util/include/TanSigSerializer.h util/include/RadialBasisSerializer.h util/include/LogSigSerializer.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -158,4 +155,8 @@ target_include_directories(flexneuralnet PUBLIC
         network/include
         sandbox
         util
-        util/include)
+        util/include
+        rapidjson)
+
+#enable_testing()
+add_subdirectory(test)

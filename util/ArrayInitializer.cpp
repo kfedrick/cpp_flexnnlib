@@ -9,22 +9,21 @@
 
 #include <stdio.h>
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
+   ArrayInitializer::~ArrayInitializer ()
+   {
+   }
 
-ArrayInitializer::~ArrayInitializer()
-{
-}
+   void ArrayInitializer::operator() (Array<double> &arr) const
+   {
+      printf ("ArrayInitializer::operator()\n");
+   }
 
-void ArrayInitializer::operator()(Array<double>& arr) const
-{
-   printf ("ArrayInitializer::operator()\n");
-}
+   ArrayInitializer *ArrayInitializer::clone () const
+   {
+      return new ArrayInitializer (*this);
+   }
 
-ArrayInitializer* ArrayInitializer::clone() const
-{
-   return new ArrayInitializer(*this);
-}
-
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */

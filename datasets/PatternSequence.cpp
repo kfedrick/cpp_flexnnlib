@@ -7,12 +7,16 @@
 
 #include "PatternSequence.h"
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-PatternSequence::PatternSequence() : vector<Pattern>() {}
-PatternSequence::PatternSequence(int sz) : vector<Pattern>(sz) {}
-PatternSequence::PatternSequence(unsigned int sz) : vector<Pattern>(sz) {}
-PatternSequence::PatternSequence(const vector<Pattern>& vec) : vector<Pattern>(vec) {}
+   PatternSequence::PatternSequence () : vector<Pattern> ()
+   {}
+   PatternSequence::PatternSequence (int sz) : vector<Pattern> (sz)
+   {}
+   PatternSequence::PatternSequence (unsigned int sz) : vector<Pattern> (sz)
+   {}
+   PatternSequence::PatternSequence (const vector<Pattern> &vec) : vector<Pattern> (vec)
+   {}
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
 /*
@@ -26,48 +26,48 @@ namespace flex_neuralnet
  * implements a fixed,non-adaptive learning rate policy.
  */
 
-class ConstantLearningRate: public LearningRatePolicy
-{
-public:
-   ConstantLearningRate();
-   ConstantLearningRate(const BaseNeuralNet& _nn);
-   ConstantLearningRate(const ConstantLearningRate& _nnLRPolicy);
-   ~ConstantLearningRate();
+   class ConstantLearningRate : public LearningRatePolicy
+   {
+   public:
+      ConstantLearningRate ();
+      ConstantLearningRate (const BaseNeuralNet &_nn);
+      ConstantLearningRate (const ConstantLearningRate &_nnLRPolicy);
+      ~ConstantLearningRate ();
 
-   ConstantLearningRate& operator=(
-         const ConstantLearningRate& _nnLRPolicy);
-};
+      ConstantLearningRate &operator= (
+         const ConstantLearningRate &_nnLRPolicy);
+   };
 
-inline ConstantLearningRate::ConstantLearningRate() :
-      LearningRatePolicy()
-{
-   neural_net = NULL;
-}
+   inline ConstantLearningRate::ConstantLearningRate () :
+      LearningRatePolicy ()
+   {
+      neural_net = NULL;
+   }
 
-inline ConstantLearningRate::ConstantLearningRate(
-      const BaseNeuralNet& _nn) :
-      LearningRatePolicy(_nn)
-{
-}
+   inline ConstantLearningRate::ConstantLearningRate (
+      const BaseNeuralNet &_nn) :
+      LearningRatePolicy (_nn)
+   {
+   }
 
-inline ConstantLearningRate::ConstantLearningRate(
-      const ConstantLearningRate& _nnLRPolicy) :
-      LearningRatePolicy(_nnLRPolicy)
-{
-}
+   inline ConstantLearningRate::ConstantLearningRate (
+      const ConstantLearningRate &_nnLRPolicy) :
+      LearningRatePolicy (_nnLRPolicy)
+   {
+   }
 
-inline ConstantLearningRate::~ConstantLearningRate()
-{
-   // Do nothing
-}
+   inline ConstantLearningRate::~ConstantLearningRate ()
+   {
+      // Do nothing
+   }
 
-inline ConstantLearningRate& ConstantLearningRate::operator=(
-      const ConstantLearningRate& _nnLRPolicy)
-{
-   copy(_nnLRPolicy);
-   return *this;
-}
+   inline ConstantLearningRate &ConstantLearningRate::operator= (
+      const ConstantLearningRate &_nnLRPolicy)
+   {
+      copy (_nnLRPolicy);
+      return *this;
+   }
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_CONSTANT_LRATE_POLICY_H_ */

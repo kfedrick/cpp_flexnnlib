@@ -12,22 +12,22 @@
 
 using namespace std;
 
-namespace flex_neuralnet
+namespace flexnnet
 {
 
-class AdaptiveCriticNet3: public TDCNeuralNet
-{
-public:
-   AdaptiveCriticNet3();
-   virtual ~AdaptiveCriticNet3();
+   class AdaptiveCriticNet3 : public TDCNeuralNet
+   {
+   public:
+      AdaptiveCriticNet3 ();
+      virtual ~AdaptiveCriticNet3 ();
 
-   virtual double get_reinforcement(const Pattern& _stateVec,
-         const Pattern& _actionVec, unsigned int recurStep = 1);
+      virtual double get_reinforcement (const Pattern &_stateVec,
+                                        const Pattern &_actionVec, unsigned int recurStep = 1);
 
-private:
-   ConnectionMap conn_map;
-};
+   private:
+      ConnectionMap conn_map;
+   };
 
-} /* namespace flex_neuralnet */
+} /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_ADAPTIVECRITIC_NET3_H_ */

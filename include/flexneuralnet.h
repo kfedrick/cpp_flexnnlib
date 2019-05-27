@@ -9,14 +9,15 @@
 #define FLEX_NEURALNET_H_
 
 /*
- * Layer classes
+ * BaseLayer classes
  */
-#include <Layer.h>
+#include <BaseLayer.h>
 
 /*
  * Utility classes
  */
 #include <Array.h>
+
 
 
 #endif /* FLEX_NEURALNET_H_ */
