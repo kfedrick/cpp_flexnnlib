@@ -12,7 +12,6 @@
 
 namespace flexnnet
 {
-
    class NamedObject
    {
    public:
@@ -48,8 +47,6 @@ namespace flexnnet
    {
       myname = _namedObj.myname;
    }
-
-
 } /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_NAMEDOBJECT_H_ */

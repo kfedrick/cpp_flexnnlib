@@ -2,23 +2,24 @@ cmake_minimum_required(VERSION 3.13)
 project(cpp_flexnnlib)
 
 set(CMAKE_CXX_STANDARD 14)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
 
-#include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}")
 
 # Download and unpack googletest at configure time
-#configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-#execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#        RESULT_VARIABLE result
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-#if (result)
-#    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-#endif ()
-#execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#        RESULT_VARIABLE result
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-#if (result)
-#    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-#endif ()
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif ()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -37,111 +38,83 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif ()
 
+add_executable(sandbox sandbox/doit.cpp)
+
 
 add_library(flexneuralnet
-        actor_critic/include/Action.h
-        actor_critic/include/ActorCriticNet.h
-        actor_critic/include/ActorCriticNet2.h
-        actor_critic/include/ActorCriticNet3.h
-        actor_critic/include/ActorCriticOutput.h
-        actor_critic/include/ActorCriticTrainer.h
-        actor_critic/include/ActorCriticTrainer2.h
-        actor_critic/include/ActorCriticTrainer3.h
-        actor_critic/include/ActorNet.h
-        actor_critic/include/ActorNet2.h
-        actor_critic/include/ActorNet3.h
-        actor_critic/include/AdaptiveComponent.h
-        actor_critic/include/AdaptiveCriticNet.h
-        actor_critic/include/AdaptiveCriticNet3.h
-        actor_critic/include/Critic.h
-        actor_critic/include/EnvironmentSimulator.h
-        actor_critic/include/GreedyActorCriticNet.h
-        actor_critic/include/GreedyActorCriticTrainer.h
-        actor_critic/include/GreedyActorNet.h
-        actor_critic/include/PBActorCriticNet.h
-        actor_critic/include/PBActorCriticTrainer.h
-        actor_critic/include/PBActorNet.h
-        actor_critic/Action.cpp
-        actor_critic/ActorCriticNet.cpp
-        actor_critic/ActorCriticNet2.cpp
-        actor_critic/ActorCriticNet3.cpp
-        actor_critic/ActorCriticOutput.cpp
-        actor_critic/ActorCriticTrainer.cpp
-        actor_critic/ActorCriticTrainer2.cpp
-        actor_critic/ActorCriticTrainer3.cpp
-        actor_critic/ActorNet.cpp
-        actor_critic/ActorNet2.cpp
-        actor_critic/ActorNet3.cpp
-        actor_critic/AdaptiveCriticNet.cpp
-        actor_critic/AdaptiveCriticNet3.cpp
-        actor_critic/GreedyActorCriticNet.cpp
-        actor_critic/GreedyActorCriticTrainer.cpp
-        actor_critic/GreedyActorNet.cpp
-        actor_critic/PBActorCriticNet.cpp
-        actor_critic/PBActorCriticTrainer.cpp
-        actor_critic/PBActorNet.cpp
-        datasets/include/DataSet.h
         datasets/include/Exemplar.h
-        datasets/include/Pattern.h
-        datasets/include/PatternSequence.h
-        datasets/Pattern.cpp
-        datasets/PatternSequence.cpp
         include/flexneuralnet.h
-        layers/include/BaseLayer.h
-        layers/include/ConnectionMap.h
-        layers/include/HvMap.h
-        layers/include/LogSig.h
-        layers/include/NetDist.h
-        layers/include/NetInputFunctor.h
-        layers/include/NetSum.h
-        layers/include/PureLin.h
-        layers/include/RadBas.h
-        layers/include/SoftMax.h
-        layers/include/TanSig.h
-        layers/include/TransferFunctor.h
-        layers/BaseLayer.cpp
-        layers/ConnectionMap.cpp
-        layers/HvMap.cpp
-        layers/LogSig.cpp
-        layers/NetDist.cpp
-        layers/NetSum.cpp
-        layers/PureLin.cpp
-        layers/RadBas.cpp
-        layers/SoftMax.cpp
-        layers/TanSig.cpp
-        network/include/BaseNeuralNet.h
-        network/include/BaseTrainer.h
-        network/include/ConstantLearningRate.h
-        network/include/DeltaBarDeltaLearningRate.h
-        network/include/GradientDescentTrainer.h
-        network/include/LearningRatePolicy.h
-        network/include/OutputErrorFunctor.h
         network/include/SumSquaredError.h
-        network/include/TD2Trainer.h
-        network/include/TDC0aTrainer.h
-        network/include/TDC0Trainer.h
-        network/include/TDCNeuralNet.h
-        network/include/TDCTrainer.h
-        network/include/TDCTrainer2.h
-        network/include/TDTrainer.h
-        network/include/TemporalDiffTrainer.h
-        network/include/TemporalDiffTrainer2.h
-        network/include/TemporalDiffTrainer3.h
         network/include/TrainingRecord.h
-        network/BaseNeuralNet.cpp
-        network/BaseTrainer.cpp
-        network/OutputErrorFunctor.cpp
         network/SumSquaredError.cpp
-        network/TDCNeuralNet.cpp
-        sandbox/LevMarqTrainer.h
         util/include/Array.h
         util/include/ArrayInitializer.h
         util/include/NamedObject.h
-        util/include/NetworkWeightsData.h
         util/include/URandArrayInitializer.h
         util/ArrayInitializer.cpp
-        util/NetworkWeightsData.cpp
-        util/URandArrayInitializer.cpp layers/include/BasicLayer.h layers/BasicLayer.cpp layers/include/Layer.h util/include/Base.h util/include/Funcs.h util/include/Derived.h layers/MyNetSum.cpp layers/include/MyNetSum.h util/LayerWeights.cpp util/include/LayerWeights.h network/BasicNeuralNet.cpp network/include/BasicNeuralNet.h layers/NetworkLayer.cpp layers/include/NetworkLayer.h util/LayerDerivatives.cpp util/include/LayerDerivatives.h util/include/LayerState.h util/include/LayerInfo.h layers/PureLinTrans.cpp layers/include/PureLinTrans.h util/JSONEncoder.cpp util/include/JSONEncoder.h layers/LogSigTrans.cpp layers/include/LogSigTrans.h layers/MyEuclideanDist.cpp layers/include/MyEuclideanDist.h layers/RadialBasisTrans.cpp layers/include/RadialBasisTrans.h layers/TanSigTrans.cpp layers/include/TanSigTrans.h util/include/LayerSerializer.h util/include/PureLinSerializer.h util/NetworkLayerSerializer.cpp util/include/NetworkLayerSerializer.h util/include/TanSigSerializer.h util/include/RadialBasisSerializer.h util/include/LogSigSerializer.h)
+        util/URandArrayInitializer.cpp
+        layers/include/BasicLayer.h
+        layers/BasicLayer.cpp
+        util/LayerWeights.cpp
+        util/include/LayerWeights.h
+        network/BasicNeuralNet.cpp
+        network/include/BasicNeuralNet.h
+        util/LayerDerivatives.cpp
+        util/include/LayerDerivatives.h
+        util/include/LayerState.h
+        layers/transfer_functions/PureLin.cpp
+        layers/transfer_functions/include/PureLin.h
+        util/JSONEncoder.cpp
+        util/include/JSONEncoder.h
+        layers/transfer_functions/LogSig.cpp
+        layers/transfer_functions/include/LogSig.h
+        layers/transfer_functions/RadBas.cpp
+        layers/transfer_functions/include/RadBas.h
+        layers/transfer_functions/TanSig.cpp
+        layers/transfer_functions/include/TanSig.h
+        layers/serializers/include/LayerSerializer.h
+        layers/serializers/PureLinSerializer.cpp
+        layers/serializers/BasicLayerSerializer.cpp
+        layers/serializers/include/BasicLayerSerializer.h
+        layers/serializers/TanSigSerializer.cpp
+        layers/serializers/RadBasSerializer.cpp
+        layers/serializers/LogSigSerializer.cpp
+        layers/transfer_functions/SoftMax.cpp
+        layers/transfer_functions/include/SoftMax.h
+        layers/serializers/SoftMaxSerializer.cpp
+        network/BasicNeuralNetFactory.cpp
+        network/include/BasicNeuralNetFactory.h
+        datasets/Datum.cpp
+        datasets/include/Datum.h
+        util/include/Array2D.h
+        util/include/Array3D.h
+        network/include/NetworkLayer.h
+        network/LayerConnRecord.cpp
+        network/include/LayerConnRecord.h
+        network/ExternalInputRecord.cpp
+        network/include/ExternalInputRecord.h
+        network/BasicNeuralNetSerializer.cpp
+        network/include/BasicNeuralNetSerializer.h
+        network/BasicNeuralNetDeserializer.cpp
+        layers/transfer_functions/NetSumLayer.cpp
+        layers/transfer_functions/include/NetSumLayer.h
+        layers/transfer_functions/EuclideanDistLayer.cpp
+        layers/transfer_functions/include/EuclideanDistLayer.h
+        trainers/TrainerConfig.cpp
+        trainers/include/TrainerConfig.h
+        trainers/include/TrainingRecord.h
+        deprecated/NNetTrainer.h
+        network/LayerInput.cpp
+        network/include/LayerInput.h
+        network/NetworkOutput.cpp
+        network/include/NetworkOutput.h
+        network/NetworkLayer.cpp
+        deprecated/TrainingAlgo.h
+        trainers/include/PerformanceMetrics.h
+        datasets/include/ExemplarSet.h
+        datasets/include/Exemplar.h
+        datasets/include/Episode.h
+        network/include/NeuralNet.h trainers/TrainerUtils.cpp trainers/include/TrainerUtils.h trainers/FATrainer.cpp trainers/include/FATrainer.h trainers/FA2Trainer.cpp trainers/include/FA2Trainer.h trainers/include/FuncApproxEvaluator.h network/include/NeuralNetSerializer.h deprecated/OldVectorSet.h datasets/include/VectorConcatenator.h datasets/include/Vectorizable.h datasets/include/A.h datasets/include/VectorizableSet.h trainers/include/ActorCriticEvaluator.h trainers/include/EvaluatorConfig.h trainers/include/TDTrainerConfig.h trainers/include/TDEvaluatorConfig.h trainers/include/ActorCriticTrainer.cpp trainers/include/ActorCriticTrainer.h trainers/include/MeanSquaredError.cpp trainers/include/MeanSquaredError.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -151,9 +124,12 @@ target_include_directories(flexneuralnet PUBLIC
         include
         layers
         layers/include
+        layers/serializers/include
+        layers/transfer_functions/include
         network
         network/include
-        sandbox
+        trainers
+        trainers/include
         util
         util/include
         rapidjson)

@@ -12,10 +12,10 @@ namespace flexnnet
    class LayerState
    {
    public:
-      std::vector<double> outputv;
-      std::vector<double> netinv;
-      std::vector<double> rawinv;
-      std::vector<double> backprop_errorv;
+      std::valarray<double> outputv;
+      std::valarray<double> netinv;
+      std::valarray<double> rawinv;
+      std::valarray<double> backprop_errorv;
    };
 }
 

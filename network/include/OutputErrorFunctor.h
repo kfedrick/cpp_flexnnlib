@@ -14,16 +14,15 @@ using namespace std;
 namespace flexnnet
 {
 
-   class OutputErrorFunctor
-   {
-   public:
-      OutputErrorFunctor ();
-      virtual ~OutputErrorFunctor ();
+class OutputErrorFunctor
+{
+public:
+   OutputErrorFunctor();
+   virtual ~OutputErrorFunctor();
 
-      virtual void
-      operator() (double &error, vector<double> &gradient, const vector<double> &outVec, const vector<double> &targetVec);
-      virtual OutputErrorFunctor *clone () const;
-   };
+   virtual void operator()(double& error, vector<double>& gradient, const vector<double>& outVec, const vector<double>& targetVec);
+   virtual OutputErrorFunctor* clone() const;
+};
 
 }
 

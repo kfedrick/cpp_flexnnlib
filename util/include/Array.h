@@ -257,13 +257,13 @@ namespace flexnnet
    template<class T> inline T &Array<T>::at (unsigned int rowIdx,
                                              unsigned int colIdx)
    {
-      return data.at (rowIdx).at (colIdx);
+      return data.at (rowIdx).at(colIdx);
    }
 
    template<class T> inline const T &Array<T>::at (unsigned int rowIdx,
                                                    unsigned int colIdx) const
    {
-      return data.at (rowIdx).at (colIdx);
+      return data.at (rowIdx).at(colIdx);
    }
 
    template<class T> inline

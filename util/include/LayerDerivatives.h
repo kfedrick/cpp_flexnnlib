@@ -5,7 +5,7 @@
 #ifndef FLEX_NEURALNET_LAYERDERIVATIVES_H_
 #define FLEX_NEURALNET_LAYERDERIVATIVES_H_
 
-#include "Array.h"
+#include "Array2D.h"
 
 namespace flexnnet
 {
@@ -13,33 +13,33 @@ namespace flexnnet
    {
    public:
       LayerDerivatives ();
-      LayerDerivatives (unsigned int _out_sz, unsigned int _netin_sz, unsigned int _rawin_sz);
+      LayerDerivatives (size_t _out_sz, size_t _rawin_sz);
       ~LayerDerivatives ();
 
-      void resize (unsigned int _out_sz, unsigned int _netin_sz, unsigned int _rawin_sz);
+      void resize (size_t _out_sz, size_t _rawin_sz);
       void stale();
 
    private:
       void initialize();
 
    public:
-      const Array<double> &const_dAdN_ref = dAdN;
-      const Array<double> &const_dNdW_ref = dNdW;
-      const Array<double> &const_dNdI_ref = dNdI;
+      const Array2D<double> &const_dAdN_ref = dAdN;
+      const Array2D<double> &const_dNdW_ref = dNdW;
+      const Array2D<double> &const_dNdI_ref = dNdI;
 
       bool stale_dAdN;
       bool stale_dNdW;
       bool stale_dNdI;
 
-      Array<double> dAdN;
-      Array<double> dNdW;
-      Array<double> dNdI;
+      Array2D<double> dAdN;
+      Array2D<double> dNdW;
+      Array2D<double> dNdI;
 
    };
 
-   inline LayerDerivatives::LayerDerivatives (unsigned int _out_sz, unsigned int _netin_sz, unsigned int _rawin_sz)
+   inline LayerDerivatives::LayerDerivatives (size_t _out_sz, size_t _rawin_sz)
    {
-      resize(_out_sz, _netin_sz, _rawin_sz);
+      resize(_out_sz, _rawin_sz);
       initialize();
    }
 
@@ -68,11 +68,11 @@ namespace flexnnet
 
    }
 
-   inline void LayerDerivatives::resize (unsigned int _out_sz, unsigned int _netin_sz, unsigned int _rawin_sz)
+   inline void LayerDerivatives::resize (size_t _out_sz, size_t _rawin_sz)
    {
-      dAdN.resize(_out_sz, _netin_sz);
-      dNdW.resize(_netin_sz, _rawin_sz+1);
-      dNdI.resize(_netin_sz, _rawin_sz+1);
+      dAdN.resize(_out_sz, _out_sz);
+      dNdW.resize(_out_sz, _rawin_sz+1);
+      dNdI.resize(_out_sz, _rawin_sz+1);
    }
 
 }

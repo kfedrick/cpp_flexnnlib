@@ -5,6 +5,9 @@
 #ifndef FLEX_NEURALNET_BASICLAYER_H_
 #define FLEX_NEURALNET_BASICLAYER_H_
 
+#include <set>
+#include <unordered_set>
+#include <sstream>
 #include <functional>
 
 #include "NamedObject.h"
@@ -16,47 +19,37 @@ namespace flexnnet
 {
    class BasicLayer : public NamedObject
    {
+
+   public:
+      enum NetworkLayerType
+      {
+         Output, Hidden
+      };
+
    protected:
 
       /* ********************************************************************
        * Constructors, destructors
        */
-      BasicLayer (unsigned int sz, const std::string &_name);
+      BasicLayer (size_t _sz, const std::string &_name, NetworkLayerType _type = Output);
 
    public:
       virtual ~BasicLayer ();
 
-      /* ********************************************************************
-       * Initialization and provisioning methods
-       */
+   public:
+
+      // Return length of layer output valarray
+      size_t size () const;
+      virtual size_t input_size () const;
+
+      // Return length of layer input valarray
+      bool is_output_layer (void) const;
+
+      const Array2D<double> &get_dAdN (void) const;
+      const Array2D<double> &get_dNdW (void) const;
+      const Array2D<double> &get_dNdI (void) const;
 
    public:
-      /* ********************************************************************
-       * Public configuration and provisioning methods
-       */
-
-      /*
-       * Specify the expected input vector size for this layer
-       */
-      virtual void resize_input_vector (unsigned int sz);
-
-      /*
-       * Return length of layer output vector
-       */
-      virtual unsigned int size () const;
-
-      /*
-       * Return length of layer input vector
-       */
-      virtual unsigned int input_size () const;
-
-      /* ********************************************************************
-       * Public layer state getter methods
-       */
-      const Array<double>& get_dAdN(void);
-      const Array<double>& get_dNdW(void);
-      const Array<double>& get_dNdI(void);
-
       /* ********************************************************************
        * Public layer operational methods
        */
@@ -67,78 +60,71 @@ namespace flexnnet
        * @param inputVec
        * @return
        */
-      virtual const std::vector<double> &activate (const std::vector<double> &inputVec);
+      virtual const std::valarray<double> &activate (const std::valarray<double> &inputVec);
 
       /**
        * Accumulate error specified in _errorv into the current layer error
        * @param _errorv
        * @return
        */
-      virtual const std::vector<double> &accumulate_error (const std::vector<double> &_errorv);
+      virtual const std::valarray<double> &accumulate_error (const std::valarray<double> &_errorv);
 
       /*
-       * Return the current value of the network layer as a std::vector
+       * Return the current value of the network layer as a std::valarray
        */
-      virtual const std::vector<double> &operator() () const;
+      virtual const std::valarray<double> &operator() () const;
 
-      std::function<std::string (void)> toJSONString;
+      virtual std::string toJson(void) const;
 
-
-
+      virtual void resize_input(size_t _rawin_sz);
 
    protected:
 
-      std::function<const std::vector<double>& (const std::vector<double> &_rawin, const flexnnet::Array<double> &_weights)> calc_netin;
-
-      std::function<void (std::vector<double>& _out, const std::vector<double>& _netin)> calc_layer_output;
+      virtual const std::valarray<double>& calc_layer_output (const std::valarray<double> &_netin) = 0;
 
       /**
-       * Calculate and return the derivative of the layer net input with respect to
-       * the layer weights for the most recent activation.
+       * Calculate the net input value based on the raw input vector and weights specified in the
+       * argument list and writes it into the _netin argument.
        */
-      std::function<const Array<double>& (const std::vector<double> &_netin, const std::vector<double> &_rawin, const flexnnet::Array<
-         double> &_weights)> calc_dNdW;
-
-      /**
-       * Calculate and return the derivative of the layer net input with respect to
-       * the layer inputs for the most recent activation.
-       */
-      std::function<const Array<double>& (const std::vector<double> &_netin, const std::vector<double> &_rawin, const flexnnet::Array<
-         double> &_weights)> calc_dNdI;
+      virtual const std::valarray<double>& calc_netin(const std::valarray<double> &_rawin) = 0;
 
       /*
        * Calculate and return the derivative of the layer output with respect to
        * the net input for the most recent activation.
        */
-      std::function<const Array<double>& (const std::vector<double>& _out, const std::vector<double>& _netin)> calc_dAdN;
-
-      std::function<void (unsigned int _layer_sz, unsigned int _rawin_sz)> resize_layer;
+      virtual const Array2D<double>& calc_dAdN (const std::valarray<double> &_out) = 0;
 
       /**
-       * Mark all derivative arrays as stale (e.g. after new activation).
+       * Calculate the derivative of the net input with respect to the weights based on the raw
+       * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
+      virtual const Array2D<double>& calc_dNdW(const std::valarray<double> &_rawin) = 0;
+
+      /**
+       * Calculate the derivative of the net input with respect to the raw input based on the raw
+       * input vector and weights specified in the argument list and writes it into the _dNdW argument.
+       */
+      virtual const Array2D<double>& calc_dNdI(const std::valarray<double> &_rawin) = 0;
+
+      // Mark all derivative arrays as stale (e.g. after new activation).
       void stale (void);
 
-
    public:
-      const unsigned int& const_layer_output_size_ref = layer_output_size;
-      const unsigned int& const_layer_input_size_ref = layer_input_size;
-
-
-   protected:
-      unsigned int layer_input_size;
+      const size_t &const_layer_output_size_ref = layer_output_size;
 
    private:
 
       /* ********************************************************************
        * Private layer configuration and provisioning data members
        */
-      const unsigned int layer_output_size;
+      const size_t layer_output_size;
+      const NetworkLayerType network_layer_type;
 
    protected:
       /* ********************************************************************
        * Protected layer state data members
        */
+      size_t layer_input_size;
 
       LayerState layer_state;
 
@@ -150,51 +136,51 @@ namespace flexnnet
       /* ********************************************************************
        * Protected derivative information
        */
-      LayerDerivatives layer_derivatives;
+      mutable LayerDerivatives layer_derivatives;
 
    };
 
-   /*
-    * Return length of layer output vector
-    */
-   inline unsigned int BasicLayer::size () const
+
+   inline size_t BasicLayer::size () const
    {
       return layer_output_size;
    }
 
-   /*
-    * Return length of layer output vector
-    */
-   inline unsigned int BasicLayer::input_size () const
+   inline size_t BasicLayer::input_size () const
    {
       return layer_input_size;
    }
 
-   inline const Array<double>& BasicLayer::get_dAdN(void)
+   inline bool BasicLayer::is_output_layer (void) const
    {
-      if (layer_derivatives.stale_dAdN)
-         layer_derivatives.dAdN = calc_dAdN(layer_state.outputv, layer_state.netinv);
+      return (network_layer_type == Output);
+   }
 
-      layer_derivatives.stale_dAdN = false;
+   inline const Array2D<double> &BasicLayer::get_dAdN (void) const
+   {
       return layer_derivatives.dAdN;
    }
 
-   inline const Array<double>& BasicLayer::get_dNdW(void)
+   inline const Array2D<double> &BasicLayer::get_dNdW (void) const
    {
-      if (layer_derivatives.stale_dNdW)
-         layer_derivatives.dNdW = calc_dNdW(layer_state.netinv, layer_state.rawinv, layer_weights.const_weights_ref);
-
-      layer_derivatives.stale_dNdW = false;
       return layer_derivatives.dNdW;
    }
 
-   inline const Array<double>& BasicLayer::get_dNdI(void)
+   inline const Array2D<double> &BasicLayer::get_dNdI (void) const
    {
-      if (layer_derivatives.stale_dNdI)
-         layer_derivatives.dNdI = calc_dNdI(layer_state.netinv, layer_state.rawinv, layer_weights.const_weights_ref);
-
-      layer_derivatives.stale_dNdI = false;
       return layer_derivatives.dNdI;
+   }
+
+   inline void BasicLayer::resize_input (size_t _rawin_sz)
+   {
+      layer_input_size = _rawin_sz;
+      layer_weights.resize(layer_output_size, layer_input_size);
+      layer_derivatives.resize (layer_output_size, layer_input_size);
+   }
+
+   inline std::string BasicLayer::toJson (void) const
+   {
+      return "";
    }
 
 } /* namespace flexnnet */

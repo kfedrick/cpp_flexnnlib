@@ -8,16 +8,16 @@
 #ifndef FLEX_NEURALNET_H_
 #define FLEX_NEURALNET_H_
 
+typedef unsigned int _index_typ;
+
 /*
  * BaseLayer classes
  */
-#include <BaseLayer.h>
+#include <BasicLayer.h>
 
 /*
  * Utility classes
  */
-#include <Array.h>
-
-
+#include <Array2D.h>
 
 #endif /* FLEX_NEURALNET_H_ */

@@ -6,7 +6,7 @@
 #define FLEX_NEURALNET_LAYERWEIGHTS_H_
 
 
-#include "Array.h"
+#include "Array2D.h"
 
 namespace flexnnet
 {
@@ -14,17 +14,17 @@ namespace flexnnet
    {
    public:
 
-      void resize(unsigned int _layer_sz, unsigned int _layer_input_sz);
+      void resize(size_t _layer_sz, size_t _layer_input_sz);
 
       /**
        * Initialize layer weights to specified value.
        */
-      void set_weights (const flexnnet::Array<double> &_weights);
+      void set_weights (const flexnnet::Array2D<double> &_weights);
 
       /**
        * Adjust layer weights by the specified delta weight array.
        */
-      void adjust_weights (const flexnnet::Array<double> &_delta);
+      void adjust_weights (const flexnnet::Array2D<double> &_delta);
 
       /**
        * Write biases and weights to json string
@@ -39,10 +39,10 @@ namespace flexnnet
 
 
    public:
-      const flexnnet::Array<double>& const_weights_ref = weights;
+      const flexnnet::Array2D<double>& const_weights_ref = weights;
 
    private:
-      flexnnet::Array<double> weights;
+      flexnnet::Array2D<double> weights;
    };
 }
 

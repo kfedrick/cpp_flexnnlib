@@ -12,7 +12,7 @@
 
 #include <string>
 #include <vector>
-#include <Array.h>
+#include <Array2D.h>
 
 namespace flexnnet
 {
@@ -21,8 +21,8 @@ namespace flexnnet
    {
    protected:
       static void vectorToJSONObj (rapidjson::Value &_val, const std::vector<double> &_vec);
-      static void ArrayToJSONObj (rapidjson::Value &_val, const flexnnet::Array<double> &_arr);
-      static void JSONObjToArray (flexnnet::Array<double> &_arr, const rapidjson::Value &_val);
+      static void ArrayToJSONObj (rapidjson::Value &_val, const flexnnet::Array2D<double> &_arr);
+      static void JSONObjToArray (flexnnet::Array2D<double> &_arr, const rapidjson::Value &_val);
 
    protected:
       // Document to use for constructing this document

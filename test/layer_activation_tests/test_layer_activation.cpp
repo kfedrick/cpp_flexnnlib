@@ -11,8 +11,6 @@
 
 #include "gtest/gtest.h"
 
-#include "test_purelin_activation.h"
-
 int main (int argc, char **argv)
 {
    ::testing::InitGoogleTest (&argc, argv);
