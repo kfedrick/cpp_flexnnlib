@@ -41,7 +41,7 @@ void BasicNeuralNetFactory::set_network_input (const Datum &_network_input)
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::set_network_input() - "
-         << "Can't reset network input after layer external inputs have been set."
+         << "Can't reset network input after layer external inputs have been set_weights."
          << std::endl;
       throw std::logic_error (sout.str ());
    }
@@ -115,7 +115,7 @@ BasicNeuralNetFactory::add_layer_connection (const std::string &_to, const std::
    switch (_type)
    {
       /*
-       * In order to set a valid forward connection from layer _from to layer _to, the
+       * In order to set_weights a valid forward connection from layer _from to layer _to, the
        * _from layer must not have a forward activation dependency on output from the
        * _to layer as this would indicate a cycle. Likewise the _to and _from layers
        * must not be the same.
@@ -137,12 +137,12 @@ BasicNeuralNetFactory::add_layer_connection (const std::string &_to, const std::
          break;
 
          /*
-          * To set a valid recurrent connection from layer _from to layer _to, the
+          * To set_weights a valid recurrent connection from layer _from to layer _to, the
           * _from layer must already have a forward activation depencency from the
           * _to layer, or the _to and _from layer must be the same.
           */
       case LayerConnRecord::Recurrent:
-         std::cout << _to.c_str () << " in set? " << (dependencies.find (_to) != dependencies.end ()) << std::endl;
+         std::cout << _to.c_str () << " in set_weights? " << (dependencies.find (_to) != dependencies.end ()) << std::endl;
 
          if (_to != _from && dependencies.find (_to) == dependencies.end ())
          {
@@ -161,7 +161,7 @@ BasicNeuralNetFactory::add_layer_connection (const std::string &_to, const std::
          break;
 
          /*
-          * To set a valid lateral connection from layer _from to layer _to, the
+          * To set_weights a valid lateral connection from layer _from to layer _to, the
           * _to and _from layer must be distinct.
           */
       case LayerConnRecord::Lateral:std::set<std::string> d1, d2;
@@ -234,7 +234,7 @@ void BasicNeuralNetFactory::validate()
       static std::stringstream sout;
       sout.clear();
       sout << "Error : BasicNeuralNetFactory::validate_network() - "
-           << "Can't build network - no network input set." << std::endl;
+           << "Can't build network - no network input set_weights." << std::endl;
       throw std::logic_error (sout.str ());
    }
 
@@ -257,7 +257,7 @@ void BasicNeuralNetFactory::validate()
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::validate_network() - "
-         << "No layer external inputs have been set."
+         << "No layer external inputs have been set_weights."
          << std::endl;
       throw std::logic_error (sout.str ());
    }
@@ -363,7 +363,7 @@ void BasicNeuralNetFactory::getForwardDependencies (std::set<std::string> &_depe
 
    const std::vector<LayerConnRecord> layer_input_records = netlayer.get_input_connections ();
 
-// Add indirect dependencies by recursing on direct dependencies not already in dependency set
+// Add indirect dependencies by recursing on direct dependencies not already in dependency set_weights
    for (auto &record : layer_input_records)
    {
       // Ignore recurrent connections
@@ -397,7 +397,7 @@ void BasicNeuralNetFactory::getAllDependencies (std::set<std::string> &_dependen
 
    const std::vector<LayerConnRecord> layer_input_records = network_layer.get_input_connections ();
 
-// Add indirect dependencies by recursing on direct dependencies not already in dependency set
+// Add indirect dependencies by recursing on direct dependencies not already in dependency set_weights
    for (auto &record : layer_input_records)
    {
       /*

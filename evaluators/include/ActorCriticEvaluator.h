@@ -9,8 +9,8 @@
 #include <iostream>
 #include <valarray>
 
-#include "TDTrainerConfig.h"
-#include "TDEvaluatorConfig.h"
+#include "trainers/include/TDTrainerConfig.h"
+#include "evaluators/include/TDEvaluatorConfig.h"
 
 namespace flexnnet
 {
@@ -86,7 +86,7 @@ namespace flexnnet
       // Vector to hold performance results for each sampling
       size_t scount = TDEvaluatorConfig<_MODE>::sampling_count();
 
-      // Iterate through all exemplars in the training set
+      // Iterate through all exemplars in the training set_weights
       for (size_t sampling_ndx = 0; sampling_ndx < scount; sampling_ndx++)
       {
          results = evaluate_episode(_agent, _env);

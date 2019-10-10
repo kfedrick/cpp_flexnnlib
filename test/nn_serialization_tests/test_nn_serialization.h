@@ -13,8 +13,9 @@
 #include "BasicNeuralNetFactory.h"
 #include "BasicNeuralNetSerializer.h"
 #include "NeuralNetSerializer.h"
+#include "TestLayer.h"
 
-class TestBasicNeuralNet : public ::testing::TestWithParam<const char *>
+class TestBasicNeuralNet : public TestLayer, public ::testing::TestWithParam<const char *>
 {
 public:
    virtual void SetUp ()

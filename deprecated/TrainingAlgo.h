@@ -5,7 +5,7 @@
 #ifndef FLEX_NEURALNET_TRAININGALGO_H_
 #define FLEX_NEURALNET_TRAININGALGO_H_
 
-#include "ExemplarSet.h"
+#include "DataSet.h"
 #include "TrainingRecord.h"
 #include "TrainerConfig.h"
 
@@ -41,11 +41,11 @@ namespace flexnnet
    {
       std::cout << "TrainAlgo::train_epoch() - entry\n";
 
-      // Iterate through all samples in the training set
+      // Iterate through all samples in the training set_weights
       int i = 0;
       for (auto asample : _trnset)
       {
-         std::cout << "TrainAlgo::train() - sample " << i << "\n";
+         std::cout << "TrainAlgo::train_run() - sample " << i << "\n";
          train_sample(_nnet, asample);
          i++;
       }

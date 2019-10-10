@@ -25,7 +25,7 @@ Datum::~Datum()
 
 const std::set<std::string>& Datum::key_set() const
 {
-   //hash<std::set<std::string>>(keyset);
+   //hash<std::set_weights<std::string>>(keyset);
    return keyset;
 }
 
@@ -65,7 +65,7 @@ void Datum::set (const std::map<std::string, std::valarray<double> > &_values)
    for (auto& item : _values)
       keyset.insert(item.first);
 
-   // Clear and set fields and data items
+   // Clear and set_weights fields and data items
    fields.clear();
    data.resize(_values.size());
    data.shrink_to_fit();
@@ -90,7 +90,7 @@ void Datum::set (const std::string _key, const std::valarray<double> &_value)
    {
       std::ostringstream err_str;
       err_str
-         << "Error : Datum.set() - key value " << _key << " doesn't exists.\n";
+         << "Error : Datum.set_weights() - key value " << _key << " doesn't exists.\n";
       throw std::invalid_argument (err_str.str ());
    }
 
@@ -99,7 +99,7 @@ void Datum::set (const std::string _key, const std::valarray<double> &_value)
    {
       std::ostringstream err_str;
       err_str
-         << "Error : Datum.set() - new valarray size " << _value.size()
+         << "Error : Datum.set_weights() - new valarray size " << _value.size()
          << "doesn't match expected size " << fields[_key].len << ".\n";
       throw std::invalid_argument (err_str.str ());
    }

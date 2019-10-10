@@ -14,30 +14,32 @@ namespace flexnnet
    class TrainerConfig
    {
    public:
-      enum VerboseLevel {OFF, INFO, DEBUGGING};
-
-   public:
       /* ***************************************************
        *    Default values
        */
-      static constexpr VerboseLevel DEFAULT_VERBOSE = OFF;
+      static constexpr size_t DEFAULT_TRAINING_RUNS = 1;
       static constexpr double DEFAULT_ERROR_GOAL = 0.0;
       static constexpr size_t DEFAULT_MAX_EPOCHS = 10;
+      static constexpr double DEFAULT_FAILBACK_PERF_DELTA = 0.05;
       static constexpr size_t DEFAULT_MAX_VALIDATION_FAIL = 10;
-      static constexpr size_t DEFAULT_BATCH_MODE = 1;
+      static constexpr size_t DEFAULT_BATCH_MODE = 0;
       static constexpr size_t DEFAULT_REPORT_FREQ = 1;
       static constexpr size_t DEFAULT_DISPLAY_FREQ = 1;
+      static constexpr size_t DEFAULT_SAVED_NNET_LIMIT = 1;
 
    public:
       /* ***************************************************
-       *    Constructors
-       */
-
-      TrainerConfig();
-
-      /* ***************************************************
        *    Public setter methods
        */
+
+      /**
+       * Set maximum training training runs. The network will be trained from
+       * random initial conditions to convergence '_runs' times; _runs must be
+       * greater than zero.
+       *
+       * @param _runs
+       */
+      void set_training_runs(size_t _runs);
 
       /**
        * Set maximum training epochs. Training will stop after at most _epochs training
@@ -45,7 +47,7 @@ namespace flexnnet
        *
        * @param _epochs
        */
-      void set_max_epochs(unsigned int _epochs);
+      void set_max_epochs(size_t _epochs);
 
       /**
        * Set performance error goal. Training will stop after performance error is less
@@ -61,21 +63,30 @@ namespace flexnnet
        *
        * @param _count
        */
-      void set_max_validation_failures(unsigned int _count);
+      void set_max_validation_failures(size_t _count);
 
       /**
-       * set_batch_mode(unsigned int _size)
+       * Set limit for training error increase from one epoch to the next.
+       * Increases beyond this limit may trigger a failback to previous weights
+       * or termination of training depending on training configuration.
+       *
+       * @param _limit
+       */
+      void set_error_increase_limit(double _limit);
+
+      /**
+       * set_batch_mode(size_t _size)
        *
        * Set training batch size:
        *
-       * @param _size : training batch size
+       * @param _size : training batch mode/size
        *
        *    0 : full batch training, update after entire training set is presented
        *    1 : online training: update after each exemplar
        *   >1 : mini-batch size - update after _size exemplars
        *
        */
-      void set_batch_size (unsigned int _size);
+      void set_batch_mode (size_t _mode);
 
       /**
        * Set reporting frequency for training trace record. Training trace record will
@@ -85,7 +96,7 @@ namespace flexnnet
        *
        * @param _freq
        */
-      void set_report_frequency(unsigned int _freq);
+      void set_report_frequency(size_t _freq);
 
       /**
        * Set the frequency for displaying the training trace info during training. Training
@@ -95,45 +106,67 @@ namespace flexnnet
        *
        * @param _freq
        */
-      void set_display_frequency(unsigned int _freq);
+      void set_display_frequency(size_t _freq);
 
       /**
-       * Set reporting level;
-       * @param _mode
+       * Set the maximum number of trained neural network weights to save when
+       * using multiple training runs. The trainer will save the best performing
+       * networks up to _limit where _limit > 0. DEFAULT: _limit = 1
+       *
+       * @param _limit
        */
-      void set_verbose(VerboseLevel _level);
+      void set_saved_nnet_limit(size_t _limit);
 
 
       /* ****************************************************
        *    Public getter methods
        */
 
-      unsigned int get_max_epochs(void) const;
+      size_t training_runs(void) const;
+      size_t max_epochs(void) const;
       double error_goal(void) const;
-      unsigned int batch_size (void) const;
-      unsigned int max_validation_failures(void) const;
-      unsigned int report_frequency(void) const;
-      unsigned int display_frequency(void) const;
-      VerboseLevel verbose_level(void) const;
+      double error_increase_limit(void) const;
+      size_t batch_mode (void) const;
+      size_t max_validation_failures(void) const;
+      size_t report_frequency(void) const;
+      size_t display_frequency(void) const;
+      size_t saved_nnet_limit(void) const;
 
    private:
-      unsigned int max_training_epochs { DEFAULT_MAX_EPOCHS };
+
+      size_t max_training_runs { DEFAULT_TRAINING_RUNS };
+      size_t max_training_epochs { DEFAULT_MAX_EPOCHS };
       double min_performance_error { DEFAULT_ERROR_GOAL };
-      unsigned int training_batch_size { DEFAULT_BATCH_MODE };
-      unsigned int max_allowed_validation_failures { DEFAULT_MAX_VALIDATION_FAIL };
-      unsigned int training_report_frequency { DEFAULT_REPORT_FREQ };
-      unsigned int training_display_frequency { DEFAULT_REPORT_FREQ };
-      VerboseLevel verbose { DEFAULT_VERBOSE };
+      double failback_performance_delta { DEFAULT_FAILBACK_PERF_DELTA };
+      size_t training_batch_mode {DEFAULT_BATCH_MODE };
+      size_t max_allowed_validation_failures { DEFAULT_MAX_VALIDATION_FAIL };
+      size_t training_report_frequency { DEFAULT_REPORT_FREQ };
+      size_t training_display_frequency { DEFAULT_DISPLAY_FREQ };
+      size_t max_saved_nnet { DEFAULT_SAVED_NNET_LIMIT };
    };
 
-   inline void TrainerConfig::set_max_epochs(unsigned int _epochs)
+   inline void TrainerConfig::set_training_runs(size_t _runs)
+   {
+      static std::ostringstream err_str;
+
+      if (_runs == 0)
+      {
+         err_str.clear();
+         err_str << "Error : set_max_runs - max training runs must be greater than zero\n";
+         throw std::invalid_argument (err_str.str ());
+      }
+
+      max_training_runs = _runs;
+   }
+
+   inline void TrainerConfig::set_max_epochs(size_t _epochs)
    {
       static std::ostringstream err_str;
 
       if (_epochs == 0)
       {
          err_str.clear();
-         err_str << "Error : set_max_epochs - max epochs must be greater than 0\n";
+         err_str << "Error : set_max_epochs - max epochs must be greater than zero\n";
          throw std::invalid_argument (err_str.str ());
       }
 
@@ -154,7 +187,21 @@ namespace flexnnet
       min_performance_error = _perf;
    }
 
-   inline void TrainerConfig::set_max_validation_failures (unsigned int _count)
+   inline void TrainerConfig::set_error_increase_limit(double _limit)
+   {
+      static std::ostringstream err_str;
+
+      if (_limit < 0)
+      {
+         err_str.clear();
+         err_str << "Error : set_error_increase_limit - min value must be >= 0\n";
+         throw std::invalid_argument (err_str.str ());
+      }
+
+      failback_performance_delta = _limit;
+   }
+
+   inline void TrainerConfig::set_max_validation_failures (size_t _count)
    {
       static std::ostringstream err_str;
 
@@ -168,28 +215,41 @@ namespace flexnnet
       max_allowed_validation_failures = _count;
    }
 
-   inline void TrainerConfig::set_batch_size (unsigned int _size)
+   inline void TrainerConfig::set_batch_mode (size_t _mode)
    {
-      training_batch_size = _size;
+      training_batch_mode = _mode;
    }
 
-   inline void TrainerConfig::set_report_frequency(unsigned int _freq)
+   inline void TrainerConfig::set_report_frequency(size_t _freq)
    {
       training_report_frequency = _freq;
    }
 
-   inline void TrainerConfig::set_display_frequency(unsigned int _freq)
+   inline void TrainerConfig::set_display_frequency(size_t _freq)
    {
       training_display_frequency = _freq;
    }
 
-   inline void TrainerConfig::set_verbose(VerboseLevel _level)
+   inline void TrainerConfig::set_saved_nnet_limit (size_t _limit)
    {
-      verbose = _level;
+      static std::ostringstream err_str;
+
+      if (_limit < 1)
+      {
+         err_str.clear();
+         err_str << "Error : set_max_validation_failures - min count must be > 0\n";
+         throw std::invalid_argument (err_str.str ());
+      }
+
+      max_saved_nnet = _limit;
    }
 
+   inline size_t TrainerConfig::training_runs(void) const
+   {
+      return max_training_runs;
+   }
 
-   inline unsigned int TrainerConfig::get_max_epochs(void) const
+   inline size_t TrainerConfig::max_epochs(void) const
    {
       return max_training_epochs;
    }
@@ -199,31 +259,35 @@ namespace flexnnet
       return min_performance_error;
    }
 
-   inline unsigned int TrainerConfig::batch_size (void) const
+   inline double TrainerConfig::error_increase_limit(void) const
    {
-      return training_batch_size;
+      return failback_performance_delta;
    }
 
-   inline unsigned int TrainerConfig::max_validation_failures(void) const
+   inline size_t TrainerConfig::batch_mode (void) const
+   {
+      return training_batch_mode;
+   }
+
+   inline size_t TrainerConfig::max_validation_failures(void) const
    {
       return max_allowed_validation_failures;
    }
 
-   inline unsigned int TrainerConfig::report_frequency(void) const
+   inline size_t TrainerConfig::report_frequency(void) const
    {
       return training_report_frequency;
    }
 
-   inline unsigned int TrainerConfig::display_frequency(void) const
+   inline size_t TrainerConfig::display_frequency(void) const
    {
       return training_display_frequency;
    }
 
-   inline TrainerConfig::VerboseLevel TrainerConfig::verbose_level(void) const
+   inline size_t TrainerConfig::saved_nnet_limit(void) const
    {
-      return verbose;
+      return max_saved_nnet;
    }
-
 }
 
 #endif //FLEX_NEURALNET_TRAINERCONFIG_H_

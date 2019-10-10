@@ -9,111 +9,106 @@
 #include <vector>
 #include <iostream>
 
-#include "flexneuralnet.h"
+#include "flexnnet.h"
 
 #include "TrainingRecord.h"
+#include "BasicNeuralNet.h"
 
 namespace flexnnet
 {
-   struct NNetTrainingStatistics
+   struct TrainingStatistics
    {
-      // Percent of training runs that satisfied the training criteria
-      double percent_successful;
-
-      double mean_trainingset_perf;
-      double std_trainingset_perf;
-
-      double mean_validset_perf;
-      double std_validset_perf;
-
-      double mean_testset_perf;
-      double std_testset_perf;
-
-      std::vector<double> raw_trainingset_perf;
-      std::vector<double> raw_validset_perf;
-      std::vector<double> raw_testset_perf;
+      double mean_perf;
+      double stddev_perf;
+      std::vector<double> raw_perf_histogram;
    };
+
+   using NetworkWeights = std::map<std::string, LayerWeights>;
 
    struct TrainedNNetRecord
    {
-      std::string serialized_nnet;
+      NetworkWeights network_weights;
       TrainingRecord training_record;
+
+      bool operator<(const TrainedNNetRecord& _rec) const
+      {
+         return training_record.best_performance < _rec.training_record.best_performance;
+      }
    };
 
    class TrainerUtils
    {
-   public:
-      static const unsigned int DEFAULT_TRAINING_RUNS = 1;
-      static const unsigned int DEFAULT_SAVED_NNET_LIMIT = 1;
-
    private:
+      struct NetworkWeightsRecord
+      {
+         double performance;
+         NetworkWeights layer_weights;
+
+         bool operator<(const NetworkWeightsRecord& _rec) const
+         {
+            return performance < _rec.performance;
+         }
+      };
 
    public:
-      TrainerUtils ();
-
-      void set_training_runs (unsigned int _count);
-      void set_saved_network_limit (unsigned int _count);
-      const NNetTrainingStatistics &get_training_statistics (void) const;
-      const vector<TrainedNNetRecord> &get_trained_neuralnets (void) const;
+      const TrainingStatistics& get_training_statistics(void) const;
+      const std::vector<TrainedNNetRecord>& get_best_networks(void) const;
 
    protected:
-      void collect_training_stats (const TrainingRecord &_tr);
-      template<class _In, class _Out, template<class, class> class _NN>
-      void save_network (_NN<_In, _Out> &_nnet, const TrainingRecord &_tr);
 
-
-   protected:
-      unsigned int &const_training_runs = training_runs;
-      unsigned int &const_saved_nnet_limit = saved_nnet_limit;
+      void save_nnet_weights(const std::string& _label, const BasicNeuralNet& _nnet);
+      void restore_nnet_weights(const std::string& _label, BasicNeuralNet& _nnet);
+      void save_best_weights(TrainingRecord& _trec, const BasicNeuralNet& _nnet);
 
    private:
-      NNetTrainingStatistics training_stats;
-      vector<TrainedNNetRecord> saved_networks;
+      TrainingStatistics training_stats;
 
-      /**
-       * The number of networks meeting the performance criteria to save. The best
-       * performing trained networks will be saved up to the 'saved_nnet_limit' based on
-       * the specified performance criteria.
-       */
-      unsigned int saved_nnet_limit;
+      // Cached layer weights (e.g. used to back out weight changes)
+      std::map<std::string, NetworkWeights> cached_layer_weights;
 
-      /**
-       * The number of training runs to perform for each training set.
-       */
-      unsigned int training_runs;
+      // List of best layer weights
+      std::vector<TrainedNNetRecord> best_nnets;
    };
 
-   template<class _In, class _Out, template<class, class> class _NN>
-   void TrainerUtils::save_network (_NN<_In, _Out> &_nnet, const TrainingRecord &_tr)
+   void TrainerUtils::save_nnet_weights(const std::string& _label, const BasicNeuralNet& _nnet)
    {
-      std::cout << "BasicNNetTrainer::save_network() - entry\n";
-
-      bool inserted = false;
-
-      /*
-       * Insert the neural network information into the list of best networks
-       * is sorted order according to its performance.
-       */
-      for (auto it = begin (saved_networks); it != end (saved_networks); it++)
-      {
-         if (_tr.final_testset_performance () > it->training_record.final_testset_performance ())
-         {
-            TrainedNNetRecord c = {.serialized_nnet = _nnet.toJSON (), .training_record = _tr};
-            saved_networks.emplace (it, c);
-            inserted = true;
-            saved_networks.resize (const_saved_nnet_limit);
-            break;
-         }
-      }
-
-      if (!inserted && saved_networks.size () < const_saved_nnet_limit)
-         saved_networks.push_back ({.serialized_nnet = _nnet.toJSON (), .training_record = _tr});
+      std::cout << "TrainerUtils::save_nnet_weights() - entry\n";
+      cached_layer_weights.emplace(_label, _nnet.get_weights());
    }
 
    inline
-   const vector<TrainedNNetRecord> &TrainerUtils::get_trained_neuralnets (void) const
+   void TrainerUtils::restore_nnet_weights(const std::string& _label, BasicNeuralNet& _nnet)
    {
-      return saved_networks;
+      std::cout << "TrainerUtils::restore_nnet_weights() - entry\n";
+
+      NetworkWeights network_weights = cached_layer_weights[_label];
+      _nnet.set_weights(network_weights);
+   }
+
+   inline
+   void TrainerUtils::save_best_weights(TrainingRecord& _trec, const BasicNeuralNet& _nnet)
+   {
+      TrainedNNetRecord nnrec;
+      nnrec.training_record = _trec;
+      nnrec.network_weights = _nnet.get_weights();
+
+      best_nnets.push_back(nnrec);
+      std::sort(best_nnets.begin(), best_nnets.end());
+
+      best_nnets.resize(10);
+   }
+
+
+   inline
+   const std::vector<TrainedNNetRecord>& TrainerUtils::get_best_networks(void) const
+   {
+      return best_nnets;
+   }
+
+   inline
+   const TrainingStatistics& TrainerUtils::get_training_statistics(void) const
+   {
+      return training_stats;
    }
 
 }

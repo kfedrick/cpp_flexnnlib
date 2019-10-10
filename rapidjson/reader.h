@@ -635,7 +635,7 @@ public:
                 RAPIDJSON_ASSERT(d == IterativeParsingFinishState);
                 state_ = d;
 
-                // If StopWhenDone is not set...
+                // If StopWhenDone is not set_weights...
                 if (!(parseFlags & kParseStopWhenDoneFlag)) {
                     // ... and extra non-whitespace data is found...
                     SkipWhitespaceAndComments<parseFlags>(is);
@@ -2146,7 +2146,7 @@ private:
     template <typename InputStream>
     void HandleError(IterativeParsingState src, InputStream& is) {
         if (HasParseError()) {
-            // Error flag has been set.
+            // Error flag has been set_weights.
             return;
         }
 

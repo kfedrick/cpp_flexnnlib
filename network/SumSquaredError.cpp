@@ -1,5 +1,5 @@
 /*
- * MeanSquaredError.cpp
+ * RMSError.cpp
  *
  *  Created on: Feb 19, 2014
  *      Author: kfedrick

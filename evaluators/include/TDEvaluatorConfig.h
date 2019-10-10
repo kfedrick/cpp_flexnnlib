@@ -5,13 +5,13 @@
 #ifndef FLEX_NEURALNET_TDEVALUATORCONFIG_H_
 #define FLEX_NEURALNET_TDEVALUATORCONFIG_H_
 
-#include "EvaluatorConfig.h"
+#include "BasicEvalConfig.h"
 #include "TDTrainerConfig.h"
 
 namespace flexnnet
 {
    template<TDForecastMode _MODE>
-   class TDEvaluatorConfig : public EvaluatorConfig
+   class TDEvaluatorConfig : public BasicEvalConfig
    {
    public:
       static constexpr double DEFAULT_TD_DISCOUNT = 0.2;

@@ -1,5 +1,5 @@
 /*
- * MeanSquaredError.h
+ * RMSError.h
  *
  *  Created on: Feb 19, 2014
  *      Author: kfedrick

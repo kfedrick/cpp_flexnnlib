@@ -27,7 +27,7 @@
  *
  * I. Concretely defined objects:
  *    A. Neural network (more or less)
- *    B. Training set (more or less)
+ *    B. Training set_weights (more or less)
  *    C. Optimization function (I have a current interface for this)
  *
  * II. Items yet to be concretely defined wrt interface:
@@ -57,7 +57,7 @@
 
 #include "BasicNeuralNet.h"
 #include "NeuralNet.h"
-#include "ExemplarSet.h"
+#include "DataSet.h"
 #include "TrainingRecord.h"
 #include "PerformanceMetrics.h"
 
@@ -126,7 +126,7 @@ namespace flexnnet
       _Sample,
       _TrainAlgo>::multitrain (const DATASET_TYP &_trnset, const DATASET_TYP &_tstset, const DATASET_TYP &_vldset)
    {
-      std::cout << "BasicTrainer::train() - entry\n";
+      std::cout << "BasicTrainer::train_run() - entry\n";
 
       // Perform the number of training runs specified by 'training_runs'
       for (
@@ -134,16 +134,16 @@ namespace flexnnet
          trun_ndx < const_training_runs;
          trun_ndx++)
       {
-         std::cout << "BasicTrainer::train() - training run " << trun_ndx << "\n";
+         std::cout << "BasicTrainer::train_run() - training run " << trun_ndx << "\n";
 
-         // Initialize and train the network
+         // Initialize and train_run the network
          neural_net.initialize_weights ();
          std::shared_ptr<TrainingRecord> tr = train (neural_net, _trnset, _tstset, _vldset);
 
          // Collect the aggregate statistics over all training runs
          collect_training_stats (*tr);
 
-         // Save the network if it has one of the best performances on the test set
+         // Save the network if it has one of the best performances on the test set_weights
          save_network (neural_net, *tr);
       }
 
@@ -160,14 +160,14 @@ namespace flexnnet
       _Sample,
       _TrainAlgo>::train(NeuralNet<_In,_Out>& _nnet, const DataSet<_In, _Out, _Sample>& _trnset, const DataSet<_In, _Out, _Sample>& _vldset, const DataSet<_In, _Out, _Sample>& _tstset)
    {
-      std::cout << "TrainAlgo::train() - entry\n";
+      std::cout << "TrainAlgo::train_run() - entry\n";
 
       // Iterate through training epochs
       unsigned int max_epochs =_TrainAlgo<_In,_Out,_Sample>::get_max_epochs();
       unsigned int epoch = 0;
       for (epoch = 0; epoch < max_epochs; epoch++)
       {
-         // TODO - train epoch
+         // TODO - train_run epoch
          _TrainAlgo<_In,_Out,_Sample>::train_epoch(_nnet, _trnset, _vldset, _tstset);
       }
 

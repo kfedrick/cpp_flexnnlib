@@ -5,10 +5,7 @@
 #ifndef FLEX_NEURALNET_BASICNEURALNET_H_
 #define FLEX_NEURALNET_BASICNEURALNET_H_
 
-#include <map>
-#include "NetworkLayer.h"
-#include "NetworkOutput.h"
-//#include "Datum.h"
+#include "flexnnet.h"
 
 namespace flexnnet
 {
@@ -50,13 +47,26 @@ namespace flexnnet
        */
       virtual const Datum &activate (const Datum &_indatum);
 
-   public:
+      /**
+       * Calculate the Jacobian for most recent network activation as the partial
+       * derivatives of the specified gradient with respect to the weights. It
+       * an error gradient is specified the Jacobian is the set of partial derivatives
+       * of the weights with respect to the output error; if a unity vector is provided
+       * the Jacobian is the set of partial derivatives of the weights with respect
+       * to the network output.
+       *
+       * @param _gradient
+       */
+      virtual const void backprop(const std::valarray<double>& _gradient);
+
+      NetworkWeights get_weights(void) const;
+      void set_weights(const NetworkWeights& _weight);
+
       const std::set<std::string> &get_layer_names (void);
 
    public:
       std::string toJSON(void) const;
       const std::vector<std::shared_ptr<NetworkLayer>> get_layers(void) const;
-      //const Datum& get_network_input(void) const;
 
    private:
       /**
@@ -71,7 +81,7 @@ namespace flexnnet
       size_t network_output_size;
 
       // Network layers stored in proper activation order
-      std::vector<std::shared_ptr<NetworkLayer>> network_layers;
+      std::vector< std::shared_ptr<NetworkLayer> > network_layers;
 
       // Set containing layer names
       std::set<std::string> layer_name_set;
@@ -114,6 +124,7 @@ namespace flexnnet
       return network_input;
    }
     */
+
 
 }
 

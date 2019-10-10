@@ -41,6 +41,11 @@ namespace flexnnet
       void set (const std::map<std::string, std::valarray<double> > &_values);
       void set (const std::string _key, const std::valarray<double> &_value);
 
+      const std::valarray<double>& vectorize(void) const
+      {
+         return (*this)();
+      }
+
       const std::valarray<double>& operator()(void) const;
       std::valarray<double>& operator()(void);
 
@@ -99,6 +104,14 @@ namespace flexnnet
       return virtual_array;
    }
 
+   inline const std::valarray<double>& Datum::operator()(void) const
+   {
+      if (stale)
+         coelesce();
+
+      return virtual_array;
+   }
+
    inline const std::valarray<double>& Datum::operator[](const std::string& _index) const
    {
       return data[ fields.at(_index).index ];
@@ -113,6 +126,7 @@ namespace flexnnet
    {
       return data.at(_index);
    }
+
 }
 
 #endif //_DATUM_H_

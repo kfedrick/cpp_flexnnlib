@@ -17,7 +17,7 @@ TEST_P(TestSoftMaxActivation, Activation)
    printf ("TEST Case %s\n", GetParam ());
    /*
     * Read a test case file. Each test case file contains a JSON layer description
-    * suitable for building and configuring a network layer along with a set of
+    * suitable for building and configuring a network layer along with a set_weights of
     * test input/output pairs for that specific layer configuration.
     */
    LayerActivationTestCase<flexnnet::SoftMax> test_case;

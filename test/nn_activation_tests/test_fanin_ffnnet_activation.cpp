@@ -19,6 +19,10 @@ using flexnnet::Datum;
 using flexnnet::NetworkLayer;
 using flexnnet::BasicNeuralNet;
 
+static bool
+array_double_near (const flexnnet::Array2D<double> &_target, const flexnnet::Array2D<double> &_test, double _epsilon);
+
+
 template<typename T> Array2D<double> TestFaninFFNNActivation<T>::parse_weights (const rapidjson::Value &_obj, size_t _rows, size_t _cols)
 {
    Array2D<double> weights(_rows, _cols);
@@ -158,7 +162,53 @@ TYPED_TEST_P (TestFaninFFNNActivation, FaninFFNNActivation)
    }
 }
 
-REGISTER_TYPED_TEST_CASE_P(TestFaninFFNNActivation, FaninFFNNActivation);
+TYPED_TEST_P (TestFaninFFNNActivation, FaninSaveWeights)
+{
+   std::cout << ".... SaveNetworkWeights Test\n";
+
+   // Set network layer names
+   std::string layer_type_id = TestFaninFFNNActivation<TypeParam>::get_typeid();
+
+   std::string layer_id = layer_type_id;
+   std::transform(layer_id.begin(), layer_id.end(), layer_id.begin(), ::tolower);
+
+   std::string sample_fname = "fanin_" + layer_id + "_ffnnet_test_cases.json";
+
+   std::cout << "\nTest Fanin Feedforward Network<" << layer_type_id << ">\n";
+
+   std::vector<FaninTestCase> test_cases = TestFaninFFNNActivation<TypeParam>::read_samples(sample_fname);
+
+   for (auto test_case : test_cases)
+   {
+      TestFaninFFNNActivation<TypeParam>::create_fanin_ffnnet (test_case);
+
+      NetworkWeights network_weights = TestFaninFFNNActivation<TypeParam>::nnet->get_weights();
+
+      const flexnnet::LayerWeights& lweights = network_weights["input2"];
+
+      for (size_t row=0; row<lweights.const_weights_ref.size().rows; row++)
+      {
+         for (size_t col=0; col<lweights.const_weights_ref.size().cols; col++)
+            std::cout << lweights.const_weights_ref(row,col) << " ";
+         std::cout << "\n";
+      }
+      std::cout << "\n";
+
+      for (auto alayer_ptr : TestFaninFFNNActivation<TypeParam>::nnet->get_layers())
+         alayer_ptr->layer_weights.zero();
+
+      //net->set_weights(network_weights);
+
+      for (auto alayer_ptr : TestFaninFFNNActivation<TypeParam>::nnet->get_layers())
+      {
+         const flexnnet::Array2D<double>& item = alayer_ptr->layer_weights.const_weights_ref;
+         const flexnnet::Array2D<double>& target = network_weights[alayer_ptr->name()].const_weights_ref;
+         //EXPECT_PRED3(array_double_near, item, target, 0.000000001) << "ruh roh";
+      }
+   }
+}
+
+REGISTER_TYPED_TEST_CASE_P(TestFaninFFNNActivation, FaninFFNNActivation, FaninSaveWeights);
 INSTANTIATE_TYPED_TEST_CASE_P(My, TestFaninFFNNActivation, MyTypes);
 
 

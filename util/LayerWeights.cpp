@@ -9,7 +9,22 @@
 
 #include "LayerWeights.h"
 
-using namespace flexnnet;
+using std::string;
+using flexnnet::LayerWeights;
+
+LayerWeights::LayerWeights(void) : NamedObject("LayerWeights")
+{
+}
+
+LayerWeights::LayerWeights(const LayerWeights& _lweights) : NamedObject(_lweights.name())
+{
+   copy(_lweights);
+}
+
+LayerWeights::LayerWeights(const LayerWeights&& _lweights) : NamedObject(_lweights.name())
+{
+   copy(_lweights);
+}
 
 /**
  * Protected method to resize bias vector and weight array
@@ -20,20 +35,10 @@ using namespace flexnnet;
 void LayerWeights::resize (size_t _layer_sz, size_t _layer_input_sz)
 {
    if (_layer_sz > 0 && _layer_input_sz > 0)
-      weights.resize (_layer_sz, _layer_input_sz + 1);
-}
-
-void LayerWeights::set_weights (const Array2D<double> &_weights)
-{
-   weights = _weights;
-}
-
-/**
- * Adjust layer weights by the specified delta weight array.
- */
-void LayerWeights::adjust_weights (const Array2D<double> &_delta)
-{
-   weights += _delta;
+   {
+      weights.resize(_layer_sz, _layer_input_sz + 1);
+      initial_value.resize(_layer_sz);
+   }
 }
 
 std::string LayerWeights::to_json (void) const

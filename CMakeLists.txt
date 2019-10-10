@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(cpp_flexnnlib)
 
 set(CMAKE_CXX_STANDARD 14)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+# set_weights(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
@@ -43,9 +43,8 @@ add_executable(sandbox sandbox/doit.cpp)
 
 add_library(flexneuralnet
         datasets/include/Exemplar.h
-        include/flexneuralnet.h
+        include/flexnnet.h
         network/include/SumSquaredError.h
-        network/include/TrainingRecord.h
         network/SumSquaredError.cpp
         util/include/Array.h
         util/include/ArrayInitializer.h
@@ -88,7 +87,7 @@ add_library(flexneuralnet
         datasets/include/Datum.h
         util/include/Array2D.h
         util/include/Array3D.h
-        network/include/NetworkLayer.h
+        layers/include/NetworkLayer.h
         network/LayerConnRecord.cpp
         network/include/LayerConnRecord.h
         network/ExternalInputRecord.cpp
@@ -100,21 +99,17 @@ add_library(flexneuralnet
         layers/transfer_functions/include/NetSumLayer.h
         layers/transfer_functions/EuclideanDistLayer.cpp
         layers/transfer_functions/include/EuclideanDistLayer.h
-        trainers/TrainerConfig.cpp
         trainers/include/TrainerConfig.h
-        trainers/include/TrainingRecord.h
-        deprecated/NNetTrainer.h
         network/LayerInput.cpp
         network/include/LayerInput.h
         network/NetworkOutput.cpp
         network/include/NetworkOutput.h
         network/NetworkLayer.cpp
-        deprecated/TrainingAlgo.h
         trainers/include/PerformanceMetrics.h
-        datasets/include/ExemplarSet.h
+        datasets/include/DataSet.h
         datasets/include/Exemplar.h
         datasets/include/Episode.h
-        network/include/NeuralNet.h trainers/TrainerUtils.cpp trainers/include/TrainerUtils.h trainers/FATrainer.cpp trainers/include/FATrainer.h trainers/FA2Trainer.cpp trainers/include/FA2Trainer.h trainers/include/FuncApproxEvaluator.h network/include/NeuralNetSerializer.h deprecated/OldVectorSet.h datasets/include/VectorConcatenator.h datasets/include/Vectorizable.h datasets/include/A.h datasets/include/VectorizableSet.h trainers/include/ActorCriticEvaluator.h trainers/include/EvaluatorConfig.h trainers/include/TDTrainerConfig.h trainers/include/TDEvaluatorConfig.h trainers/include/ActorCriticTrainer.cpp trainers/include/ActorCriticTrainer.h trainers/include/MeanSquaredError.cpp trainers/include/MeanSquaredError.h)
+        network/include/NeuralNet.h trainers/include/TrainerUtils.h trainers/FATrainer.cpp trainers/include/FATrainer.h evaluators/include/FuncApproxEvaluator.h network/include/NeuralNetSerializer.h  datasets/include/VectorConcatenator.h datasets/include/Vectorizable.h datasets/include/A.h datasets/include/VectorizableSet.h evaluators/include/ActorCriticEvaluator.h evaluators/include/BasicEvalConfig.h trainers/include/TDTrainerConfig.h evaluators/include/TDEvaluatorConfig.h trainers/include/ActorCriticTrainer.h evaluators/include/RMSError.h trainers/include/TrainingRecord.h trainers/include/flexnnet_trainers.h util/include/flexnnet_utils.h layers/include/flexnnet_layers.h network/include/flexnnet_networks.h trainers/include/BasicTrainer.h datasets/include/DataSet2.h trainers/include/BackpropAlgo.h util/include/NetworkError.cpp util/include/NetworkError.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

@@ -19,6 +19,8 @@
 #include "SoftMax.h"
 #include "LogSig.h"
 
+#include "TestLayer.h"
+
 #define TESTCASE_PATH "test/nn_activation_tests/samples/"
 
 struct FaninTestCase
@@ -38,7 +40,7 @@ struct FaninTestCase
 };
 
 template<typename T>
-class TestFaninFFNNActivation : public ::testing::Test
+class TestFaninFFNNActivation : public TestLayer, public ::testing::Test
 {
 public:
    virtual void SetUp ()

@@ -5,8 +5,6 @@
 #ifndef FLEX_NEURALNET_LAYERSTATE_H_
 #define FLEX_NEURALNET_LAYERSTATE_H_
 
-#include "BasicLayer.h"
-
 namespace flexnnet
 {
    class LayerState

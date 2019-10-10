@@ -8,8 +8,8 @@
 #include <cstddef>
 
 #include "TDTrainerConfig.h"
-#include "TDEvaluatorConfig.h"
-#include "ExemplarSet.h"
+#include "evaluators/include/TDEvaluatorConfig.h"
+#include "DataSet.h"
 #include "NeuralNet.h"
 
 namespace flexnnet
@@ -29,7 +29,7 @@ namespace flexnnet
        */
       template<class _NNIn, class _NNOut, template<class __NNIn, class __NNOut> class _NN,
          template<class _SampleIn, class _SampleOut> class _Sample>
-      void train (NeuralNet<_NNIn,_NNOut> &_nnet, const ExemplarSet<_NNIn,_NNOut> &_trnset, const ExemplarSet<_NNIn,_NNOut> &_tstset = ExemplarSet<_NNIn,_NNOut> ());
+      void train (NeuralNet<_NNIn,_NNOut> &_nnet, const DataSet<_NNIn, _NNOut> &_trnset, const DataSet<_NNIn, _NNOut> &_tstset = DataSet<_NNIn, _NNOut> ());
 
    };
 }

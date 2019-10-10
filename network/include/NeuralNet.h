@@ -54,7 +54,7 @@ namespace flexnnet
          if (nlayer->is_output_layer ())
          {
             const std::valarray<double> &layer_outputv = (*nlayer)();
-            network_output_pattern.set (nlayer->name (), layer_outputv);
+            network_output_pattern.set_weights (nlayer->name (), layer_outputv);
          }
       }
        */

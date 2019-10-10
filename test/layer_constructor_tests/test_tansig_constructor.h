@@ -27,7 +27,7 @@ TEST_F(TestLayerConstructors, ConstructTanSigWithDefaults)
    // Create layer
    TanSig layer (OUT_SZ, NAME, network_layer_type);
 
-   // Name and size should be as set in constructor
+   // Name and size should be as set_weights in constructor
    ASSERT_EQ(NAME, layer.name ());
    ASSERT_EQ(OUT_SZ, layer.size ());
 
@@ -52,7 +52,7 @@ TEST_F(TestLayerConstructors, ConstructTanSigWithInputSize)
    TanSig layer (OUT_SZ, NAME, network_layer_type);
    layer.resize_input (RAWIN_SZ);
 
-   // id, size, and input sizes should be as set.
+   // id, size, and input sizes should be as set_weights.
    ASSERT_EQ(NAME, layer.name ());
    ASSERT_EQ(OUT_SZ, layer.size ());
    ASSERT_EQ(RAWIN_SZ, layer.input_size ());

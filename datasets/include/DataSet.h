@@ -10,8 +10,8 @@
 
 namespace flexnnet
 {
-   template<class _InType, class _OutType>
-   class ExemplarSet : public std::set<Exemplar<_InType, _OutType> >
+   template<class _InType, class _OutType, template <class,class> class _Sample>
+   class DataSet : public std::set< _Sample<_InType, _OutType> >
    {
       void initialize(void) {};
       void randomize_order(void) {};

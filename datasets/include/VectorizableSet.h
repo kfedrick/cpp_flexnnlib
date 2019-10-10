@@ -6,8 +6,6 @@
 #define FLEX_NEURALNET_VECTORIZABLESET_H_
 
 #include <iostream>
-
-
 #include <valarray>
 #include <map>
 #include <memory>
@@ -17,7 +15,7 @@
 namespace flexnnet
 {
    template<typename... _Types>
-   class VectorizableSet : public VectorConcatenator
+   class VectorizableSet
    {
    protected:
       // The number of Vectorizable object in this class
