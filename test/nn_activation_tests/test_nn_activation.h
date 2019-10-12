@@ -5,14 +5,13 @@
 #ifndef _TEST_NN_ACTIVATION_H_
 #define _TEST_NN_ACTIVATION_H_
 
-class TestNNActivation : public ::testing::TestWithParam<const char *>
+class TestNNActivation : public ::testing::TestWithParam<const char*>
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 };
-
 
 #endif //_TEST_NN_ACTIVATION_H_

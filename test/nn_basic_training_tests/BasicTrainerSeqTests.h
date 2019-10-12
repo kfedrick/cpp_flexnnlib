@@ -16,9 +16,9 @@ TYPED_TEST_P (BasicTrainerTests, BasicSequence)
 
    TypeParam basic_trainer;
 
-   basic_trainer.set_training_runs (2);
-   basic_trainer.set_max_epochs (3);
-   basic_trainer.train (*BasicTrainerTests<TypeParam>::nnet, BasicTrainerTests<TypeParam>::trnset);
+   basic_trainer.set_training_runs(2);
+   basic_trainer.set_max_epochs(3);
+   basic_trainer.train(*BasicTrainerTests<TypeParam>::nnet, BasicTrainerTests<TypeParam>::trnset);
 }
 
 #endif //_BASICTRAINERSEQTESTS_H_

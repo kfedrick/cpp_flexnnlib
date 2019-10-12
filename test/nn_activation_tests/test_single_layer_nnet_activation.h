@@ -16,8 +16,9 @@
 #include "SoftMax.h"
 #include "LogSig.h"
 
-#define TESTCASE_PATH "test/nn_activation_tests/samples/"
+using flexnnet::NNetIO_Typ;
 
+#define TESTCASE_PATH "test/nn_activation_tests/samples/"
 
 struct TestCase
 {
@@ -25,27 +26,27 @@ struct TestCase
    size_t input_sz;
    flexnnet::Array2D<double> weights;
 
-   flexnnet::Datum input;
-   flexnnet::Datum target_output;
+   NNetIO_Typ input;
+   NNetIO_Typ target_output;
 };
 
 template<typename T>
 class TestSingleLayerNNActivation : public ::testing::Test
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 
-   std::string get_typeid ();
+   std::string get_typeid();
 
    void create_single_layer_nnet(const TestCase& _testcase);
-   void create_two_layer_ffnnet (const TestCase& _testcase);
+   void create_two_layer_ffnnet(const TestCase& _testcase);
 
    std::vector<TestCase> read_samples(std::string _fpath);
-   flexnnet::Datum parse_datum (const rapidjson::Value &_obj);
-   flexnnet::Array2D<double> parse_weights (const rapidjson::Value &_obj, size_t _rows, size_t _cols);
+   NNetIO_Typ parse_datum(const rapidjson::Value& _obj);
+   flexnnet::Array2D<double> parse_weights(const rapidjson::Value& _obj, size_t _rows, size_t _cols);
 
 public:
 
@@ -57,28 +58,33 @@ public:
    std::shared_ptr<flexnnet::BasicNeuralNet> nnet;
 };
 
-TYPED_TEST_CASE_P (TestSingleLayerNNActivation);
+TYPED_TEST_CASE_P
+(TestSingleLayerNNActivation);
 
-typedef ::testing::Types<flexnnet::PureLin, flexnnet::TanSig, flexnnet::RadBas, flexnnet::SoftMax, flexnnet::LogSig> MyTypes;
+typedef ::testing::Types<flexnnet::PureLin,
+                         flexnnet::TanSig,
+                         flexnnet::RadBas,
+                         flexnnet::SoftMax,
+                         flexnnet::LogSig> MyTypes;
 
-template<typename T> std::string TestSingleLayerNNActivation<T>::get_typeid ()
+template<typename T> std::string TestSingleLayerNNActivation<T>::get_typeid()
 {
-   std::string type_id = typeid (T).name();
+   std::string type_id = typeid(T).name();
    static char buf[2048];
-   size_t size = sizeof (buf);
+   size_t size = sizeof(buf);
    int status;
 
-   char *res = abi::__cxa_demangle (type_id.c_str (), buf, &size, &status);
-   buf[sizeof (buf) - 1] = 0;
+   char* res = abi::__cxa_demangle(type_id.c_str(), buf, &size, &status);
+   buf[sizeof(buf) - 1] = 0;
 
    std::string buf_str = buf;
-   size_t pos = buf_str.rfind (':')+1;
+   size_t pos = buf_str.rfind(':') + 1;
    buf_str = buf_str.substr(pos);
 
    return buf_str;
 }
 
-template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nnet (const TestCase& _testcase)
+template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nnet(const TestCase& _testcase)
 {
    // Set network layer names
    SINGLE_LAYER_TYPE_ID = TestSingleLayerNNActivation<T>::get_typeid();
@@ -88,10 +94,11 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nn
 
    // Create layer
    std::vector<std::shared_ptr<flexnnet::NetworkLayer>> network_layers;
-   network_layers.push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Output)));
+   network_layers
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Output)));
 
    // Add external input to layer
-   network_layers[0]->add_external_input (_testcase.input, {"input"});
+   network_layers[0]->add_external_input(_testcase.input, {"input"});
 
    // Set layer weights
    network_layers[0]->layer_weights.set_weights(_testcase.weights);
@@ -100,7 +107,7 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nn
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
 }
 
-template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnnet (const TestCase& _testcase)
+template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnnet(const TestCase& _testcase)
 {
    // Set network layer names
    SINGLE_LAYER_TYPE_ID = TestSingleLayerNNActivation<T>::get_typeid();
@@ -111,30 +118,30 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnne
    std::vector<std::shared_ptr<flexnnet::NetworkLayer>> network_layers;
 
    // Create hidden layer
-   network_layers.push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Hidden)));
+   network_layers
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Hidden)));
 
    // Add external input to layer
-   network_layers[0]->add_external_input (_testcase.input, {"input"});
+   network_layers[0]->add_external_input(_testcase.input, {"input"});
 
    // Set layer weights
    network_layers[0]->layer_weights.set_weights(_testcase.weights);
 
    // Create output layer
-   network_layers.push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(_testcase.layer_sz, "output", flexnnet::BasicLayer::Output)));
+   network_layers.push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(_testcase
+                                                                                        .layer_sz, "output", flexnnet::BasicLayer::Output)));
 
    // Add input from hidden layer
    network_layers[1]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
 
    // Create diagonal matrix for output layer weights
-   flexnnet::Array2D<double> diag(_testcase.layer_sz, _testcase.layer_sz+1);
-   for (int i=0; i< _testcase.layer_sz; i++)
-      diag.at(i,i) = 1.0;
+   flexnnet::Array2D<double> diag(_testcase.layer_sz, _testcase.layer_sz + 1);
+   for (int i = 0; i < _testcase.layer_sz; i++)
+      diag.at(i, i) = 1.0;
    network_layers[1]->layer_weights.set_weights(diag);
 
    // Create neural net
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
 }
-
-
 
 #endif //_TEST_SINGLE_LAYER_NNET_ACTIVATION_H_

@@ -16,10 +16,10 @@
 #include "Episode.h"
 #include "NeuralNet.h"
 
-
 namespace flexnnet
 {
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    class FATrainer : public TrainerUtils, public TrainerConfig, public _Eval<_NNIn, _NNOut, _Sample, _ErrFunc>
    {
    protected:
@@ -113,31 +113,36 @@ namespace flexnnet
       std::shared_ptr<DataSet_Typ_> test_dataset;
    };
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::set_validation_dataset(const DataSet_Typ_& _vldset)
    {
       validation_dataset = &_vldset;
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::set_test_dataset(const DataSet_Typ_& _tstset)
    {
       test_dataset = &_tstset;
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::clear_validation_dataset(void)
    {
 
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::clear_test_dataset(void)
    {
 
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::train(NN_Typ_& _nnet, const DataSet_Typ_& _trnset)
    {
       std::cout << "FATrainer::train() - entry\n";
@@ -156,8 +161,10 @@ namespace flexnnet
       }
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
-   TrainingRecord FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::train_run(NN_Typ_& _nnet, const DataSet_Typ_& _trnset)
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
+   TrainingRecord
+   FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::train_run(NN_Typ_& _nnet, const DataSet_Typ_& _trnset)
    {
       std::cout << "   FATrainer::train_run() - entry\n";
       TrainingRecord training_record;
@@ -168,14 +175,14 @@ namespace flexnnet
       //    validation set performance if one is available; training set
       //    performance otherwise.
       //
-      double& perf = (validation_dataset != nullptr)? vld_perf : trn_perf;
+      double& perf = (validation_dataset != nullptr) ? vld_perf : trn_perf;
 
       // Previous performance value - used for failback testing
       double prev_trn_perf = std::numeric_limits<double>::max();
       double failback_limit = error_increase_limit();
 
       // Init best performance assuming we are trying to minimize error
-      double best_perf { std::numeric_limits<double>::max() };
+      double best_perf{std::numeric_limits<double>::max()};
       size_t best_epoch = 0;
 
       // Iterate through training epochs
@@ -195,26 +202,26 @@ namespace flexnnet
          // Evaluate the performance of the updated network
          trn_perf = _Eval<_NNIn, _NNOut, _Sample, _ErrFunc>::evaluate(_nnet, _trnset);
 
-         if ((trn_perf - prev_trn_perf)/prev_trn_perf > failback_limit)
+         if ((trn_perf - prev_trn_perf) / prev_trn_perf > failback_limit)
          {
             restore_nnet_weights("failback", _nnet);
             epoch--;
             continue;
          }
 
-         training_record.training_set_trace.push_back({ .epoch=epoch, .performance=trn_perf });
+         training_record.training_set_trace.push_back({.epoch=epoch, .performance=trn_perf});
 
          // Check the performance on the validation and test set if they exists
          if (validation_dataset != nullptr)
          {
             vld_perf = _Eval<_NNIn, _NNOut, _Sample, _ErrFunc>::evaluate(_nnet, *validation_dataset);
-            training_record.training_set_trace.push_back({ .epoch=epoch, .performance=vld_perf });
+            training_record.training_set_trace.push_back({.epoch=epoch, .performance=vld_perf});
          }
 
          if (test_dataset != nullptr)
          {
             tst_perf = _Eval<_NNIn, _NNOut, _Sample, _ErrFunc>::evaluate(_nnet, *test_dataset);
-            training_record.training_set_trace.push_back({ .epoch=epoch, .performance=tst_perf });
+            training_record.training_set_trace.push_back({.epoch=epoch, .performance=tst_perf});
          }
 
          // Call function to save network weights for the best epoch.
@@ -232,10 +239,11 @@ namespace flexnnet
       return training_record;
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void
    FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::
-      train_epoch(_index_typ _epoch, NN_Typ_& _nnet, const DataSet_Typ_& _trnset)
+   train_epoch(_index_typ _epoch, NN_Typ_& _nnet, const DataSet_Typ_& _trnset)
    {
       std::cout << "      Enter - FATrainer::train_epoch()\n";
       bool pending_updates = false;
@@ -264,8 +272,13 @@ namespace flexnnet
          update_weights(_nnet);
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
-   void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::train_sample(_index_typ _epoch, NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
+   void FATrainer<_NNIn,
+                  _NNOut,
+                  _Sample,
+                  _ErrFunc,
+                  _Eval>::train_sample(_index_typ _epoch, NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
    {
       std::cout << "         Enter - FATrainer::train_exemplar()\n";
 
@@ -278,20 +291,31 @@ namespace flexnnet
       calc_weight_updates(_exemplar.target(), nn_out, _nnet);
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
-   void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::train_sample(_index_typ _epoch, NN_Typ_& _nnet, const Episode_Typ_& _exemplar)
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
+   void FATrainer<_NNIn,
+                  _NNOut,
+                  _Sample,
+                  _ErrFunc,
+                  _Eval>::train_sample(_index_typ _epoch, NN_Typ_& _nnet, const Episode_Typ_& _exemplar)
    {
       std::cout << "         Enter - FATrainer::train_episode()\n";
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
-   void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::calc_weight_updates(const _NNOut& _tgt, const _NNOut _netout, NN_Typ_& _nnet)
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
+   void FATrainer<_NNIn,
+                  _NNOut,
+                  _Sample,
+                  _ErrFunc,
+                  _Eval>::calc_weight_updates(const _NNOut& _tgt, const _NNOut _netout, NN_Typ_& _nnet)
    {
       std::cout << "            Enter - FATrainer::present_datum()\n";
 
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, class _ErrFunc, template<class,class,template<class,class> class,class> class _Eval>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, class _ErrFunc,
+      template<class, class, template<class, class> class, class> class _Eval>
    void FATrainer<_NNIn, _NNOut, _Sample, _ErrFunc, _Eval>::update_weights(NN_Typ_& _nnet)
    {
       std::cout << "            Enter - FATrainer::update_weights()\n";

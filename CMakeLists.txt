@@ -109,7 +109,33 @@ add_library(flexneuralnet
         datasets/include/DataSet.h
         datasets/include/Exemplar.h
         datasets/include/Episode.h
-        network/include/NeuralNet.h trainers/include/TrainerUtils.h trainers/FATrainer.cpp trainers/include/FATrainer.h evaluators/include/FuncApproxEvaluator.h network/include/NeuralNetSerializer.h  datasets/include/VectorConcatenator.h datasets/include/Vectorizable.h datasets/include/A.h datasets/include/VectorizableSet.h evaluators/include/ActorCriticEvaluator.h evaluators/include/BasicEvalConfig.h trainers/include/TDTrainerConfig.h evaluators/include/TDEvaluatorConfig.h trainers/include/ActorCriticTrainer.h evaluators/include/RMSError.h trainers/include/TrainingRecord.h trainers/include/flexnnet_trainers.h util/include/flexnnet_utils.h layers/include/flexnnet_layers.h network/include/flexnnet_networks.h trainers/include/BasicTrainer.h datasets/include/DataSet2.h trainers/include/BackpropAlgo.h util/include/NetworkError.cpp util/include/NetworkError.h)
+        network/include/NeuralNet.h
+        trainers/include/TrainerUtils.h
+        trainers/FATrainer.cpp
+        trainers/include/FATrainer.h
+        evaluators/include/BasicEvaluator.h
+        network/include/NeuralNetSerializer.h
+        datasets/include/VectorConcatenator.h
+        datasets/include/Vectorizable.h
+        datasets/include/A.h
+        datasets/include/VectorizableSet.h
+        evaluators/include/ActorCriticEvaluator.h
+        evaluators/include/BasicEvalConfig.h
+        trainers/include/TDTrainerConfig.h
+        evaluators/include/TDEvaluatorConfig.h
+        trainers/include/ActorCriticTrainer.h
+        evaluators/include/RMSError.h
+        trainers/include/TrainingRecord.h
+        trainers/include/flexnnet_trainers.h
+        util/include/flexnnet_utils.h
+        layers/include/flexnnet_layers.h
+        network/include/flexnnet_networks.h
+        trainers/include/BasicTrainer.h
+        datasets/include/DataSet2.h
+        trainers/include/BackpropAlgo.h
+        util/include/NetworkError.cpp
+        util/include/NetworkError.h
+        )
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

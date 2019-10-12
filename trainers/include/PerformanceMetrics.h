@@ -14,7 +14,8 @@ namespace flexnnet
        *
        * @return - The overall performance score.
        */
-      virtual double score(void) {};
+      virtual double score(void)
+      {};
    };
 }
 

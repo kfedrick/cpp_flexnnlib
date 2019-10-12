@@ -11,7 +11,7 @@
 
 namespace flexnnet
 {
-   class SoftMax  : public NetSumLayer
+   class SoftMax : public NetSumLayer
    {
    public:
       struct Parameters
@@ -24,7 +24,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      SoftMax(size_t _sz, const std::string &_name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      SoftMax(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
       ~SoftMax();
 
       void set_gain(double _val);
@@ -35,12 +35,12 @@ namespace flexnnet
 
       void set_params(const Parameters& _params);
 
-      std::string toJson (void) const;
+      std::string toJson(void) const;
 
    protected:
-      const std::valarray<double>& calc_layer_output (const std::valarray<double> &_netin);
-      const Array2D<double>& calc_dAdN (const std::valarray<double> &_out);
-      
+      const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
+      const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
+
    private:
       double lower_bound;
       double output_range;
@@ -54,10 +54,10 @@ namespace flexnnet
       Array2D<double> dAdN;
    };
 
-   inline void SoftMax::set_params (const Parameters& _val)
+   inline void SoftMax::set_params(const Parameters& _val)
    {
       set_gain(_val.gain);
-      set_rescaled (_val.rescaled_flag);
+      set_rescaled(_val.rescaled_flag);
    }
 
    inline void SoftMax::set_gain(double _val)
@@ -90,9 +90,9 @@ namespace flexnnet
       return params.rescaled_flag;
    }
 
-   inline std::string SoftMax::toJson (void) const
+   inline std::string SoftMax::toJson(void) const
    {
-      return LayerSerializer<SoftMax>::toJson (*this);
+      return LayerSerializer<SoftMax>::toJson(*this);
    }
 }
 

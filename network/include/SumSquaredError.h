@@ -16,13 +16,13 @@ namespace flexnnet
    class SumSquaredError : public flexnnet::OutputErrorFunctor
    {
    public:
-      SumSquaredError ();
-      virtual ~SumSquaredError ();
+      SumSquaredError();
+      virtual ~SumSquaredError();
 
-      void operator() (double &error, vector<double> &gradient,
-                       const vector<double> &outVec, const vector<double> &targetVec);
+      void operator()(double& error, vector<double>& gradient,
+                      const vector<double>& outVec, const vector<double>& targetVec);
 
-      SumSquaredError *clone () const;
+      SumSquaredError* clone() const;
    };
 
 }

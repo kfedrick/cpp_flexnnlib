@@ -1,1 +1,104 @@
-{"layer_definition" : {"id":"test2","is_output_layer":true,"dimensions":{"layer_size":3,"layer_input_size":2},"learned_parameters":{"weights":[[1.0,0.5,-0.1],[0.5,1.0,0],[0.5,-0.25,0.1]]},"transfer_function":{"type":"flexnnet::TanSigTrans","parameters":{"gain":1.0}}}, "test_cases" : [ {"input": [1.0, -0.3], "initial_value": [0.5], "target": { "output":[0.635148952, 0.19737532, 0.588259256], "dAdN":[[0.596585808,0,0],[0,0.961042983,0],[0,0,0.653951047]], "dNdW":[[1.0,-0.3,1.0],[1.0,-0.3,1.0],[1.0,-0.3,1.0]], "dNdI":[[1,0.5,-0.1],[0.5,1,0],[0.5,-0.25,0.1]]}} ]}
+{
+  "layer_definition": {
+    "id": "test2",
+    "is_output_layer": true,
+    "dimensions": {
+      "layer_size": 3,
+      "layer_input_size": 2
+    },
+    "learned_parameters": {
+      "weights": [
+        [
+          1.0,
+          0.5,
+          -0.1
+        ],
+        [
+          0.5,
+          1.0,
+          0
+        ],
+        [
+          0.5,
+          -0.25,
+          0.1
+        ]
+      ]
+    },
+    "transfer_function": {
+      "type": "flexnnet::TanSigTrans",
+      "parameters": {
+        "gain": 1.0
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "input": [
+        1.0,
+        -0.3
+      ],
+      "initial_value": [
+        0.5
+      ],
+      "target": {
+        "output": [
+          0.635148952,
+          0.19737532,
+          0.588259256
+        ],
+        "dAdN": [
+          [
+            0.596585808,
+            0,
+            0
+          ],
+          [
+            0,
+            0.961042983,
+            0
+          ],
+          [
+            0,
+            0,
+            0.653951047
+          ]
+        ],
+        "dNdW": [
+          [
+            1.0,
+            -0.3,
+            1.0
+          ],
+          [
+            1.0,
+            -0.3,
+            1.0
+          ],
+          [
+            1.0,
+            -0.3,
+            1.0
+          ]
+        ],
+        "dNdI": [
+          [
+            1,
+            0.5,
+            -0.1
+          ],
+          [
+            0.5,
+            1,
+            0
+          ],
+          [
+            0.5,
+            -0.25,
+            0.1
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -7,9 +7,11 @@
 #include "TTrainDeriv.h"
 #include "TTrainDeriv2.h"
 
-template <class, class> class X {};
+template<class, class> class X
+{
+};
 
-int main (int argc, char **argv)
+int main(int argc, char** argv)
 {
    TTrain<int, float> tt(1, 0.3);
    std::cout << tt.get_A() << " " << tt.get_B() << std::endl;
@@ -22,7 +24,6 @@ int main (int argc, char **argv)
 
    TTrainDeriv2<int, float, TTrain> ttd2(1, 0.3, &tt);
    std::cout << ttd2.get_A() << " " << ttd2.get_B() << std::endl;
-
 
    return 0;
 }

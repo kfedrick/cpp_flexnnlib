@@ -11,7 +11,7 @@
 
 namespace flexnnet
 {
-   class RadBas  : public EuclideanDistLayer
+   class RadBas : public EuclideanDistLayer
    {
    public:
       struct Parameters
@@ -23,18 +23,18 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      RadBas(size_t _sz, const std::string &_name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      RadBas(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
       ~RadBas();
 
       void set_rescaled(bool _val);
       bool is_rescaled(void) const;
       void set_params(const Parameters& _params);
 
-      std::string toJson (void) const;
+      std::string toJson(void) const;
 
    protected:
-      const std::valarray<double>& calc_layer_output (const std::valarray<double> &_netin);
-      const Array2D<double>& calc_dAdN (const std::valarray<double> &_out);
+      const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
+      const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
 
    private:
       double lower_bound;
@@ -43,9 +43,9 @@ namespace flexnnet
       Parameters params;
    };
 
-   inline void RadBas::set_params (const Parameters& _val)
+   inline void RadBas::set_params(const Parameters& _val)
    {
-      set_rescaled (_val.rescaled_flag);
+      set_rescaled(_val.rescaled_flag);
    }
 
    inline void RadBas::set_rescaled(bool _val)
@@ -68,9 +68,9 @@ namespace flexnnet
       return params.rescaled_flag;
    }
 
-   inline std::string RadBas::toJson (void) const
+   inline std::string RadBas::toJson(void) const
    {
-      return LayerSerializer<RadBas>::toJson (*this);
+      return LayerSerializer<RadBas>::toJson(*this);
    }
 }
 

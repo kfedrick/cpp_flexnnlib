@@ -31,23 +31,23 @@ namespace flexnnet
       /* ********************************************************************
        * Constructors, destructors
        */
-      BasicLayer (size_t _sz, const std::string &_name, NetworkLayerType _type = Output);
+      BasicLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
 
    public:
-      virtual ~BasicLayer ();
+      virtual ~BasicLayer();
 
    public:
 
       // Return length of layer output valarray
-      size_t size () const;
-      virtual size_t input_size () const;
+      size_t size() const;
+      virtual size_t input_size() const;
 
       // Return length of layer input valarray
-      bool is_output_layer (void) const;
+      bool is_output_layer(void) const;
 
-      const Array2D<double> &get_dAdN (void) const;
-      const Array2D<double> &get_dNdW (void) const;
-      const Array2D<double> &get_dNdI (void) const;
+      const Array2D<double>& get_dAdN(void) const;
+      const Array2D<double>& get_dNdW(void) const;
+      const Array2D<double>& get_dNdI(void) const;
 
    public:
       /* ********************************************************************
@@ -60,19 +60,19 @@ namespace flexnnet
        * @param inputVec
        * @return
        */
-      virtual const std::valarray<double> &activate (const std::valarray<double> &inputVec);
+      virtual const std::valarray<double>& activate(const std::valarray<double>& inputVec);
 
       /**
        * Accumulate error specified in _errorv into the current layer error
        * @param _errorv
        * @return
        */
-      virtual const std::valarray<double> &accumulate_error (const std::valarray<double> &_errorv);
+      virtual const std::valarray<double>& accumulate_error(const std::valarray<double>& _errorv);
 
       /*
        * Return the current value of the network layer as a std::valarray
        */
-      virtual const std::valarray<double> &operator() () const;
+      virtual const std::valarray<double>& operator()() const;
 
       virtual std::string toJson(void) const;
 
@@ -80,37 +80,37 @@ namespace flexnnet
 
    protected:
 
-      virtual const std::valarray<double>& calc_layer_output (const std::valarray<double> &_netin) = 0;
+      virtual const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin) = 0;
 
       /**
        * Calculate the net input value based on the raw input vector and weights specified in the
        * argument list and writes it into the _netin argument.
        */
-      virtual const std::valarray<double>& calc_netin(const std::valarray<double> &_rawin) = 0;
+      virtual const std::valarray<double>& calc_netin(const std::valarray<double>& _rawin) = 0;
 
       /*
        * Calculate and return the derivative of the layer output with respect to
        * the net input for the most recent activation.
        */
-      virtual const Array2D<double>& calc_dAdN (const std::valarray<double> &_out) = 0;
+      virtual const Array2D<double>& calc_dAdN(const std::valarray<double>& _out) = 0;
 
       /**
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      virtual const Array2D<double>& calc_dNdW(const std::valarray<double> &_rawin) = 0;
+      virtual const Array2D<double>& calc_dNdW(const std::valarray<double>& _rawin) = 0;
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      virtual const Array2D<double>& calc_dNdI(const std::valarray<double> &_rawin) = 0;
+      virtual const Array2D<double>& calc_dNdI(const std::valarray<double>& _rawin) = 0;
 
       // Mark all derivative arrays as stale (e.g. after new activation).
-      void stale (void);
+      void stale(void);
 
    public:
-      const size_t &const_layer_output_size_ref = layer_output_size;
+      const size_t& const_layer_output_size_ref = layer_output_size;
 
    private:
 
@@ -140,45 +140,44 @@ namespace flexnnet
 
    };
 
-
-   inline size_t BasicLayer::size () const
+   inline size_t BasicLayer::size() const
    {
       return layer_output_size;
    }
 
-   inline size_t BasicLayer::input_size () const
+   inline size_t BasicLayer::input_size() const
    {
       return layer_input_size;
    }
 
-   inline bool BasicLayer::is_output_layer (void) const
+   inline bool BasicLayer::is_output_layer(void) const
    {
       return (network_layer_type == Output);
    }
 
-   inline const Array2D<double> &BasicLayer::get_dAdN (void) const
+   inline const Array2D<double>& BasicLayer::get_dAdN(void) const
    {
       return layer_derivatives.dAdN;
    }
 
-   inline const Array2D<double> &BasicLayer::get_dNdW (void) const
+   inline const Array2D<double>& BasicLayer::get_dNdW(void) const
    {
       return layer_derivatives.dNdW;
    }
 
-   inline const Array2D<double> &BasicLayer::get_dNdI (void) const
+   inline const Array2D<double>& BasicLayer::get_dNdI(void) const
    {
       return layer_derivatives.dNdI;
    }
 
-   inline void BasicLayer::resize_input (size_t _rawin_sz)
+   inline void BasicLayer::resize_input(size_t _rawin_sz)
    {
       layer_input_size = _rawin_sz;
       layer_weights.resize(layer_output_size, layer_input_size);
-      layer_derivatives.resize (layer_output_size, layer_input_size);
+      layer_derivatives.resize(layer_output_size, layer_input_size);
    }
 
-   inline std::string BasicLayer::toJson (void) const
+   inline std::string BasicLayer::toJson(void) const
    {
       return "";
    }

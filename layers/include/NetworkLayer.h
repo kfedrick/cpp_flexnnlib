@@ -27,36 +27,34 @@ namespace flexnnet
        * Constructors, destructors
        */
 
-      NetworkLayer (size_t _sz, const std::string &_name, NetworkLayerType _type = Output);
+      NetworkLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
 
    public:
 
       ~NetworkLayer();
 
-
    public:
       /* ******************************************************************
        * Public member functions to connect layers and external inputs.
        */
-      size_t add_connection (BasicLayer &_layer, LayerConnRecord::ConnectionType _type);
-      size_t add_external_input (const Datum &_xdatum, const std::set <std::string> &_indexSet);
+      size_t add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type);
+      size_t add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet);
    };
 
-
-   inline size_t NetworkLayer::add_connection (BasicLayer &_layer, LayerConnRecord::ConnectionType _type)
+   inline size_t NetworkLayer::add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type)
    {
       LayerInput::add_connection(_layer, _type);
 
       // Resize input for basic layer
-      resize_input (virtual_input_size ());
+      resize_input(virtual_input_size());
    }
 
-   inline size_t NetworkLayer::add_external_input (const Datum &_xdatum, const std::set <std::string> &_indexSet)
+   inline size_t NetworkLayer::add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet)
    {
       LayerInput::add_external_input(_xdatum, _indexSet);
 
       // Resize input for basic layer
-      resize_input (virtual_input_size ());
+      resize_input(virtual_input_size());
 
       return virtual_input_size();
    }

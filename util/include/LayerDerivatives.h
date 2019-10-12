@@ -12,20 +12,20 @@ namespace flexnnet
    class LayerDerivatives
    {
    public:
-      LayerDerivatives ();
-      LayerDerivatives (size_t _out_sz, size_t _rawin_sz);
-      ~LayerDerivatives ();
+      LayerDerivatives();
+      LayerDerivatives(size_t _out_sz, size_t _rawin_sz);
+      ~LayerDerivatives();
 
-      void resize (size_t _out_sz, size_t _rawin_sz);
+      void resize(size_t _out_sz, size_t _rawin_sz);
       void stale();
 
    private:
       void initialize();
 
    public:
-      const Array2D<double> &const_dAdN_ref = dAdN;
-      const Array2D<double> &const_dNdW_ref = dNdW;
-      const Array2D<double> &const_dNdI_ref = dNdI;
+      const Array2D<double>& const_dAdN_ref = dAdN;
+      const Array2D<double>& const_dNdW_ref = dNdW;
+      const Array2D<double>& const_dNdI_ref = dNdI;
 
       bool stale_dAdN;
       bool stale_dNdW;
@@ -37,13 +37,13 @@ namespace flexnnet
 
    };
 
-   inline LayerDerivatives::LayerDerivatives (size_t _out_sz, size_t _rawin_sz)
+   inline LayerDerivatives::LayerDerivatives(size_t _out_sz, size_t _rawin_sz)
    {
       resize(_out_sz, _rawin_sz);
       initialize();
    }
 
-   inline LayerDerivatives::LayerDerivatives ()
+   inline LayerDerivatives::LayerDerivatives()
    {
       initialize();
    }
@@ -63,16 +63,16 @@ namespace flexnnet
       stale_dNdI = true;
    }
 
-   inline LayerDerivatives::~LayerDerivatives ()
+   inline LayerDerivatives::~LayerDerivatives()
    {
 
    }
 
-   inline void LayerDerivatives::resize (size_t _out_sz, size_t _rawin_sz)
+   inline void LayerDerivatives::resize(size_t _out_sz, size_t _rawin_sz)
    {
       dAdN.resize(_out_sz, _out_sz);
-      dNdW.resize(_out_sz, _rawin_sz+1);
-      dNdI.resize(_out_sz, _rawin_sz+1);
+      dNdW.resize(_out_sz, _rawin_sz + 1);
+      dNdI.resize(_out_sz, _rawin_sz + 1);
    }
 
 }

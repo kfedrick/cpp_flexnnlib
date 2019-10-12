@@ -18,17 +18,15 @@ using flexnnet::NetworkLayer;
 using flexnnet::BasicNeuralNet;
 using flexnnet::BasicNeuralNetFactory;
 
-
-
 TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
 {
-   std::string transfunc_type_str = typeid (TypeParam).name();
+   std::string transfunc_type_str = typeid(TypeParam).name();
    static char buf[2048];
-   size_t size = sizeof (buf);
+   size_t size = sizeof(buf);
    int status;
 
-   char *res = abi::__cxa_demangle (transfunc_type_str.c_str (), buf, &size, &status);
-   buf[sizeof (buf) - 1] = 0;
+   char* res = abi::__cxa_demangle(transfunc_type_str.c_str(), buf, &size, &status);
+   buf[sizeof(buf) - 1] = 0;
 
    const string LAYER_ID = buf;
    const size_t LAYER_SZ = 3;
@@ -46,27 +44,27 @@ TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
    std::cout << "\n Single Layer (" << LAYER_ID.c_str() << ") NN Basic Build Test\n";
 
    // Set target single network layer weights size
-   Array2D<double>::Dimensions WEIGHTS_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size()+1};
+   Array2D<double>::Dimensions WEIGHTS_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size() + 1};
    Array2D<double>::Dimensions DADN_SZ = {.rows=LAYER_SZ, .cols=LAYER_SZ};
-   Array2D<double>::Dimensions DNDW_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size()+1};
-   Array2D<double>::Dimensions DNDI_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size()+1};
+   Array2D<double>::Dimensions DNDW_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size() + 1};
+   Array2D<double>::Dimensions DNDI_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size() + 1};
 
    // Construct and build network
    BasicNeuralNetFactory factory;
 
    std::shared_ptr<TypeParam> layer_ptr = factory
-      .add_layer<TypeParam> (LAYER_SZ, LAYER_ID, LAYER_LTYPE);
+      .add_layer<TypeParam>(LAYER_SZ, LAYER_ID, LAYER_LTYPE);
 
-   factory.set_layer_external_input (LAYER_ID, DATUM, {"input"});
+   factory.set_layer_external_input(LAYER_ID, DATUM, {"input"});
 
    std::shared_ptr<BasicNeuralNet> nnet = factory.build("test_nn");
 
    // Verify that network layer names are identical
-   std::set<string> layer_names = nnet->get_layer_names ();
+   std::set<string> layer_names = nnet->get_layer_names();
    ASSERT_EQ(LAYER_NAMES, layer_names);
 
    // Get list of network layers
-   const std::vector<std::shared_ptr<NetworkLayer>>& layers = nnet->get_layers ();
+   const std::vector<std::shared_ptr<NetworkLayer>>& layers = nnet->get_layers();
 
    // There should be exactly one layer
    ASSERT_EQ(1, layers.size());
@@ -75,8 +73,8 @@ TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
    const BasicLayer& layer_ref = *layers[0];
    ASSERT_EQ(LAYER_ID, layer_ref.name());
    ASSERT_EQ(LAYER_SZ, layer_ref.size());
-   ASSERT_EQ(DATUM["input"].size(), layer_ref.input_size ());
-   ASSERT_EQ(IS_OUTPUT_LAYER, layer_ref.is_output_layer ());
+   ASSERT_EQ(DATUM["input"].size(), layer_ref.input_size());
+   ASSERT_EQ(IS_OUTPUT_LAYER, layer_ref.is_output_layer());
 
    // Verify weight array size
    const Array2D<double>& weights = layer_ref.layer_weights.const_weights_ref;
@@ -99,5 +97,7 @@ TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
    ASSERT_EQ(DNDI_SZ.cols, dNdI.size().cols);
 }
 
-REGISTER_TYPED_TEST_CASE_P(TestSingleLayerNNBuild, SingleLayerNNBuild);
-INSTANTIATE_TYPED_TEST_CASE_P(My, TestSingleLayerNNBuild, MyTypes);
+REGISTER_TYPED_TEST_CASE_P
+(TestSingleLayerNNBuild, SingleLayerNNBuild);
+INSTANTIATE_TYPED_TEST_CASE_P
+(My, TestSingleLayerNNBuild, MyTypes);

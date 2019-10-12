@@ -19,17 +19,18 @@ private:
    _C c;
 };
 
-template <class _A, class _B, class _C> TTrainDeriv<_A, _B, _C>::TTrainDeriv(_A _a, _B _b, _C _c) : TTrain<_A, _B>(_a, _b)
+template<class _A, class _B, class _C>
+TTrainDeriv<_A, _B, _C>::TTrainDeriv(_A _a, _B _b, _C _c) : TTrain<_A, _B>(_a, _b)
 {
    c = _c;
 }
 
-template <class _A, class _B, class _C> _A TTrainDeriv<_A, _B, _C>::get_A()
+template<class _A, class _B, class _C> _A TTrainDeriv<_A, _B, _C>::get_A()
 {
    return TTrain<_A, _B>::get_A() * 2;
 }
 
-template <class _A, class _B, class _C> _C TTrainDeriv<_A, _B, _C>::get_C()
+template<class _A, class _B, class _C> _C TTrainDeriv<_A, _B, _C>::get_C()
 {
    return c;
 }

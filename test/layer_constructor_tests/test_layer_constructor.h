@@ -10,12 +10,12 @@
 #include "Array2D.h"
 #include "BasicLayer.h"
 
-class TestLayerConstructors : public ::testing::TestWithParam<const char *>
+class TestLayerConstructors : public ::testing::TestWithParam<const char*>
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 };
 

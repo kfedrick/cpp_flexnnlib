@@ -67,7 +67,7 @@ namespace flexnnet
       template<class _SampleIn, class _SampleOut> class _Sample,
       template<class __NNTIn, class _NNTOut,
       template<class _TAlgoSampleIn, class _TAlgoSampleOut> class> class _TrainAlgo>
-   class NNetTrainer : public TrainerUtils, public _TrainAlgo<_NNIn,_NNOut,_Sample>
+   class NNetTrainer : public TrainerUtils, public _TrainAlgo<_NNIn, _NNOut, _Sample>
    {
 
    private:
@@ -76,9 +76,8 @@ namespace flexnnet
       typedef _Sample<_NNIn, _NNOut> SAMPLE_TYP;
       typedef flexnnet::DataSet<_NNIn, _NNOut, _Sample> DATASET_TYP;
 
-
    public:
-      NNetTrainer (NN_TYP &_nnet, TRAINER_TYP &_trainer);
+      NNetTrainer(NN_TYP& _nnet, TRAINER_TYP& _trainer);
 
    public:
       /**
@@ -90,13 +89,19 @@ namespace flexnnet
        * @param _tstset
        * @param _vldset
        */
-      const vector<TrainedNNetRecord>& multitrain (
-         const DATASET_TYP &_trnset, const DATASET_TYP &_tstset, const DATASET_TYP &_vldset = DATASET_TYP ());
-      std::shared_ptr<flexnnet::TrainingRecord> train(NeuralNet<_NNIn,_NNOut>& _nnet, const DataSet<_NNIn, _NNOut, _Sample>& _trnset, const DataSet<_NNIn, _NNOut, _Sample>& _tstset, const DataSet<_NNIn, _NNOut, _Sample>& _vldset);
+      const vector <TrainedNNetRecord>& multitrain(
+         const DATASET_TYP& _trnset, const DATASET_TYP& _tstset, const DATASET_TYP& _vldset = DATASET_TYP());
+      std::shared_ptr<flexnnet::TrainingRecord>
+      train(NeuralNet<_NNIn, _NNOut>& _nnet, const DataSet<_NNIn, _NNOut, _Sample>& _trnset, const DataSet<_NNIn,
+                                                                                                           _NNOut,
+                                                                                                           _Sample>& _tstset, const DataSet<
+         _NNIn,
+         _NNOut,
+         _Sample>& _vldset);
 
    private:
-      _NN<_NNIn, _NNOut> &neural_net;
-      _TrainAlgo<_NNIn, _NNOut, _Sample> &train_algo;
+      _NN<_NNIn, _NNOut>& neural_net;
+      _TrainAlgo<_NNIn, _NNOut, _Sample>& train_algo;
    };
 
    template<class _In, class _Out, template<class _NNIn, class _NNOut> class _NN,
@@ -107,24 +112,22 @@ namespace flexnnet
       _Out,
       _NN,
       _Sample,
-      _Trainer>::NNetTrainer (NN_TYP &_nnet, TRAINER_TYP &_trainer)
+      _Trainer>::NNetTrainer(NN_TYP& _nnet, TRAINER_TYP& _trainer)
       :
-      TrainerUtils(), neural_net (_nnet), train_algo (_trainer)
+      TrainerUtils(), neural_net(_nnet), train_algo(_trainer)
    {
       std::cout << "BasicTrainer::BasicTrainer() - entry\n";
    }
 
-
-
    template<class _In, class _Out, template<class _NNIn, class _NNOut> class _NN,
       template<class, class> class _Sample,
       template<class, class, template<class, class> class _TrainerSample> class _TrainAlgo>
-   const vector<TrainedNNetRecord>& NNetTrainer<
+   const vector <TrainedNNetRecord>& NNetTrainer<
       _In,
       _Out,
       _NN,
       _Sample,
-      _TrainAlgo>::multitrain (const DATASET_TYP &_trnset, const DATASET_TYP &_tstset, const DATASET_TYP &_vldset)
+      _TrainAlgo>::multitrain(const DATASET_TYP& _trnset, const DATASET_TYP& _tstset, const DATASET_TYP& _vldset)
    {
       std::cout << "BasicTrainer::train_run() - entry\n";
 
@@ -137,14 +140,14 @@ namespace flexnnet
          std::cout << "BasicTrainer::train_run() - training run " << trun_ndx << "\n";
 
          // Initialize and train_run the network
-         neural_net.initialize_weights ();
-         std::shared_ptr<TrainingRecord> tr = train (neural_net, _trnset, _tstset, _vldset);
+         neural_net.initialize_weights();
+         std::shared_ptr<TrainingRecord> tr = train(neural_net, _trnset, _tstset, _vldset);
 
          // Collect the aggregate statistics over all training runs
-         collect_training_stats (*tr);
+         collect_training_stats(*tr);
 
          // Save the network if it has one of the best performances on the test set_weights
-         save_network (neural_net, *tr);
+         save_network(neural_net, *tr);
       }
 
       return get_trained_neuralnets();
@@ -158,17 +161,22 @@ namespace flexnnet
       _Out,
       _NN,
       _Sample,
-      _TrainAlgo>::train(NeuralNet<_In,_Out>& _nnet, const DataSet<_In, _Out, _Sample>& _trnset, const DataSet<_In, _Out, _Sample>& _vldset, const DataSet<_In, _Out, _Sample>& _tstset)
+      _TrainAlgo>::train(NeuralNet<_In, _Out>& _nnet, const DataSet<_In, _Out, _Sample>& _trnset, const DataSet<_In,
+                                                                                                                _Out,
+                                                                                                                _Sample>& _vldset, const DataSet<
+      _In,
+      _Out,
+      _Sample>& _tstset)
    {
       std::cout << "TrainAlgo::train_run() - entry\n";
 
       // Iterate through training epochs
-      unsigned int max_epochs =_TrainAlgo<_In,_Out,_Sample>::get_max_epochs();
+      unsigned int max_epochs = _TrainAlgo<_In, _Out, _Sample>::get_max_epochs();
       unsigned int epoch = 0;
       for (epoch = 0; epoch < max_epochs; epoch++)
       {
          // TODO - train_run epoch
-         _TrainAlgo<_In,_Out,_Sample>::train_epoch(_nnet, _trnset, _vldset, _tstset);
+         _TrainAlgo<_In, _Out, _Sample>::train_epoch(_nnet, _trnset, _vldset, _tstset);
       }
 
       // TODO - implement

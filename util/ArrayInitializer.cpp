@@ -12,18 +12,18 @@
 namespace flexnnet
 {
 
-   ArrayInitializer::~ArrayInitializer ()
+   ArrayInitializer::~ArrayInitializer()
    {
    }
 
-   void ArrayInitializer::operator() (Array<double> &arr) const
+   void ArrayInitializer::operator()(Array<double>& arr) const
    {
-      printf ("ArrayInitializer::operator()\n");
+      printf("ArrayInitializer::operator()\n");
    }
 
-   ArrayInitializer *ArrayInitializer::clone () const
+   ArrayInitializer* ArrayInitializer::clone() const
    {
-      return new ArrayInitializer (*this);
+      return new ArrayInitializer(*this);
    }
 
 } /* namespace flexnnet */

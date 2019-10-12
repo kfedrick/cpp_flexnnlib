@@ -9,11 +9,13 @@
 
 namespace flexnnet
 {
-   template <typename _Sample>
+   template<typename _Sample>
    class DataSet2 : public std::set<_Sample>
    {
-      void initialize(void) {};
-      void randomize_order(void) {};
+      void initialize(void)
+      {};
+      void randomize_order(void)
+      {};
    };
 }
 

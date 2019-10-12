@@ -48,10 +48,9 @@ namespace flexnnet
 
       size_t sampling_count(void) const;
 
-
    private:
-      size_t num_samplings {DEFAULT_SAMPLING_COUNT};
-      size_t sampling_sz {DEFAULT_SAMPLE_SIZE};
+      size_t num_samplings{DEFAULT_SAMPLING_COUNT};
+      size_t sampling_sz{DEFAULT_SAMPLE_SIZE};
    };
 
    inline void BasicEvalConfig::set_sampling_count(size_t _count)

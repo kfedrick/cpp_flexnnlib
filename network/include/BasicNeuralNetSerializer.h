@@ -40,31 +40,32 @@ namespace flexnnet
       };
 
    public:
-      static std::shared_ptr<flexnnet::BasicNeuralNet> parse (const std::string &_json);
-      static std::string toJson (const BasicNeuralNet &_neural_net);
+      static std::shared_ptr<flexnnet::BasicNeuralNet> parse(const std::string& _json);
+      static std::string toJson(const BasicNeuralNet& _neural_net);
 
    public:
-      static rapidjson::Value &encode (rapidjson::Value &_obj, const BasicNeuralNet &_neural_net);
-      static rapidjson::Value &
-      encodeNetworkLayers (rapidjson::Value &_obj, const std::vector<std::shared_ptr<NetworkLayer>> &_network_layers);
-      static rapidjson::Value &
-      encodeLayerTopology (rapidjson::Value &_obj, const std::vector<std::shared_ptr<NetworkLayer>> &_network_layers);
-      static rapidjson::Value &encodeNetworkConnections (rapidjson::Value &_obj, const NetworkLayer &_layer);
-      static rapidjson::Value &
-      encodeExternalLayerInput (rapidjson::Value &_obj, const std::vector<ExternalInputRecord> &_xinput);
-      static rapidjson::Value &encodeConnectionFromLayer (rapidjson::Value &_obj, const LayerConnRecord &_conn);
-      static rapidjson::Value &encodeNetworkInput (rapidjson::Value &_obj, const Datum &_datum);
+      static rapidjson::Value& encode(rapidjson::Value& _obj, const BasicNeuralNet& _neural_net);
+      static rapidjson::Value&
+      encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<NetworkLayer>>& _network_layers);
+      static rapidjson::Value&
+      encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<NetworkLayer>>& _network_layers);
+      static rapidjson::Value& encodeNetworkConnections(rapidjson::Value& _obj, const NetworkLayer& _layer);
+      static rapidjson::Value&
+      encodeExternalLayerInput(rapidjson::Value& _obj, const std::vector<ExternalInputRecord>& _xinput);
+      static rapidjson::Value& encodeConnectionFromLayer(rapidjson::Value& _obj, const LayerConnRecord& _conn);
+      static rapidjson::Value& encodeNetworkInput(rapidjson::Value& _obj, const Datum& _datum);
 
    public:
-      static std::vector<std::shared_ptr<NetworkLayer>> parseNetworkTopology (const rapidjson::Value &_obj, std::map<std::string,
-                                                                                                    std::shared_ptr<
-                                                                                                    NetworkLayer>> &_layers, const Datum &_network_input);
-      static LayerInputInfo parseLayerConnections (const rapidjson::Value &_obj);
-      static Datum parseNetworkInput (const rapidjson::Value &_obj);
-      static LayerInputInfo parseExternalInput (const rapidjson::Value &_obj);
-      static std::string connTypeToString (LayerConnRecord::ConnectionType _type);
-      static LayerConnRecord::ConnectionType StringToConnType (const std::string &_typeStr);
-      static std::map<std::string, std::shared_ptr<NetworkLayer>> parseNetworkLayers (const rapidjson::Value &_obj);
+      static std::vector<std::shared_ptr<NetworkLayer>>
+      parseNetworkTopology(const rapidjson::Value& _obj, std::map<std::string,
+                                                                  std::shared_ptr<
+                                                                     NetworkLayer>>& _layers, const Datum& _network_input);
+      static LayerInputInfo parseLayerConnections(const rapidjson::Value& _obj);
+      static Datum parseNetworkInput(const rapidjson::Value& _obj);
+      static LayerInputInfo parseExternalInput(const rapidjson::Value& _obj);
+      static std::string connTypeToString(LayerConnRecord::ConnectionType _type);
+      static LayerConnRecord::ConnectionType StringToConnType(const std::string& _typeStr);
+      static std::map<std::string, std::shared_ptr<NetworkLayer>> parseNetworkLayers(const rapidjson::Value& _obj);
 
    };
 }

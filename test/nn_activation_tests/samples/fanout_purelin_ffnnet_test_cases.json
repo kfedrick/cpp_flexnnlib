@@ -1,35 +1,83 @@
 {
-  "input1_size" : 3,
-  "input2_size" : 2,
-  "hlayer_size" : 2,
-  "olayer1_size" : 2,
-  "olayer2_size" : 1,
-  "test_cases" :
-  [
+  "input1_size": 3,
+  "input2_size": 2,
+  "hlayer_size": 2,
+  "olayer1_size": 2,
+  "olayer2_size": 1,
+  "test_cases": [
     {
-      "hlayer_weights" :
-      [
-         [1, 0, -0.2, 0],
-         [0, 1, 0, 2]
+      "hlayer_weights": [
+        [
+          1,
+          0,
+          -0.2,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          2
+        ]
       ],
-      "olayer1_weights" :
-      [
-         [1, 0, 0],
-         [0, 1, 2]
+      "olayer1_weights": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ]
       ],
-      "olayer2_weights" :
-      [
-         [1, 0, -0.25]
+      "olayer2_weights": [
+        [
+          1,
+          0,
+          -0.25
+        ]
       ],
-      "input" :
-      [
-         {"field":"input1","size":3,"index":0,"value":[1,0,-0.25]},
-         {"field":"input2","size":2,"index":1,"value":[0.5,-2]}
+      "input": [
+        {
+          "field": "input1",
+          "size": 3,
+          "index": 0,
+          "value": [
+            1,
+            0,
+            -0.25
+          ]
+        },
+        {
+          "field": "input2",
+          "size": 2,
+          "index": 1,
+          "value": [
+            0.5,
+            -2
+          ]
+        }
       ],
-      "output" :
-      [
-         {"field":"output1","size":2,"index":0,"value":[1.05, 4.0]},
-         {"field":"output2","size":1,"index":1,"value":[0.8]}
+      "output": [
+        {
+          "field": "output1",
+          "size": 2,
+          "index": 0,
+          "value": [
+            1.05,
+            4.0
+          ]
+        },
+        {
+          "field": "output2",
+          "size": 1,
+          "index": 1,
+          "value": [
+            0.8
+          ]
+        }
       ]
     }
   ]

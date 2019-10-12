@@ -14,7 +14,7 @@
 namespace flexnnet
 {
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc = RMSError>
    class BasicTrainer
@@ -96,7 +96,7 @@ namespace flexnnet
    };
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void
@@ -106,7 +106,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void BasicTrainer<_NNIn, _NNOut, _TData, _TrainAlgo, _Eval, _ErrFunc>::set_test_dataset(const DataSet_Typ_& _tstset)
@@ -115,7 +115,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void BasicTrainer<_NNIn, _NNOut, _TData, _TrainAlgo, _Eval, _ErrFunc>::clear_validation_dataset(void)
@@ -124,7 +124,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void BasicTrainer<_NNIn, _NNOut, _TData, _TrainAlgo, _Eval, _ErrFunc>::clear_test_dataset(void)
@@ -133,7 +133,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void
@@ -156,7 +156,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    TrainingRecord
@@ -241,7 +241,7 @@ namespace flexnnet
    }
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData,
-      template<class, class, template<class,class> class, template<class> class> class _TrainAlgo,
+      template<class, class, template<class, class> class, template<class> class> class _TrainAlgo,
       template<class, class, template<class, class> class, template<class> class> class _Eval,
       template<class> class _ErrFunc>
    void

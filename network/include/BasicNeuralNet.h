@@ -9,12 +9,13 @@
 
 namespace flexnnet
 {
+   typedef  std::map<std::string, std::valarray<double>> NNetIO_Typ;
+
    class BasicNeuralNet : public NamedObject
    {
-
    public:
-      BasicNeuralNet (const std::vector<std::shared_ptr<NetworkLayer>> &layers, bool _recurrent, const std::string &_name = "BasicNeuralNet");
-      virtual ~BasicNeuralNet ();
+      BasicNeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      virtual ~BasicNeuralNet();
 
    public:
       /**
@@ -23,7 +24,7 @@ namespace flexnnet
        *
        * @return - the size of the network output vector.
        */
-      size_t size (void);
+      size_t size(void);
 
    public:
 
@@ -31,7 +32,7 @@ namespace flexnnet
        * Initialize network weights and other network state information
        * prior to training.
        */
-      virtual void initialize_weights (void);
+      virtual void initialize_weights(void);
 
       /**
        * Reset network state activation prior to presentation of next
@@ -45,7 +46,7 @@ namespace flexnnet
        * @param _indatum - the input datum to the network
        * @return - the network output for the specified input data
        */
-      virtual const Datum &activate (const Datum &_indatum);
+      virtual const NNetIO_Typ& activate(const NNetIO_Typ& _input);
 
       /**
        * Calculate the Jacobian for most recent network activation as the partial
@@ -62,7 +63,7 @@ namespace flexnnet
       NetworkWeights get_weights(void) const;
       void set_weights(const NetworkWeights& _weight);
 
-      const std::set<std::string> &get_layer_names (void);
+      const std::set<std::string>& get_layer_names(void);
 
    public:
       std::string toJSON(void) const;
@@ -75,13 +76,13 @@ namespace flexnnet
        *
        * @return - the size of the virtual output vector.
        */
-      std::map<std::string, std::valarray<double>> init_network_output_layer (void);
+      std::map<std::string, std::valarray<double>> init_network_output_layer(void);
 
    private:
       size_t network_output_size;
 
       // Network layers stored in proper activation order
-      std::vector< std::shared_ptr<NetworkLayer> > network_layers;
+      std::vector<std::shared_ptr<NetworkLayer> > network_layers;
 
       // Set containing layer names
       std::set<std::string> layer_name_set;
@@ -103,14 +104,14 @@ namespace flexnnet
       //Datum network_input;
    };
 
-   inline const std::set<std::string> &BasicNeuralNet::get_layer_names (void)
+   inline const std::set<std::string>& BasicNeuralNet::get_layer_names(void)
    {
       return layer_name_set;
    }
 
-   inline size_t BasicNeuralNet::size (void)
+   inline size_t BasicNeuralNet::size(void)
    {
-      return network_output_conn.virtual_input_size ();
+      return network_output_conn.virtual_input_size();
    }
 
    inline const std::vector<std::shared_ptr<NetworkLayer>> BasicNeuralNet::get_layers(void) const

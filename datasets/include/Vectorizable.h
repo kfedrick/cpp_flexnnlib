@@ -17,10 +17,13 @@ namespace flexnnet
     */
    class Vectorizable : public NamedObject
    {
-   protected:
+   public:
       Vectorizable();
+      Vectorizable(const std::string& _name);
       Vectorizable(const Vectorizable& _v);
-      Vectorizable(const std::string _name);
+
+      ~Vectorizable();
+
 
    public:
       virtual const std::valarray<double>& vectorize(void) const = 0;
@@ -37,13 +40,19 @@ namespace flexnnet
    {
    }
 
-   inline Vectorizable::Vectorizable(const std::string _name) : NamedObject(_name)
+   inline Vectorizable::Vectorizable(const std::string& _name) : NamedObject(_name)
    {
    }
 
    inline Vectorizable::Vectorizable(const Vectorizable& _v) : NamedObject(_v.name())
    {
    }
+
+   inline Vectorizable::~Vectorizable()
+   {
+
+   }
+
 }
 
 #endif //FLEX_NEURALNET_VECTORIZABLE_H_

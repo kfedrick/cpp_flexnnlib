@@ -17,7 +17,7 @@ namespace flexnnet
        *
        * @return - The start state
        */
-       _InType& reset(void);
+      _InType& reset(void);
 
       /**
        * Advance the episode to the next state given the specified dynamic feedback; return

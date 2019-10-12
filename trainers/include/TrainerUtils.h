@@ -98,7 +98,6 @@ namespace flexnnet
       best_nnets.resize(10);
    }
 
-
    inline
    const std::vector<TrainedNNetRecord>& TrainerUtils::get_best_networks(void) const
    {

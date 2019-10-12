@@ -17,11 +17,11 @@ namespace flexnnet
    {
    public:
 
-      virtual ~ArrayInitializer ();
+      virtual ~ArrayInitializer();
 
-      virtual void operator() (Array<double> &arr) const;
+      virtual void operator()(Array<double>& arr) const;
 
-      virtual ArrayInitializer *clone () const;
+      virtual ArrayInitializer* clone() const;
    };
 
 } /* namespace flexnnet */

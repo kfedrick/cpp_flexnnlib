@@ -29,9 +29,9 @@ template<typename T>
 class TestSingleLayerNNBuild : public ::testing::Test
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 };
 
@@ -39,8 +39,5 @@ TYPED_TEST_CASE_P
 (TestSingleLayerNNBuild);
 
 typedef ::testing::Types<PureLin, TanSig, RadBas, SoftMax, LogSig> MyTypes;
-
-
-
 
 #endif //_TEST_SINGLE_LAYER_NNET_H_

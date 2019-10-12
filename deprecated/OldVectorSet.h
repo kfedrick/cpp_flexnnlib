@@ -24,8 +24,8 @@ namespace flexnnet
       static const int size = sizeof...(_Types);
 
    public:
-      OldVectorSet(_Types&... vals);
-      OldVectorSet(_Types&&... vals);
+      OldVectorSet(_Types& ... vals);
+      OldVectorSet(_Types&& ... vals);
 
       const std::valarray<double>& operator[](const std::string& _key) const;
 
@@ -33,11 +33,11 @@ namespace flexnnet
       void doit_impl(const std::tuple<Ts...>&& tuple)
       {
          std::cout << std::get<I>(tuple) << "\n";
-         data_map.emplace( { std::get<I>(tuple).name(), std::get<I>(tuple) } );
+         data_map.emplace({std::get<I>(tuple).name(), std::get<I>(tuple)});
 
          if (I + 1 < sizeof... (Ts))
          {
-            doit_impl<(I+1<sizeof...(Ts) ? I+1 : I)>(tuple);
+            doit_impl<(I + 1 < sizeof...(Ts) ? I + 1 : I)>(tuple);
          }
       }
 
@@ -47,28 +47,25 @@ namespace flexnnet
          doit_impl<0>();
       }
 
-
-
-
    private:
       //std::tuple<_Types...> my_tuple;
       std::map<const std::string, std::shared_ptr<const Vectorizable>> data_map;
    };
 
    template<typename... _Types>
-   OldVectorSet< _Types...>::OldVectorSet(_Types&... vals)
+   OldVectorSet<_Types...>::OldVectorSet(_Types& ... vals)
    {
       std::cout << "OldVectorSet(const _Types&...)\n";
    }
 
    template<typename... _Types>
-   OldVectorSet< _Types...>::OldVectorSet(_Types&&... vals)
+   OldVectorSet<_Types...>::OldVectorSet(_Types&& ... vals)
    {
       std::cout << "OldVectorSet(const _Types&&...)\n";
    }
 
    template<typename... _Types>
-   const std::valarray<double>& OldVectorSet< _Types...>::operator[](const std::string& _key) const
+   const std::valarray<double>& OldVectorSet<_Types...>::operator[](const std::string& _key) const
    {
       return data_map.at(_key)->vectorize();
    }

@@ -25,8 +25,8 @@ namespace flexnnet
       using Vectorizable_ptr_ = std::shared_ptr<Vectorizable>;
 
    public:
-      VectorizableSet(_Types&... vals);
-      VectorizableSet(_Types&&... vals);
+      VectorizableSet(_Types& ... vals);
+      VectorizableSet(_Types&& ... vals);
 
       /**
        * Return the vectorization of the object named by key.
@@ -43,7 +43,6 @@ namespace flexnnet
        */
       const std::valarray<double>& concat(void) const;
 
-      
    private:
 
       /**
@@ -57,7 +56,7 @@ namespace flexnnet
        * @param _ts - Remaining vectorizable object references
        */
       template<size_t I, class T, class... Ts>
-      void assign_impl (T&& _t, Ts&& ... _vals);
+      void assign_impl(T&& _t, Ts&& ... _vals);
 
       /**
        * Recursive terminal for unpacking variadic constructor arguments.
@@ -65,9 +64,9 @@ namespace flexnnet
        * @tparam Ts
        */
       template<size_t I, class... Ts>
-      void assign_impl (void)
+      void assign_impl(void)
       {}
-      
+
    private:
       // The container for the Vectorizable objects in this class
       std::map<const std::string, std::shared_ptr<const Vectorizable>> data_map;
@@ -77,22 +76,22 @@ namespace flexnnet
    };
 
    template<typename... _Types>
-   VectorizableSet< _Types...>::VectorizableSet(_Types&... _vals)
+   VectorizableSet<_Types...>::VectorizableSet(_Types& ... _vals)
    {
       std::cout << "VectorizableSet(const _Types&...)\n";
-      assign_impl<0> (std::forward<_Types> (_vals)...);
+      assign_impl<0>(std::forward<_Types>(_vals)...);
    }
 
    template<typename... _Types>
-   VectorizableSet< _Types...>::VectorizableSet(_Types&&... _vals)
+   VectorizableSet<_Types...>::VectorizableSet(_Types&& ... _vals)
    {
       std::cout << "VectorizableSet(const _Types&&...)\n";
-      assign_impl<0> (std::forward<_Types> (_vals)...);
+      assign_impl<0>(std::forward<_Types>(_vals)...);
    }
 
    template<typename... _Types>
    template<size_t I, class T, class... Ts>
-   void VectorizableSet< _Types...>::assign_impl (T&& _val, Ts&& ... _vals)
+   void VectorizableSet<_Types...>::assign_impl(T&& _val, Ts&& ... _vals)
    {
       std::cout << "assign_impl(T&&, Ts&&)\n";
       std::cout << _val.name().c_str() << " " << I << " " << sizeof...(Ts) << "\n";
@@ -106,29 +105,29 @@ namespace flexnnet
          std::ostringstream err_str;
          err_str
             << "Error : VectorizableSet() - key '" << name << "' already exists.\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       // Create a new Object using copy constructor, pack into a shared pointer
       // and add it to the data map.
       Vectorizable_sptr_ vptr = Vectorizable_ptr_(new T(std::forward<T>(_val)));
-      data_map.insert( { _val.name(), vptr } );
+      data_map.insert({_val.name(), vptr});
 
-      std::cout << "--- " << name << " = " << data_map[name]->vectorize().size() << " " <<  data_map[name]->vectorize()[1] << "\n";
+      std::cout << "--- " << name << " = " << data_map[name]->vectorize().size() << " "
+                << data_map[name]->vectorize()[1] << "\n";
 
       // Recursively call unpacker
-      assign_impl<(I + 1)> (std::forward<Ts> (_vals)...);
+      assign_impl<(I + 1)>(std::forward<Ts>(_vals)...);
    }
 
-
    template<typename... _Types>
-   const std::valarray<double>& VectorizableSet< _Types...>::at(const std::string& _key) const
+   const std::valarray<double>& VectorizableSet<_Types...>::at(const std::string& _key) const
    {
       return data_map.at(_key)->vectorize();
    }
 
    template<typename... _Types>
-   const std::valarray<double>& VectorizableSet< _Types...>::concat(void) const
+   const std::valarray<double>& VectorizableSet<_Types...>::concat(void) const
    {
       if (!stale)
          virtual_vector;
@@ -136,8 +135,8 @@ namespace flexnnet
       size_t vndx = 0;
       for (auto& item : data_map)
       {
-         const std::valarray<double>& va = item.second->vectorize ();
-         for (auto i = 0; i < va.size (); i++)
+         const std::valarray<double>& va = item.second->vectorize();
+         for (auto i = 0; i < va.size(); i++)
             virtual_vector[vndx++] = va[i];
       }
 

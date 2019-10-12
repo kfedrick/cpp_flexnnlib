@@ -17,6 +17,4 @@
 
 typedef unsigned int _index_typ;
 
-
-
 #endif /* FLEX_NEURALNET_H_ */

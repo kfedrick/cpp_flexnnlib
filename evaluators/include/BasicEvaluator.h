@@ -2,14 +2,13 @@
 // Created by kfedrick on 9/23/19.
 //
 
-#ifndef FLEX_NEURALNET_FUNCAPPROXEVALUATOR_H_
-#define FLEX_NEURALNET_FUNCAPPROXEVALUATOR_H_
+#ifndef FLEX_NEURALNET_BASICEVALUATOR_H_
+#define FLEX_NEURALNET_BASICEVALUATOR_H_
 
 #include <cstddef>
 #include <iostream>
 
 #include "DataSet.h"
-#include "DataSet2.h"
 #include "Episode.h"
 #include "BasicEvalConfig.h"
 #include "NeuralNet.h"
@@ -17,8 +16,8 @@
 
 namespace flexnnet
 {
-   template<class _NNIn, class _NNOut, template<class,class> class _Sample, template<class> class _ErrFunc = RMSError>
-   class FuncApproxEvaluator : public BasicEvalConfig, public _ErrFunc<_NNOut>
+   template<class _NNIn, class _NNOut, template<class, class> class _Sample, template<class> class _ErrFunc = RMSError>
+   class BasicEvaluator : public BasicEvalConfig, public _ErrFunc<_NNOut>
    {
    protected:
       using _index_typ = size_t;
@@ -51,8 +50,8 @@ namespace flexnnet
       double evaluate_exemplar(NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar);
    };
 
-   template<class _In, class _Out, template<class,class> class _Sample, template<class> class _Err>
-   double FuncApproxEvaluator<_In, _Out, _Sample, _Err>::evaluate(NN_Typ_& _nnet, const DataSet_Typ_& _tstset)
+   template<class _In, class _Out, template<class, class> class _Sample, template<class> class _Err>
+   double BasicEvaluator<_In, _Out, _Sample, _Err>::evaluate(NN_Typ_& _nnet, const DataSet_Typ_& _tstset)
    {
       std::cout << "FAEvaluator::evaluate()\n";
 
@@ -72,8 +71,9 @@ namespace flexnnet
       return perf.sum() / scount;
    }
 
-   template<class _In, class _Out, template<class,class> class _Sample, template<class> class _Err>
-   double FuncApproxEvaluator<_In, _Out, _Sample, _Err>::evaluate_subsampling(NN_Typ_& _nnet, const DataSet_Typ_& _tstset)
+   template<class _In, class _Out, template<class, class> class _Sample, template<class> class _Err>
+   double
+   BasicEvaluator<_In, _Out, _Sample, _Err>::evaluate_subsampling(NN_Typ_& _nnet, const DataSet_Typ_& _tstset)
    {
       std::cout << "FAEvaluator::evaluate_subsampling()\n";
 
@@ -93,9 +93,9 @@ namespace flexnnet
       return perf.sum() / _tstset.size();
    }
 
-   template<class _In, class _Out, template<class,class> class _Sample, template<class> class _Err>
+   template<class _In, class _Out, template<class, class> class _Sample, template<class> class _Err>
    double
-   FuncApproxEvaluator<_In, _Out, _Sample, _Err>::evaluate_exemplar(NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
+   BasicEvaluator<_In, _Out, _Sample, _Err>::evaluate_exemplar(NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
    {
       std::cout << "FAEvaluator::evaluate_exemplar()\n";
 
@@ -108,4 +108,4 @@ namespace flexnnet
 
 }
 
-#endif //FLEX_NEURALNET_FUNCAPPROXEVALUATOR_H_
+#endif //FLEX_NEURALNET_BASICEVALUATOR_H_

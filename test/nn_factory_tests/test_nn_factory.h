@@ -41,12 +41,12 @@ using flexnnet::BasicLayer;;
 using flexnnet::BasicNeuralNetFactory;
 using flexnnet::BasicNeuralNetSerializer;
 
-class TestBasicNNFactory : public TestNNFactory, public ::testing::TestWithParam<const char *>
+class TestBasicNNFactory : public TestNNFactory, public ::testing::TestWithParam<const char*>
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 
    void printArray2D(const std::string& _label, Array2D<double>& _arr);
@@ -62,20 +62,18 @@ public:
    const string SINGLE_LOGSIG_ID = "logsig_layer";
 };
 
-
 inline void TestBasicNNFactory::printArray2D(const std::string& _label, Array2D<double>& _arr)
 {
-   printf ("\n\n");
-   printf ("%s\n", _label.c_str());
+   printf("\n\n");
+   printf("%s\n", _label.c_str());
    Array2D<double>::Dimensions dim = _arr.size();
    for (unsigned int i = 0; i < dim.rows; i++)
    {
       for (unsigned int j = 0; j < dim.cols; j++)
-         printf ("%7.5f ", _arr.at(i,j));
-      printf ("\n");
+         printf("%7.5f ", _arr.at(i, j));
+      printf("\n");
    }
-   printf ("---\n\n");
+   printf("---\n\n");
 }
-
 
 #endif //_TEST_NN_FACTORY_H_

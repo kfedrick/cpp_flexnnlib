@@ -65,7 +65,7 @@ namespace flexnnet
        */
       Results evaluate_episode(_Agent<_State, _Action>& _agent, _Env<_State, _Action>& _env);
 
-    };
+   };
 
    template<class _State, class _Action,
       template<class, class> class _Env, template<class, class> class _Agent,
@@ -157,7 +157,7 @@ namespace flexnnet
             td_error = tgt_rsig - est_rsig;
          }
 
-         // Else use COST_TO_GO temporal difference error
+            // Else use COST_TO_GO temporal difference error
          else
          {
             if (_env.is_terminal())
@@ -181,7 +181,6 @@ namespace flexnnet
 
       return results;
    }
-
 
 }
 

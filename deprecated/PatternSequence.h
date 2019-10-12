@@ -19,10 +19,10 @@ namespace flexnnet
    class PatternSequence : public vector<Pattern>
    {
    public:
-      PatternSequence ();
-      PatternSequence (int sz);
-      PatternSequence (unsigned int sz);
-      PatternSequence (const vector<Pattern> &vec);
+      PatternSequence();
+      PatternSequence(int sz);
+      PatternSequence(unsigned int sz);
+      PatternSequence(const vector<Pattern>& vec);
    };
 
 } /* namespace flexnnet */

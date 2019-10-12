@@ -6,7 +6,7 @@
 
 using flexnnet::NetworkLayer;
 
-NetworkLayer::NetworkLayer (size_t _sz, const std::string &_name, NetworkLayerType _type) : BasicLayer(_sz, _name, _type)
+NetworkLayer::NetworkLayer(size_t _sz, const std::string& _name, NetworkLayerType _type) : BasicLayer(_sz, _name, _type)
 {}
 
 NetworkLayer::~NetworkLayer()

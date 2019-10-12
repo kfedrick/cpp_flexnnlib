@@ -20,15 +20,15 @@ namespace flexnnet
    class BasicNeuralNetFactory
    {
    public:
-      BasicNeuralNetFactory ();
+      BasicNeuralNetFactory();
 
    public:
-      ~BasicNeuralNetFactory ();
+      ~BasicNeuralNetFactory();
 
       void clear(void);
 
       template<class _LayerType> std::shared_ptr<_LayerType>
-      add_layer (size_t _sz, const std::string &_name, BasicLayer::NetworkLayerType _type, const typename _LayerType::Parameters &_params = _LayerType::DEFAULT_PARAMS);
+      add_layer(size_t _sz, const std::string& _name, BasicLayer::NetworkLayerType _type, const typename _LayerType::Parameters& _params = _LayerType::DEFAULT_PARAMS);
 
       /**
        * Add connection to the layer, _to, from the layer, _from.
@@ -36,14 +36,16 @@ namespace flexnnet
        * @param _to - the name of the layer to recieve input
        * @param _from - the name of the layer to send its output
        */
-      void add_layer_connection (const std::string &_to, const std::string &_from, LayerConnRecord::ConnectionType _type = LayerConnRecord::Forward);
+      void
+      add_layer_connection(const std::string& _to, const std::string& _from, LayerConnRecord::ConnectionType _type = LayerConnRecord::Forward);
 
       /**
        * Add a connection to the layer, _to, from an external input vector.
        * @param _to
        * @param _vec
        */
-      void set_layer_external_input (const std::string &_to, const Datum &_network_input, const std::set<std::string> &_patternNdx);
+      void
+      set_layer_external_input(const std::string& _to, const Datum& _network_input, const std::set<std::string>& _patternNdx);
 
       /**
        * Build and return a pointer to the network
@@ -51,16 +53,15 @@ namespace flexnnet
        */
       std::shared_ptr<BasicNeuralNet> build(const std::string& _network_name);
 
-      int size (void);
-
+      int size(void);
 
       std::vector<std::string> getActivationOrder(void);
 
    private:
-      void updateActivationOrder (void);
+      void updateActivationOrder(void);
 
-      void getAllDependencies (std::set<std::string>& _dependencies, const std::string &_name);
-      void getForwardDependencies (std::set<std::string>& _dependencies, const std::string &_name);
+      void getAllDependencies(std::set<std::string>& _dependencies, const std::string& _name);
+      void getForwardDependencies(std::set<std::string>& _dependencies, const std::string& _name);
       void validate(void);
       void validateNetworkInput(const Datum& _network_input);
       unsigned int outputLayerCount();
@@ -92,24 +93,24 @@ namespace flexnnet
       bool built;
    };
 
-   inline int BasicNeuralNetFactory::size (void)
+   inline int BasicNeuralNetFactory::size(void)
    {
-      return layers.size ();
+      return layers.size();
    }
 
    template<class _TransFunc> std::shared_ptr<_TransFunc>
-   BasicNeuralNetFactory::add_layer (size_t _sz, const std::string &_name, BasicLayer::NetworkLayerType _type, const typename _TransFunc::Parameters &_params)
+   BasicNeuralNetFactory::add_layer(size_t _sz, const std::string& _name, BasicLayer::NetworkLayerType _type, const typename _TransFunc::Parameters& _params)
    {
-      if (layers.find (_name) != layers.end ())
+      if (layers.find(_name) != layers.end())
       {
          static std::stringstream sout;
-         sout << "Error : BasicNeuralNetFactory::add_layer() - layer \"" << _name.c_str () << "\" already exists."
+         sout << "Error : BasicNeuralNetFactory::add_layer() - layer \"" << _name.c_str() << "\" already exists."
               << std::endl;
-         throw std::invalid_argument (sout.str ());
+         throw std::invalid_argument(sout.str());
       }
 
-      auto layer_ptr = std::shared_ptr<_TransFunc>(new _TransFunc (_sz, _name, _type));
-      layer_ptr->set_params (_params);
+      auto layer_ptr = std::shared_ptr<_TransFunc>(new _TransFunc(_sz, _name, _type));
+      layer_ptr->set_params(_params);
 
       // Add the new layer to the collection of network layers
 //      layers[_name] = NetworkLayer(layer_ptr);

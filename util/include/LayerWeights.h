@@ -136,7 +136,6 @@ namespace flexnnet
       initial_value = std::move(_lweights.initial_value);
    }
 
-
    inline LayerWeights& LayerWeights::operator=(const LayerWeights& _lweights)
    {
       copy(_lweights);

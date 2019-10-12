@@ -32,7 +32,7 @@ LayerWeights::LayerWeights(const LayerWeights&& _lweights) : NamedObject(_lweigh
  * @param _layer_sz
  * @param _layer_input_sz
  */
-void LayerWeights::resize (size_t _layer_sz, size_t _layer_input_sz)
+void LayerWeights::resize(size_t _layer_sz, size_t _layer_input_sz)
 {
    if (_layer_sz > 0 && _layer_input_sz > 0)
    {
@@ -41,7 +41,7 @@ void LayerWeights::resize (size_t _layer_sz, size_t _layer_input_sz)
    }
 }
 
-std::string LayerWeights::to_json (void) const
+std::string LayerWeights::to_json(void) const
 {
    std::string json;
    return json;

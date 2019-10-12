@@ -14,7 +14,7 @@ namespace flexnnet
    class VectorConcatenator
    {
    public:
-      virtual const std::valarray<double>& concat (void) const = 0;
+      virtual const std::valarray<double>& concat(void) const = 0;
    };
 
 }

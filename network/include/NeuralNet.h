@@ -15,12 +15,12 @@ namespace flexnnet
    {
 
    public:
-      NeuralNet (const std::vector<std::shared_ptr<NetworkLayer>> &layers, bool _recurrent, const std::string &_name = "BasicNeuralNet");
-      virtual ~NeuralNet ();
+      NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      virtual ~NeuralNet();
 
    public:
 
-      const _OutType &activate (const _InType &_indatum);
+      const _OutType& activate(const _InType& _indatum);
       const _InType& get_network_input(void) const;
 
    private:
@@ -34,7 +34,7 @@ namespace flexnnet
    };
 
    template<class _InType, class _OutType>
-   const _OutType &NeuralNet<_InType, _OutType>::activate (const _InType &_xdatum)
+   const _OutType& NeuralNet<_InType, _OutType>::activate(const _InType& _xdatum)
    {
       /*
        * Activate all network layers
@@ -62,13 +62,15 @@ namespace flexnnet
    }
 
    template<class _InType, class _OutType>
-   NeuralNet<_InType, _OutType>::NeuralNet (const std::vector<std::shared_ptr<NetworkLayer>> &_layers, bool _recurrent, const std::string &_name) : BasicNeuralNet(_layers, _recurrent, _name)
+   NeuralNet<_InType,
+             _OutType>::NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
+      : BasicNeuralNet(_layers, _recurrent, _name)
    {
 
    }
 
    template<class _InType, class _OutType>
-   NeuralNet<_InType, _OutType>::~NeuralNet ()
+   NeuralNet<_InType, _OutType>::~NeuralNet()
    {
 
    }

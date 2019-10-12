@@ -38,11 +38,10 @@ namespace flexnnet
       };
 
    protected:
-      static BasicLayerInfo parseBasic (const std::string &_json);
-      static BasicLayerInfo parseBasic (const rapidjson::Value& _obj);
-      static rapidjson::Value& encodeBasic (rapidjson::Value &_obj, const BasicLayer& _layer);
+      static BasicLayerInfo parseBasic(const std::string& _json);
+      static BasicLayerInfo parseBasic(const rapidjson::Value& _obj);
+      static rapidjson::Value& encodeBasic(rapidjson::Value& _obj, const BasicLayer& _layer);
       static std::string demangle(const std::string& name);
-
 
    private:
       static rapidjson::Value& encodeID(rapidjson::Value& _obj, const BasicLayer& _layer);

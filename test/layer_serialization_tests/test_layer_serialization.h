@@ -12,12 +12,12 @@
 #include "Array2D.h"
 #include "BasicLayer.h"
 
-class TestLayerSerialization : public TestLayer, public ::testing::TestWithParam<const char *>
+class TestLayerSerialization : public TestLayer, public ::testing::TestWithParam<const char*>
 {
 public:
-   virtual void SetUp ()
+   virtual void SetUp()
    {}
-   virtual void TearDown ()
+   virtual void TearDown()
    {}
 };
 

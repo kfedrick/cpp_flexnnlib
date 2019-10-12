@@ -22,8 +22,7 @@ using flexnnet::BasicNeuralNetSerializer;
 using flexnnet::NeuralNetSerializer;
 
 static bool
-array_double_near (const flexnnet::Array2D<double> &_target, const flexnnet::Array2D<double> &_test, double _epsilon);
-
+array_double_near(const flexnnet::Array2D<double>& _target, const flexnnet::Array2D<double>& _test, double _epsilon);
 
 TEST_F(TestBasicNeuralNet, Serializer)
 {
@@ -118,10 +117,10 @@ TEST_F(TestBasicNeuralNet, SaveNetworkWeights)
    for (auto& layer_name : names)
       cout << layer_name << "\n";
 
-   flexnnet::Array2D<double> myweights(3,4);
-   myweights.at(0,0) = 1;
-   myweights.at(1,1) = 2;
-   myweights.at(2,2) = 3;
+   flexnnet::Array2D<double> myweights(3, 4);
+   myweights.at(0, 0) = 1;
+   myweights.at(1, 1) = 2;
+   myweights.at(2, 2) = 3;
 
    net->get_layers()[0]->layer_weights.set_weights(myweights);
    net->get_layers()[1]->layer_weights.set_weights(myweights);
@@ -132,13 +131,13 @@ TEST_F(TestBasicNeuralNet, SaveNetworkWeights)
 
    const flexnnet::LayerWeights& lweights = network_weights["hidden2"];
 
-      for (size_t row=0; row<lweights.const_weights_ref.size().rows; row++)
-      {
-         for (size_t col=0; col<lweights.const_weights_ref.size().cols; col++)
-            cout << lweights.const_weights_ref(row,col) << " ";
-         cout << "\n";
-      }
+   for (size_t row = 0; row < lweights.const_weights_ref.size().rows; row++)
+   {
+      for (size_t col = 0; col < lweights.const_weights_ref.size().cols; col++)
+         cout << lweights.const_weights_ref(row, col) << " ";
       cout << "\n";
+   }
+   cout << "\n";
 
    for (auto alayer_ptr : net->get_layers())
       alayer_ptr->layer_weights.zero();

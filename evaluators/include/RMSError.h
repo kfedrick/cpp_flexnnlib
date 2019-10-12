@@ -10,21 +10,21 @@
 
 namespace flexnnet
 {
-   template <typename _Type>
+   template<typename _Type>
    class RMSError
    {
    public:
       NetworkError error(const _Type& _target, const _Type& _observed);
    };
 
-   template <typename _Type>
+   template<typename _Type>
    NetworkError RMSError<_Type>::error(const _Type& _target, const _Type& _observed)
    {
       std::valarray<double> dEdy(_target.vectorize() - _observed.vectorize());
       dEdy = dEdy * dEdy;
 
       // Return square root of the mean squared error (RMSError)
-      return { sqrt(dEdy.sum()/dEdy.size()), .dEdy = dEdy };
+      return {sqrt(dEdy.sum() / dEdy.size()), .dEdy = dEdy};
    }
 
 }

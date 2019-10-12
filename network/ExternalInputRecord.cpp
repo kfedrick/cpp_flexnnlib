@@ -6,7 +6,8 @@
 
 using flexnnet::ExternalInputRecord;
 
-ExternalInputRecord::ExternalInputRecord() {}
+ExternalInputRecord::ExternalInputRecord()
+{}
 
 ExternalInputRecord::ExternalInputRecord(const std::string& _field, size_t _sz, size_t _index)
 {

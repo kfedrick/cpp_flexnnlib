@@ -10,11 +10,10 @@
 #include "test_radbas_constructor.h"
 #include "test_softmax_constructor.h"
 
-
-int main (int argc, char **argv)
+int main(int argc, char** argv)
 {
-   ::testing::InitGoogleTest (&argc, argv);
+   ::testing::InitGoogleTest(&argc, argv);
 
-   return RUN_ALL_TESTS ();
+   return RUN_ALL_TESTS();
 }
 

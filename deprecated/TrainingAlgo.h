@@ -13,31 +13,35 @@ using flexnnet::TrainerConfig;
 
 namespace flexnnet
 {
-   enum EpochStatus { UPDATED = 1, FAILBACK= 0 };
+   enum EpochStatus
+   {
+      UPDATED = 1, FAILBACK = 0
+   };
 
-   template<class _NNIn, class _NNOut, template<class,class> class _SampleType>
+   template<class _NNIn, class _NNOut, template<class, class> class _SampleType>
    class TrainingAlgo : public TrainerConfig
    {
    public:
 
-      void initialize_network (void);
+      void initialize_network(void);
 
    protected:
-      EpochStatus train_epoch(NeuralNet<_NNIn,_NNOut>& _nnet, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _trnset, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _vldset, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _tstset);
-      void train_sample(NeuralNet<_NNIn,_NNOut>& _nnet, const _SampleType<_NNIn, _NNOut>& _asample);
+      EpochStatus
+      train_epoch(NeuralNet <_NNIn, _NNOut>& _nnet, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _trnset, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _vldset, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _tstset);
+      void train_sample(NeuralNet <_NNIn, _NNOut>& _nnet, const _SampleType<_NNIn, _NNOut>& _asample);
 
    };
 
-   template<class _NNIn, class _NNOut, template<class,class> class _SampleType>
-   void TrainingAlgo<_NNIn,_NNOut,_SampleType>::initialize_network(void)
+   template<class _NNIn, class _NNOut, template<class, class> class _SampleType>
+   void TrainingAlgo<_NNIn, _NNOut, _SampleType>::initialize_network(void)
    {
       // TODO - implement
    }
 
-
-
-   template<class _NNIn, class _NNOut, template<class,class> class _SampleType>
-   EpochStatus TrainingAlgo<_NNIn,_NNOut,_SampleType>::train_epoch(NeuralNet<_NNIn,_NNOut>& _nnet, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _trnset, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _vldset, const ExemplarSet<_NNIn, _NNOut, _SampleType>& _tstset)
+   template<class _NNIn, class _NNOut, template<class, class> class _SampleType>
+   EpochStatus TrainingAlgo<_NNIn,
+                            _NNOut,
+                            _SampleType>::train_epoch(NeuralNet <_NNIn, _NNOut>& _nnet, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _trnset, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _vldset, const ExemplarSet <_NNIn, _NNOut, _SampleType>& _tstset)
    {
       std::cout << "TrainAlgo::train_epoch() - entry\n";
 
@@ -51,8 +55,10 @@ namespace flexnnet
       }
    }
 
-   template<class _NNIn, class _NNOut, template<class,class> class _SampleType>
-   void TrainingAlgo<_NNIn,_NNOut,_SampleType>::train_sample(NeuralNet<_NNIn,_NNOut>& _nnet, const _SampleType<_NNIn, _NNOut>& _asample)
+   template<class _NNIn, class _NNOut, template<class, class> class _SampleType>
+   void
+   TrainingAlgo<_NNIn, _NNOut, _SampleType>::train_sample(NeuralNet <_NNIn, _NNOut>& _nnet, const _SampleType<_NNIn,
+                                                                                                              _NNOut>& _asample)
    {
       std::cout << "TrainAlgo::train_sample() - entry\n";
    }

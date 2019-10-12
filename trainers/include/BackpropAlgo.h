@@ -39,7 +39,10 @@ namespace flexnnet
 
    template<class _NNIn, class _NNOut, template<class, class> class _TData, template<class> class _ErrFunc>
    void
-   BackpropAlgo<_NNIn, _NNOut, _TData, _ErrFunc>::present_datum(size_t _epoch, NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
+   BackpropAlgo<_NNIn,
+                _NNOut,
+                _TData,
+                _ErrFunc>::present_datum(size_t _epoch, NN_Typ_& _nnet, const Exemplar_Typ_& _exemplar)
    {
       std::cout << "         Enter - BackpropAlgo::present_datum()\n";
 

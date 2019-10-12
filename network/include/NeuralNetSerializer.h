@@ -14,12 +14,12 @@ namespace flexnnet
    class NeuralNetSerializer
    {
    public:
-      static std::shared_ptr<NeuralNet<_InType, _OutType>> parse (const std::string& _json);
-      static std::string toJson (const NeuralNet<_InType, _OutType>& _neural_net);
+      static std::shared_ptr<NeuralNet<_InType, _OutType>> parse(const std::string& _json);
+      static std::string toJson(const NeuralNet<_InType, _OutType>& _neural_net);
    };
 
    template<class _InType, class _OutType>
-   std::shared_ptr<NeuralNet<_InType, _OutType>> NeuralNetSerializer<_InType,_OutType>::parse (const std::string& _json)
+   std::shared_ptr<NeuralNet<_InType, _OutType>> NeuralNetSerializer<_InType, _OutType>::parse(const std::string& _json)
    {
       rapidjson::Document netdoc;
       netdoc.Parse(_json.c_str());
@@ -27,18 +27,21 @@ namespace flexnnet
       Datum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
 
       std::map<std::string, std::shared_ptr<NetworkLayer>> layers;
-      layers = BasicNeuralNetSerializer::parseNetworkLayers (netdoc["network_layers"].GetArray());
+      layers = BasicNeuralNetSerializer::parseNetworkLayers(netdoc["network_layers"].GetArray());
 
       std::vector<std::shared_ptr<NetworkLayer>> network_layers;
-      network_layers = BasicNeuralNetSerializer::parseNetworkTopology (netdoc["layer_topology"].GetArray (), layers, network_input);
+      network_layers = BasicNeuralNetSerializer::parseNetworkTopology(netdoc["layer_topology"]
+                                                                         .GetArray(), layers, network_input);
 
-      std::shared_ptr<NeuralNet<_InType, _OutType>> net = std::shared_ptr<NeuralNet<_InType,_OutType>>(new NeuralNet<_InType,_OutType>(network_layers, false));
+      std::shared_ptr<NeuralNet<_InType, _OutType>> net = std::shared_ptr<NeuralNet<_InType, _OutType>>(new NeuralNet<
+         _InType,
+         _OutType>(network_layers, false));
 
       return net;
    }
 
    template<class _InType, class _OutType>
-   std::string NeuralNetSerializer<_InType,_OutType>::toJson (const NeuralNet<_InType, _OutType>& _neural_net)
+   std::string NeuralNetSerializer<_InType, _OutType>::toJson(const NeuralNet<_InType, _OutType>& _neural_net)
    {
 
    }

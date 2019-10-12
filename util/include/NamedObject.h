@@ -16,47 +16,47 @@ namespace flexnnet
    {
    public:
 
-      NamedObject (const char *_name = "NamedObject");
-      NamedObject (const std::string &_name);
+      NamedObject(const char* _name = "NamedObject");
+      NamedObject(const std::string& _name);
 
       void rename(const std::string& _name);
       void rename(const std::string&& _name);
 
-      const std::string &name () const;
+      const std::string& name() const;
 
    protected:
-      void copy (const NamedObject &_namedObj);
+      void copy(const NamedObject& _namedObj);
 
    private:
       std::string myname;
    };
 
-   inline NamedObject::NamedObject (const std::string &_name)
+   inline NamedObject::NamedObject(const std::string& _name)
    {
       myname = _name;
    }
 
-   inline NamedObject::NamedObject (const char *_name)
+   inline NamedObject::NamedObject(const char* _name)
    {
       myname = _name;
    }
 
-   inline const std::string &NamedObject::name () const
+   inline const std::string& NamedObject::name() const
    {
       return myname;
    }
 
-   inline void NamedObject::copy (const NamedObject &_namedObj)
+   inline void NamedObject::copy(const NamedObject& _namedObj)
    {
       myname = _namedObj.myname;
    }
 
-   inline void NamedObject::rename (const std::string &_name)
+   inline void NamedObject::rename(const std::string& _name)
    {
       myname = _name;
    }
 
-   inline void NamedObject::rename (const std::string &&_name)
+   inline void NamedObject::rename(const std::string&& _name)
    {
       myname = std::move(_name);
    }

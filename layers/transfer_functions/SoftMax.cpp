@@ -10,10 +10,10 @@ using flexnnet::SoftMax;
 
 const SoftMax::Parameters SoftMax::DEFAULT_PARAMS = {.gain=1.0, .rescaled_flag=false};
 
-
-flexnnet::SoftMax::SoftMax(size_t _sz, const std::string &_name, NetworkLayerType _type, const Parameters& _params) : NetSumLayer(_sz, _name, _type)
+flexnnet::SoftMax::SoftMax(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params)
+   : NetSumLayer(_sz, _name, _type)
 {
-   set_params (_params);
+   set_params(_params);
    exp_netin.resize(_sz);
 }
 
@@ -21,20 +21,20 @@ flexnnet::SoftMax::~SoftMax()
 {
 }
 
-const std::valarray<double>& flexnnet::SoftMax::calc_layer_output (const std::valarray<double>& _rawin)
+const std::valarray<double>& flexnnet::SoftMax::calc_layer_output(const std::valarray<double>& _rawin)
 {
    double sum_exp = 0;
 
    std::valarray<double>& netinv = layer_state.netinv;
    std::valarray<double>& outputv = layer_state.outputv;
 
-   netinv = calc_netin (_rawin);
+   netinv = calc_netin(_rawin);
 
 
    // Calculate the initial exp of the input values and accumulate the summation
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
    {
-      exp_netin[i] = exp (params.gain * netinv[i]);
+      exp_netin[i] = exp(params.gain * netinv[i]);
       sum_exp += exp_netin[i];
    }
 

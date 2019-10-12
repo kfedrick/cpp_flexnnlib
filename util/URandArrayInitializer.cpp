@@ -11,40 +11,40 @@
 namespace flexnnet
 {
 
-   URandArrayInitializer::URandArrayInitializer (double lower, double upper)
+   URandArrayInitializer::URandArrayInitializer(double lower, double upper)
    {
       lower_bound = lower;
       upper_bound = upper;
 
-      srand (time (NULL));
+      srand(time(NULL));
    }
 
-   URandArrayInitializer::~URandArrayInitializer ()
+   URandArrayInitializer::~URandArrayInitializer()
    {
       // TODO Auto-generated destructor stub
    }
 
-   double URandArrayInitializer::urand () const
+   double URandArrayInitializer::urand() const
    {
-      return rand () / double (RAND_MAX);
+      return rand() / double(RAND_MAX);
    }
 
-   double URandArrayInitializer::urand (double a, double b) const
+   double URandArrayInitializer::urand(double a, double b) const
    {
-      return (b - a) * urand () + a;
+      return (b - a) * urand() + a;
    }
 
-   void URandArrayInitializer::operator() (Array<double> &arr) const
+   void URandArrayInitializer::operator()(Array<double>& arr) const
    {
-      arr.set (0);
-      for (int i = 0; i < arr.rowDim (); i++)
-         for (int j = 0; j < arr.colDim (); j++)
-            arr.at (i, j) = urand (lower_bound, upper_bound);
+      arr.set(0);
+      for (int i = 0; i < arr.rowDim(); i++)
+         for (int j = 0; j < arr.colDim(); j++)
+            arr.at(i, j) = urand(lower_bound, upper_bound);
    }
 
-   URandArrayInitializer *URandArrayInitializer::clone () const
+   URandArrayInitializer* URandArrayInitializer::clone() const
    {
-      return new URandArrayInitializer (*this);
+      return new URandArrayInitializer(*this);
    }
 
 } /* namespace flexnnet */

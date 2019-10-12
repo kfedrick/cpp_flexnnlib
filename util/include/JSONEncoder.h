@@ -20,18 +20,17 @@ namespace flexnnet
    class JSONEncoder
    {
    protected:
-      static void vectorToJSONObj (rapidjson::Value &_val, const std::vector<double> &_vec);
-      static void ArrayToJSONObj (rapidjson::Value &_val, const flexnnet::Array2D<double> &_arr);
-      static void JSONObjToArray (flexnnet::Array2D<double> &_arr, const rapidjson::Value &_val);
+      static void vectorToJSONObj(rapidjson::Value& _val, const std::vector<double>& _vec);
+      static void ArrayToJSONObj(rapidjson::Value& _val, const flexnnet::Array2D<double>& _arr);
+      static void JSONObjToArray(flexnnet::Array2D<double>& _arr, const rapidjson::Value& _val);
 
    protected:
       // Document to use for constructing this document
       static rapidjson::Document document;
 
       // Document::AllocatorType to use for constructing this document
-      static rapidjson::Document::AllocatorType &allocator;
+      static rapidjson::Document::AllocatorType& allocator;
    };
-
 
 }
 

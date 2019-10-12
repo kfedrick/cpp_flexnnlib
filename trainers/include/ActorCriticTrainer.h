@@ -29,7 +29,10 @@ namespace flexnnet
        */
       template<class _NNIn, class _NNOut, template<class __NNIn, class __NNOut> class _NN,
          template<class _SampleIn, class _SampleOut> class _Sample>
-      void train (NeuralNet<_NNIn,_NNOut> &_nnet, const DataSet<_NNIn, _NNOut> &_trnset, const DataSet<_NNIn, _NNOut> &_tstset = DataSet<_NNIn, _NNOut> ());
+      void train(NeuralNet<_NNIn, _NNOut>& _nnet, const DataSet<_NNIn, _NNOut>& _trnset, const DataSet<_NNIn,
+                                                                                                       _NNOut>& _tstset = DataSet<
+         _NNIn,
+         _NNOut>());
 
    };
 }

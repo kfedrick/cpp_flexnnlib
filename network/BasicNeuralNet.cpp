@@ -53,7 +53,7 @@ std::map<std::string, std::valarray<double>> BasicNeuralNet::init_network_output
    return opatt_map;
 }
 
-const Datum& BasicNeuralNet::activate(const Datum& _xdatum)
+const flexnnet::NNetIO_Typ& BasicNeuralNet::activate(const NNetIO_Typ& _xdatum)
 {
    /*
     * Activate all network layers
@@ -77,7 +77,7 @@ const Datum& BasicNeuralNet::activate(const Datum& _xdatum)
       }
    }
    //return network_output_pattern;
-   return Datum();
+   return NNetIO_Typ();
 }
 
 const void BasicNeuralNet::backprop(const std::valarray<double>& _gradient)

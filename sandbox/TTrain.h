@@ -5,7 +5,6 @@
 #ifndef _TTRAIN_H_
 #define _TTRAIN_H_
 
-
 template<class _A, class _B>
 class TTrain
 {
@@ -21,21 +20,21 @@ private:
    _B b;
 };
 
-template <class _A, class _B> TTrain<_A, _B>::TTrain()
+template<class _A, class _B> TTrain<_A, _B>::TTrain()
 {}
 
-template <class _A, class _B> TTrain<_A, _B>::TTrain(_A _a, _B _b)
+template<class _A, class _B> TTrain<_A, _B>::TTrain(_A _a, _B _b)
 {
    a = _a;
    b = _b;
 }
 
-template <class _A, class _B> _A TTrain<_A, _B>::get_A()
+template<class _A, class _B> _A TTrain<_A, _B>::get_A()
 {
    return a;
 }
 
-template <class _A, class _B> _B TTrain<_A, _B>::get_B()
+template<class _A, class _B> _B TTrain<_A, _B>::get_B()
 {
    return b;
 }

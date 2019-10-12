@@ -23,7 +23,7 @@ namespace flexnnet
 
    public:
       Datum();
-      Datum(const std::map< std::string, std::valarray<double> >& _values);
+      Datum(const std::map<std::string, std::valarray<double> >& _values);
 
       virtual ~Datum();
 
@@ -35,11 +35,11 @@ namespace flexnnet
       size_t index(const std::string& _index) const;
 
       Datum& operator=(const Datum& _datum);
-      Datum& operator=(const std::map< std::string, std::valarray<double> >& _values);
+      Datum& operator=(const std::map<std::string, std::valarray<double> >& _values);
 
-      void insert (const std::string &_index, const std::valarray<double> &_value);
-      void set (const std::map<std::string, std::valarray<double> > &_values);
-      void set (const std::string _key, const std::valarray<double> &_value);
+      void insert(const std::string& _index, const std::valarray<double>& _value);
+      void set(const std::map<std::string, std::valarray<double> >& _values);
+      void set(const std::string _key, const std::valarray<double>& _value);
 
       const std::valarray<double>& vectorize(void) const
       {
@@ -55,7 +55,7 @@ namespace flexnnet
 
    public:
       const std::set<std::string>& const_keyset_ref = keyset;
-      const std::map<const std::string, Entry>& const_fields_ref =  fields;
+      const std::map<const std::string, Entry>& const_fields_ref = fields;
 
    private:
       Datum& copy(const Datum& _datum);
@@ -72,7 +72,7 @@ namespace flexnnet
       mutable std::set<std::string> keyset;
 
       std::map<const std::string, Entry> fields;
-      std::vector< std::valarray<double> > data;
+      std::vector<std::valarray<double> > data;
    };
 
    inline size_t Datum::size() const
@@ -95,7 +95,6 @@ namespace flexnnet
       return fields.at(_index).index;
    }
 
-
    inline std::valarray<double>& Datum::operator()(void)
    {
       if (stale)
@@ -114,7 +113,7 @@ namespace flexnnet
 
    inline const std::valarray<double>& Datum::operator[](const std::string& _index) const
    {
-      return data[ fields.at(_index).index ];
+      return data[fields.at(_index).index];
    }
 
    inline const std::valarray<double>& Datum::operator[](size_t _index) const

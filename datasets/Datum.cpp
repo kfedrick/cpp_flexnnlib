@@ -11,13 +11,13 @@
 
 using flexnnet::Datum;
 
-Datum::Datum(void) {}
+Datum::Datum(void)
+{}
 
-Datum::Datum(const std::map< std::string, std::valarray<double> >& _values)
+Datum::Datum(const std::map<std::string, std::valarray<double> >& _values)
 {
-   set (_values);
+   set(_values);
 }
-
 
 Datum::~Datum()
 {
@@ -56,9 +56,7 @@ Datum& Datum::copy(const Datum& _datum)
    fields_hashval = _datum.fields_hashval;
 }
 
-
-
-void Datum::set (const std::map<std::string, std::valarray<double> > &_values)
+void Datum::set(const std::map<std::string, std::valarray<double> >& _values)
 {
    // Clear existing Datum keyset and reset it using the specified map
    keyset.clear();
@@ -73,7 +71,7 @@ void Datum::set (const std::map<std::string, std::valarray<double> > &_values)
    size_t ndx = 0;
    for (auto& key : keyset)
    {
-      fields[key] = { .index=ndx, .len=_values.at(key).size() };
+      fields[key] = {.index=ndx, .len=_values.at(key).size()};
       data[ndx++] = _values.at(key);
    }
 
@@ -83,7 +81,7 @@ void Datum::set (const std::map<std::string, std::valarray<double> > &_values)
    stale = true;
 }
 
-void Datum::set (const std::string _key, const std::valarray<double> &_value)
+void Datum::set(const std::string _key, const std::valarray<double>& _value)
 {
    // If key is doesn't exist, throw exception
    if (fields.count(_key) == 0)
@@ -91,7 +89,7 @@ void Datum::set (const std::string _key, const std::valarray<double> &_value)
       std::ostringstream err_str;
       err_str
          << "Error : Datum.set_weights() - key value " << _key << " doesn't exists.\n";
-      throw std::invalid_argument (err_str.str ());
+      throw std::invalid_argument(err_str.str());
    }
 
    // If new value array is not the correct size, throw exception
@@ -101,7 +99,7 @@ void Datum::set (const std::string _key, const std::valarray<double> &_value)
       err_str
          << "Error : Datum.set_weights() - new valarray size " << _value.size()
          << "doesn't match expected size " << fields[_key].len << ".\n";
-      throw std::invalid_argument (err_str.str ());
+      throw std::invalid_argument(err_str.str());
    }
 
    // Set new value
@@ -118,7 +116,6 @@ void Datum::resize_virtual() const
    virtual_array.resize(sz);
 }
 
-
 void Datum::coelesce() const
 {
    if (!stale)
@@ -126,13 +123,13 @@ void Datum::coelesce() const
 
    size_t vndx = 0;
    for (auto& item : data)
-      for (auto i=0; i<item.size(); i++)
+      for (auto i = 0; i < item.size(); i++)
          virtual_array[vndx++] = item[i];
 
-      stale = false;
+   stale = false;
 }
 
-void Datum::insert (const std::string &_index, const std::valarray<double> &_value)
+void Datum::insert(const std::string& _index, const std::valarray<double>& _value)
 {
    // If key is already there, throw exception
    if (fields.count(_index) == 1)
@@ -140,7 +137,7 @@ void Datum::insert (const std::string &_index, const std::valarray<double> &_val
       std::ostringstream err_str;
       err_str
          << "Error : Datum.insert() - key value " << _index << " already exists.\n";
-      throw std::invalid_argument (err_str.str ());
+      throw std::invalid_argument(err_str.str());
    }
 
    // Insert new value key
@@ -160,7 +157,7 @@ void Datum::insert (const std::string &_index, const std::valarray<double> &_val
       }
       else
       {
-         fields[key] = { .index=ndx, .len=_value.size() };
+         fields[key] = {.index=ndx, .len=_value.size()};
          newdata[ndx] = _value;
       }
 

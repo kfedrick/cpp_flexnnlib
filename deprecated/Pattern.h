@@ -17,33 +17,33 @@ namespace flexnnet
    class Pattern
    {
    public:
-      Pattern (int sz = 0);
-      Pattern (const std::vector<unsigned int> &vsizes);
-      Pattern (const std::vector<std::vector<double> > &vec);
-      Pattern (const std::vector<double> &vec);
-      ~Pattern ();
+      Pattern(int sz = 0);
+      Pattern(const std::vector<unsigned int>& vsizes);
+      Pattern(const std::vector<std::vector<double> >& vec);
+      Pattern(const std::vector<double>& vec);
+      ~Pattern();
 
-      int size () const;
+      int size() const;
 
-      const std::vector<double> &operator() (void) const;
-      const std::vector<double> &at (int index) const;
-      const std::vector<double> &operator[] (int index) const;
+      const std::vector<double>& operator()(void) const;
+      const std::vector<double>& at(int index) const;
+      const std::vector<double>& operator[](int index) const;
 
-      void operator= (const Pattern &patt);
-      void operator= (const std::vector<std::vector<double> > &vec);
-      void operator= (const std::vector<double> &vec);
+      void operator=(const Pattern& patt);
+      void operator=(const std::vector<std::vector<double> >& vec);
+      void operator=(const std::vector<double>& vec);
 
-      void push_back (const std::vector<double> &vec);
+      void push_back(const std::vector<double>& vec);
 
-      void clear ();
+      void clear();
 
-      operator const std::vector<double> & () const;
+      operator const std::vector<double>&() const;
 
-      void toFile (std::fstream &_fs);
-      void fromFile (std::fstream &_fs);
+      void toFile(std::fstream& _fs);
+      void fromFile(std::fstream& _fs);
 
    private:
-      void coalesce () const;
+      void coalesce() const;
 
    private:
       std::vector<std::vector<double> > data;

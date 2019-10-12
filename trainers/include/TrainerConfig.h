@@ -86,7 +86,7 @@ namespace flexnnet
        *   >1 : mini-batch size - update after _size exemplars
        *
        */
-      void set_batch_mode (size_t _mode);
+      void set_batch_mode(size_t _mode);
 
       /**
        * Set reporting frequency for training trace record. Training trace record will
@@ -117,7 +117,6 @@ namespace flexnnet
        */
       void set_saved_nnet_limit(size_t _limit);
 
-
       /* ****************************************************
        *    Public getter methods
        */
@@ -126,7 +125,7 @@ namespace flexnnet
       size_t max_epochs(void) const;
       double error_goal(void) const;
       double error_increase_limit(void) const;
-      size_t batch_mode (void) const;
+      size_t batch_mode(void) const;
       size_t max_validation_failures(void) const;
       size_t report_frequency(void) const;
       size_t display_frequency(void) const;
@@ -134,15 +133,15 @@ namespace flexnnet
 
    private:
 
-      size_t max_training_runs { DEFAULT_TRAINING_RUNS };
-      size_t max_training_epochs { DEFAULT_MAX_EPOCHS };
-      double min_performance_error { DEFAULT_ERROR_GOAL };
-      double failback_performance_delta { DEFAULT_FAILBACK_PERF_DELTA };
-      size_t training_batch_mode {DEFAULT_BATCH_MODE };
-      size_t max_allowed_validation_failures { DEFAULT_MAX_VALIDATION_FAIL };
-      size_t training_report_frequency { DEFAULT_REPORT_FREQ };
-      size_t training_display_frequency { DEFAULT_DISPLAY_FREQ };
-      size_t max_saved_nnet { DEFAULT_SAVED_NNET_LIMIT };
+      size_t max_training_runs{DEFAULT_TRAINING_RUNS};
+      size_t max_training_epochs{DEFAULT_MAX_EPOCHS};
+      double min_performance_error{DEFAULT_ERROR_GOAL};
+      double failback_performance_delta{DEFAULT_FAILBACK_PERF_DELTA};
+      size_t training_batch_mode{DEFAULT_BATCH_MODE};
+      size_t max_allowed_validation_failures{DEFAULT_MAX_VALIDATION_FAIL};
+      size_t training_report_frequency{DEFAULT_REPORT_FREQ};
+      size_t training_display_frequency{DEFAULT_DISPLAY_FREQ};
+      size_t max_saved_nnet{DEFAULT_SAVED_NNET_LIMIT};
    };
 
    inline void TrainerConfig::set_training_runs(size_t _runs)
@@ -153,7 +152,7 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_max_runs - max training runs must be greater than zero\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       max_training_runs = _runs;
@@ -167,7 +166,7 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_max_epochs - max epochs must be greater than zero\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       max_training_epochs = _epochs;
@@ -181,7 +180,7 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_error_goal - min error goal must be >= 0\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       min_performance_error = _perf;
@@ -195,13 +194,13 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_error_increase_limit - min value must be >= 0\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       failback_performance_delta = _limit;
    }
 
-   inline void TrainerConfig::set_max_validation_failures (size_t _count)
+   inline void TrainerConfig::set_max_validation_failures(size_t _count)
    {
       static std::ostringstream err_str;
 
@@ -209,13 +208,13 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_max_validation_failures - min count must be > 0\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       max_allowed_validation_failures = _count;
    }
 
-   inline void TrainerConfig::set_batch_mode (size_t _mode)
+   inline void TrainerConfig::set_batch_mode(size_t _mode)
    {
       training_batch_mode = _mode;
    }
@@ -230,7 +229,7 @@ namespace flexnnet
       training_display_frequency = _freq;
    }
 
-   inline void TrainerConfig::set_saved_nnet_limit (size_t _limit)
+   inline void TrainerConfig::set_saved_nnet_limit(size_t _limit)
    {
       static std::ostringstream err_str;
 
@@ -238,7 +237,7 @@ namespace flexnnet
       {
          err_str.clear();
          err_str << "Error : set_max_validation_failures - min count must be > 0\n";
-         throw std::invalid_argument (err_str.str ());
+         throw std::invalid_argument(err_str.str());
       }
 
       max_saved_nnet = _limit;
@@ -264,7 +263,7 @@ namespace flexnnet
       return failback_performance_delta;
    }
 
-   inline size_t TrainerConfig::batch_mode (void) const
+   inline size_t TrainerConfig::batch_mode(void) const
    {
       return training_batch_mode;
    }
