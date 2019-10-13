@@ -8,7 +8,6 @@
 #include "gtest/gtest.h"
 
 #include <evaluators/include/BasicEvaluator.h>
-#include <datasets/include/DataSet2.h>
 #include "evaluators/include/RMSError.h"
 #include "FATrainer.h"
 #include "BasicTrainer.h"

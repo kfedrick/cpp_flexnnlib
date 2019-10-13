@@ -9,7 +9,7 @@
 
 namespace flexnnet
 {
-   class A : public Vectorizable
+   class A : public NamedObject, public Vectorizable
    {
    public:
       A();
@@ -18,30 +18,31 @@ namespace flexnnet
       A(const A&& _a);
       virtual size_t size(void) const;
       virtual const std::valarray<double>& vectorize(void) const;
+      virtual const Vectorizable& assign(const std::valarray<double>& _val);
 
    private:
       std::string vname;
       std::valarray<double> data;
    };
 
-   inline A::A() : Vectorizable()
+   inline A::A() : NamedObject("A"), Vectorizable()
    {
       std::cout << "A()\n";
    }
 
-   inline A::A(const A& _a) : Vectorizable(_a)
+   inline A::A(const A& _a) : NamedObject(_a.name()), Vectorizable(_a)
    {
       std::cout << "A(const A&)\n";
       data = _a.data;
    }
 
-   inline A::A(const A&& _a) : Vectorizable(_a)
+   inline A::A(const A&& _a) : NamedObject(_a.name()), Vectorizable(_a)
    {
       std::cout << "A(const A&&)\n";
       data = std::move(_a.data);
    }
 
-   inline A::A(const std::string _name, const std::valarray<double>&& _vec) : Vectorizable(_name)
+   inline A::A(const std::string _name, const std::valarray<double>&& _vec) : NamedObject(_name), Vectorizable()
    {
       std::cout << "A(const std::string, const std::valarray<double)\n";
       data = _vec;
@@ -55,6 +56,11 @@ namespace flexnnet
    inline const std::valarray<double>& A::vectorize(void) const
    {
       return data;
+   }
+
+   inline const Vectorizable& A::assign(const std::valarray<double>& _val)
+   {
+      return *this;
    }
 }
 

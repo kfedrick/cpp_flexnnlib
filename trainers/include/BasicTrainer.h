@@ -6,7 +6,6 @@
 #define FLEX_NEURALNET_BASICTRAINER_H_
 
 #include <network/include/NeuralNet.h>
-#include <datasets/include/DataSet2.h>
 #include <iostream>
 #include "TrainingRecord.h"
 #include "TrainerConfig.h"

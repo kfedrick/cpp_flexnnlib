@@ -131,11 +131,10 @@ add_library(flexneuralnet
         layers/include/flexnnet_layers.h
         network/include/flexnnet_networks.h
         trainers/include/BasicTrainer.h
-        datasets/include/DataSet2.h
         trainers/include/BackpropAlgo.h
         util/include/NetworkError.cpp
         util/include/NetworkError.h
-        )
+        datasets/include/VectorMap.h datasets/include/NamedValarray.h datasets/include/VectorizableMap.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

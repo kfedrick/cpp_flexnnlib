@@ -7,51 +7,22 @@
 
 #include <valarray>
 #include <memory>
-#include "NamedObject.h"
 
 namespace flexnnet
 {
    /**
     * Vectorizable defines an interface for classes that may encode their
-    * state representation as a real valued vector.
+    * internal state representation as a real valued vector.
     */
-   class Vectorizable : public NamedObject
+   class Vectorizable
    {
    public:
-      Vectorizable();
-      Vectorizable(const std::string& _name);
-      Vectorizable(const Vectorizable& _v);
-
-      ~Vectorizable();
-
-
-   public:
       virtual const std::valarray<double>& vectorize(void) const = 0;
+      virtual const Vectorizable& assign(const std::valarray<double>& _val) = 0;
    };
 
    // Define shared pointer for Vectorizable
-   using Vectorizable_sptr_ = std::shared_ptr<Vectorizable>;
-
-   /* -----------------------------------------------
-    *    Out-of-line function definitions
-    */
-
-   inline Vectorizable::Vectorizable() : NamedObject("Vectorizable")
-   {
-   }
-
-   inline Vectorizable::Vectorizable(const std::string& _name) : NamedObject(_name)
-   {
-   }
-
-   inline Vectorizable::Vectorizable(const Vectorizable& _v) : NamedObject(_v.name())
-   {
-   }
-
-   inline Vectorizable::~Vectorizable()
-   {
-
-   }
+   typedef std::shared_ptr<Vectorizable> Vectorizable_sptr_;
 
 }
 

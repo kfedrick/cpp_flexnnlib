@@ -2,6 +2,7 @@
 // Created by kfedrick on 6/19/19.
 //
 
+#include <datasets/include/VectorizableMap.h>
 #include "test_nn_serialization.h"
 #include "TestLayer.h"
 
@@ -79,7 +80,8 @@ TEST_F(TestBasicNeuralNet, Deserializer)
 
    std::cout << "call OldVectorSet constructor\n";
    //flexnnet::VectorizableSet<flexnnet::A, flexnnet::A> vs(a, flexnnet::A("bugs", {666, 2.7}));
-   flexnnet::VectorizableSet<flexnnet::A, flexnnet::A> vs(a, b);
+   flexnnet::VectorizableMap<flexnnet::A, flexnnet::A> v1;
+   flexnnet::VectorizableMap<flexnnet::A, flexnnet::A> vs(a, b);
 
    //flexnnet::OldVectorSet<flexnnet::A> vs(flexnnet::A("a_vectorizable", {0, 1.3, 2}));
 
