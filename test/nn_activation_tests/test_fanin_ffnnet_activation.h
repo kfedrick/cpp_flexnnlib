@@ -108,28 +108,28 @@ template<typename T> void TestFaninFFNNActivation<T>::create_fanin_ffnnet(const 
 
    // Create hidden fanin layer #1
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer1_sz, FANIN_LAYER1_ID, flexnnet::BasicLayer::Hidden)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer1_sz, FANIN_LAYER1_ID, flexnnet::NetworkLayer::Hidden)));
 
    // Add external input to hidden fanin layer #1
    network_layers[0]->add_external_input(_testcase.input, {"input1"});
 
    // Set hidden fanin layer #1 weights
-   network_layers[0]->layer_weights.set_weights(_testcase.hlayer1_weights);
+   network_layers[0]->layer_weights.set(_testcase.hlayer1_weights);
 
    // Create hidden fanin layer #2
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer2_sz, FANIN_LAYER2_ID, flexnnet::BasicLayer::Hidden)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer2_sz, FANIN_LAYER2_ID, flexnnet::NetworkLayer::Hidden)));
 
    // Add external input to hidden fanin layer #2
    network_layers[1]->add_external_input(_testcase.input, {"input2"});
 
    // Set hidden fanin layer #2 weights
-   network_layers[1]->layer_weights.set_weights(_testcase.hlayer2_weights);
+   network_layers[1]->layer_weights.set(_testcase.hlayer2_weights);
 
    // Create output layer
    size_t total_sz = _testcase.hlayer1_sz + _testcase.hlayer2_sz;
    network_layers
-      .push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(total_sz, "output", flexnnet::BasicLayer::Output)));
+      .push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(total_sz, "output", flexnnet::NetworkLayer::Output)));
 
    // Add input from both hidden layer
    network_layers[2]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
@@ -139,7 +139,7 @@ template<typename T> void TestFaninFFNNActivation<T>::create_fanin_ffnnet(const 
    flexnnet::Array2D<double> diag(total_sz, total_sz + 1);
    for (int i = 0; i < total_sz; i++)
       diag.at(i, i) = 1.0;
-   network_layers[2]->layer_weights.set_weights(diag);
+   network_layers[2]->layer_weights.set(diag);
 
    // Create neural net
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));

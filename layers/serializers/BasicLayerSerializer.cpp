@@ -28,8 +28,6 @@ rapidjson::Value& flexnnet::BasicLayerSerializer::encodeBasic(rapidjson::Value& 
 
    _obj.AddMember("id", encodeID(temp_obj, _layer), allocator);
 
-   _obj.AddMember("is_output_layer", _layer.is_output_layer(), allocator);
-
    _obj.AddMember("dimensions", encodeDimensions(temp_obj, _layer), allocator);
 
    _obj.AddMember("learned_parameters", encodeWeights(temp_obj, _layer), allocator);

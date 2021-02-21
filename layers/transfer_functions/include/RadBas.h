@@ -23,7 +23,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      RadBas(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      RadBas(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
       ~RadBas();
 
       void set_rescaled(bool _val);

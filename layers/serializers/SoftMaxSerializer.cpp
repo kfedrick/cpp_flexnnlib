@@ -47,9 +47,9 @@ namespace flexnnet
       double gain = _obj["transfer_function"]["parameters"]["gain"].GetDouble();
       bool rescaled = _obj["transfer_function"]["parameters"]["rescaled"].GetBool();
 
-      BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
+      NetworkLayer::NetworkLayerType network_layer_type = NetworkLayer::Output;
       if (!network_layer_info.is_output_layer)
-         network_layer_type = BasicLayer::Hidden;
+         network_layer_type = NetworkLayer::Hidden;
 
       std::shared_ptr<SoftMax> layer_ptr = std::shared_ptr<SoftMax>(new SoftMax(network_layer_info
                                                                                    .size, network_layer_info
@@ -58,7 +58,7 @@ namespace flexnnet
 
       layer_ptr->set_gain(gain);
       layer_ptr->set_rescaled(rescaled);
-      layer_ptr->layer_weights.set_weights(network_layer_info.weights);
+      layer_ptr->layer_weights.set(network_layer_info.weights);
 
       return layer_ptr;
    }

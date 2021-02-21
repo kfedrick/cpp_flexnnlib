@@ -87,7 +87,7 @@ add_library(flexneuralnet
         datasets/include/Datum.h
         util/include/Array2D.h
         util/include/Array3D.h
-        layers/include/NetworkLayer.h
+        network/include/NetworkLayer.h
         network/LayerConnRecord.cpp
         network/include/LayerConnRecord.h
         network/ExternalInputRecord.cpp
@@ -134,7 +134,7 @@ add_library(flexneuralnet
         trainers/include/BackpropAlgo.h
         util/include/NetworkError.cpp
         util/include/NetworkError.h
-        datasets/include/VectorMap.h datasets/include/NamedValarray.h datasets/include/VectorizableMap.h)
+        datasets/include/VectorMap.h datasets/include/NamedValarray.h datasets/include/VectorizableMap.h network/BaseNeuralNet.cpp network/include/BaseNeuralNet.h network/NetworkTopology.cpp network/include/NetworkTopology.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

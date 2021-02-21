@@ -69,12 +69,6 @@ const Array2D<double>& NetSumLayer::calc_dNdW(const std::valarray<double>& _rawi
    std::valarray<double>& netin = layer_state.netinv;
    for (size_t out_ndx = 0; out_ndx < netin.size(); out_ndx++)
    {
-      /*
-      _dNdW[out_ndx][bias_ndx] = 1;
-      for (unsigned int in_ndx = 0; in_ndx < _rawin.size (); in_ndx++)
-         _dNdW[out_ndx][in_ndx] = _rawin.at (in_ndx);
-      */
-
       dNdW.at(out_ndx, bias_ndx) = 1;
       for (size_t in_ndx = 0; in_ndx < _rawin.size(); in_ndx++)
          dNdW.at(out_ndx, in_ndx) = _rawin[in_ndx];

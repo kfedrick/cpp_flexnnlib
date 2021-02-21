@@ -13,8 +13,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/istreamwrapper.h>
-
-#include "TestLayer.h"
+#include <CommonTestFixtureFunctions.h>
 
 #include "Array2D.h"
 #include "LayerSerializer.h"
@@ -22,7 +21,7 @@
 #include "PureLin.h"
 #include "LogSig.h"
 
-template<class _LayerType> class LayerActivationTestCase : public TestLayer
+template<class _LayerType> class LayerActivationTestCase : public CommonTestFixtureFunctions
 {
 public:
    virtual void SetUp()
@@ -65,31 +64,31 @@ private:
    rapidjson::Document doc;
 };
 
-class TestPureLinActivation : public TestLayer, public ::testing::TestWithParam<const char*>
+class TestPureLinActivation : public CommonTestFixtureFunctions, public ::testing::TestWithParam<const char*>
 {
 };
 INSTANTIATE_TEST_CASE_P
 (InstantiationName, TestPureLinActivation, ::testing::Values("purelin_activity_test1.json", "purelin_activity_test2.json"));
 
-class TestLogSigActivation : public TestLayer, public ::testing::TestWithParam<const char*>
+class TestLogSigActivation : public CommonTestFixtureFunctions, public ::testing::TestWithParam<const char*>
 {
 };
 INSTANTIATE_TEST_CASE_P
 (InstantiationName, TestLogSigActivation, ::testing::Values("logsig_activity_test1.json", "logsig_activity_test2.json"));
 
-class TestTanSigActivation : public TestLayer, public ::testing::TestWithParam<const char*>
+class TestTanSigActivation : public CommonTestFixtureFunctions, public ::testing::TestWithParam<const char*>
 {
 };
 INSTANTIATE_TEST_CASE_P
 (InstantiationName, TestTanSigActivation, ::testing::Values("tansig_activity_test1.json", "tansig_activity_test2.json"));
 
-class TestRadBasActivation : public TestLayer, public ::testing::TestWithParam<const char*>
+class TestRadBasActivation : public CommonTestFixtureFunctions, public ::testing::TestWithParam<const char*>
 {
 };
 INSTANTIATE_TEST_CASE_P
 (InstantiationName, TestRadBasActivation, ::testing::Values("radbas_activity_test1.json"));
 
-class TestSoftMaxActivation : public TestLayer, public ::testing::TestWithParam<const char*>
+class TestSoftMaxActivation : public CommonTestFixtureFunctions, public ::testing::TestWithParam<const char*>
 {
 };
 INSTANTIATE_TEST_CASE_P
@@ -151,7 +150,7 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
          test_sample.input[i] = in_arr[i].GetDouble();
 
       // Read the test input vector
-      const rapidjson::Value& init_arr = a_tuple_obj["initial_value"];
+      const rapidjson::Value& init_arr = a_tuple_obj["initial_layer_value"];
       for (rapidjson::SizeType i = 0; i < init_arr.Size(); i++)
          test_sample.initial_value[i] = init_arr[i].GetDouble();
 

@@ -45,16 +45,16 @@ namespace flexnnet
       std::string type = _obj["transfer_function"]["type"].GetString();
       double gain = _obj["transfer_function"]["parameters"]["gain"].GetDouble();
 
-      BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
+      NetworkLayer::NetworkLayerType network_layer_type = NetworkLayer::Output;
       if (!network_layer_info.is_output_layer)
-         network_layer_type = BasicLayer::Hidden;
+         network_layer_type = NetworkLayer::Hidden;
 
       std::shared_ptr<LogSig> layer_ptr = std::shared_ptr<LogSig>(new LogSig(network_layer_info.size, network_layer_info
          .id, network_layer_type));
       layer_ptr->resize_input(network_layer_info.input_size);
 
       layer_ptr->set_gain(gain);
-      layer_ptr->layer_weights.set_weights(network_layer_info.weights);
+      layer_ptr->layer_weights.set(network_layer_info.weights);
 
       return layer_ptr;
    }

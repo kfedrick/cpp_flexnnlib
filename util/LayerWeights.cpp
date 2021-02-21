@@ -12,16 +12,21 @@
 using std::string;
 using flexnnet::LayerWeights;
 
-LayerWeights::LayerWeights(void) : NamedObject("LayerWeights")
+LayerWeights::LayerWeights(void)
 {
 }
 
-LayerWeights::LayerWeights(const LayerWeights& _lweights) : NamedObject(_lweights.name())
+LayerWeights::LayerWeights(const std::vector<std::vector<double>>& _lweights)
+{
+   set(_lweights);
+}
+
+LayerWeights::LayerWeights(const LayerWeights& _lweights)
 {
    copy(_lweights);
 }
 
-LayerWeights::LayerWeights(const LayerWeights&& _lweights) : NamedObject(_lweights.name())
+LayerWeights::LayerWeights(const LayerWeights&& _lweights)
 {
    copy(_lweights);
 }
@@ -37,7 +42,7 @@ void LayerWeights::resize(size_t _layer_sz, size_t _layer_input_sz)
    if (_layer_sz > 0 && _layer_input_sz > 0)
    {
       weights.resize(_layer_sz, _layer_input_sz + 1);
-      initial_value.resize(_layer_sz);
+      initial_layer_value.resize(_layer_sz);
    }
 }
 

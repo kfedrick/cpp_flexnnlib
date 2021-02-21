@@ -25,7 +25,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      LogSig(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      LogSig(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
       ~LogSig();
 
       void set_gain(double _val);

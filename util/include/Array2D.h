@@ -54,6 +54,7 @@ namespace flexnnet
        * *****************************************
        */
       const_size_ref& size() const;
+      static Dimensions size(const std::vector<std::vector<T>>& _arr);
 
       value_ref at(size_t _rowndx, size_t _colndx);
       const_value_ref at(size_t _rowndx, size_t) const;
@@ -69,11 +70,14 @@ namespace flexnnet
 
       type_ref operator=(const_value_ref val);
       type_ref operator=(const_type_ref arr);
+      type_ref operator=(const std::vector<std::vector<T> >& _arr);
       type_ref operator+=(const_type_ref _arr);
       type_ref operator-=(const_type_ref arr);
       type_ref operator*=(const_type_ref _arr);
 
+   private:
       static bool validate_dimensions(const_type_ref _arr1, const_type_ref arr2);
+      static bool validate_dimensions(const_size_ref _ldim, const_size_ref _rdim);
 
    private:
       Dimensions dimensions;
@@ -105,6 +109,35 @@ namespace flexnnet
    const typename Array2D<T>::Dimensions& Array2D<T>::size() const
    {
       return dimensions;
+   }
+
+   template<class T>
+   typename Array2D<T>::Dimensions Array2D<T>::size(const std::vector<std::vector<T>>& _arr)
+   {
+      typename Array2D<T>::Dimensions dims;
+
+      dims.rows = _arr.size();
+      dims.cols = 0;
+
+      // Set number of columns to the size of the first vector
+      if (dims.rows > 0)
+         dims.cols = _arr[0].size();
+
+      // Validate that the remaining rows have the same number of columns
+      for (unsigned int row_ndx = 0; row_ndx < dims.rows; row_ndx++)
+      {
+         // Validate the size of each row vector
+         if (_arr[row_ndx].size() != dims.cols)
+         {
+            std::ostringstream err_str;
+            err_str
+               << "Error : Array2D<T>(vector<vector<T>>) - mismatch column size on row "
+               << row_ndx << " (" << _arr[row_ndx].size() << ") " << " : expected " << dims.cols << "."
+               << std::endl;
+            throw std::invalid_argument(err_str.str());
+         }
+      }
+      return dims;
    }
 
    template<class T> inline T& Array2D<T>::at(size_t _rowndx, size_t _colndx)
@@ -170,31 +203,13 @@ namespace flexnnet
    template<class T> inline
    void Array2D<T>::set(const std::vector<std::vector<T> >& _arr)
    {
-      unsigned int src_row_dim = _arr.size();
-      unsigned int src_col_dim = 0;
-
-      if (src_row_dim > 0)
-         src_col_dim = _arr[0].size();
-
-      if (src_row_dim != dimensions.rows || src_col_dim != dimensions.cols)
-         resize(src_row_dim, src_col_dim);
+      // Get dimensionality of source array
+      Dimensions src_dims = Array2D<T>::size(_arr);
+      resize(src_dims.rows, src_dims.cols);
 
       for (unsigned int row_ndx = 0; row_ndx < dimensions.rows; row_ndx++)
-      {
-         // Validate the size of each row vector
-         if (_arr[row_ndx].size() != dimensions.cols)
-         {
-            std::ostringstream err_str;
-            err_str
-               << "Error : Array2D<T>(vector<vector<T>>) - bad column size on row "
-               << row_ndx << " (" << _arr[row_ndx].size() << ") " << " : expected " << dimensions.cols << "."
-               << std::endl;
-            throw std::invalid_argument(err_str.str());
-         }
-
          for (unsigned int col_ndx = 0; col_ndx < dimensions.cols; col_ndx++)
             this->at(row_ndx, col_ndx) = _arr[row_ndx][col_ndx];
-      }
    }
 
    template<class T> inline
@@ -226,6 +241,16 @@ namespace flexnnet
 
       dimensions = _arr.dimensions;
       data = _arr.data;
+      return *this;
+   }
+
+   template<class T> inline Array2D<T>& Array2D<T>::operator=(const std::vector<std::vector<T> >& _arr)
+   {
+      Dimensions src_dims = Array2D<T>::size(_arr);
+      validate_dimensions(this->dimensions, src_dims);
+
+      set(_arr);
+      return *this;
    }
 
    template<class T> inline Array2D<T>& Array2D<T>::operator+=(const_type_ref _arr)
@@ -281,6 +306,20 @@ namespace flexnnet
       return true;
    }
 
+   template<class T> inline bool Array2D<T>::validate_dimensions(const_size_ref _ldim, const_size_ref _rdim)
+   {
+      if ((_ldim.rows != _rdim.rows || _ldim.cols != _rdim.cols))
+      {
+         std::ostringstream err_str;
+         err_str
+            << "Error : Array2<T>::operator+(Array2<T>, Array2<T>) - mismatched array dimension :\n"
+            << "arg 1 :(" << _ldim.rows << "," << _ldim.cols << ")\n"
+            << "arg 2 :(" << _rdim.rows << "," << _rdim.cols << ")";
+         throw std::invalid_argument(err_str.str());
+      }
+
+      return true;
+   }
 } /* namespace flexnnet */
 
 #endif /* FLEX_NEURALNET_ARRAY2D_H_ */

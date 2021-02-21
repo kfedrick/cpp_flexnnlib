@@ -3,8 +3,6 @@
 //
 
 #include "test_single_layer_nnet_activation.h"
-#include "TestLayer.h"
-
 #include <iostream>
 #include <fstream>
 
@@ -124,16 +122,33 @@ TYPED_TEST_P (TestSingleLayerNNActivation, SingleLayerNNActivation)
 
    for (auto test_case : test_cases)
    {
+      std::cout << "create network\n";
       TestSingleLayerNNActivation<TypeParam>::create_single_layer_nnet(test_case);
+
+      std::cout << "activate network\n";
+      std::cout.precision(10);
+      std::cout << "\nnetwork input : \n{";
+      bool first = true;
+      for (auto val : test_case.input)
+      {
+         if (!first)
+            std::cout << ", ";
+
+         std::cout << val.first.c_str() << " " << val.second.size();
+         first = false;
+      }
+      std::cout << "}\n";
+      TestSingleLayerNNActivation<TypeParam>::prettyPrintVector("stuff", test_case.input.at("input"));
       NNetIO_Typ netout = TestSingleLayerNNActivation<TypeParam>::nnet->activate(test_case.input);
 
       // Check layer output
+      std::cout << "check output\n";
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";
 
       std::cout.setf(std::ios::fixed, std::ios::floatfield);
       std::cout.precision(10);
       std::cout << "\nnetwork output : \n{";
-      bool first = true;
+      first = true;
       for (auto val : netout)
       {
          if (!first)

@@ -7,8 +7,8 @@
 
 using flexnnet::BasicLayer;
 
-BasicLayer::BasicLayer(size_t _sz, const std::string& _name, NetworkLayerType _type)
-   : NamedObject(_name), layer_output_size(_sz), layer_input_size(0), network_layer_type(_type)
+BasicLayer::BasicLayer(size_t _sz, const std::string& _name)
+   : NamedObject(_name), layer_output_size(_sz), layer_input_size(0)
 {
    layer_state.outputv.resize(_sz);
    layer_state.netinv.resize(_sz);
@@ -21,9 +21,6 @@ BasicLayer::~BasicLayer()
 const std::valarray<double>& BasicLayer::activate(const std::valarray<double>& _rawin)
 {
    layer_state.rawinv = _rawin;
-
-   Array2D<double>::Dimensions dim = layer_weights.const_weights_ref.size();
-
    calc_layer_output(_rawin);
 
    layer_derivatives.stale();

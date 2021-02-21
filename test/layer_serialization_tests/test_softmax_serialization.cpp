@@ -32,7 +32,7 @@ TEST_F(TestLayerSerialization, SerializeSoftMax)
    initw.at(0, 0) = 1.0;
    initw.at(1, 2) = 2.0;
    initw.at(1, 2) = -1.0;
-   layer.layer_weights.set_weights(initw);
+   layer.layer_weights.set(initw);
 
    // Set gain
    layer.set_rescaled(false);

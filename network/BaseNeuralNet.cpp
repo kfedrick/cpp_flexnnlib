@@ -1,45 +1,43 @@
 //
-// Created by kfedrick on 5/12/19.
+// Created by kfedrick on 2/20/21.
 //
 
-#include "BasicNeuralNet.h"
-#include "BasicNeuralNetSerializer.h"
-
+#include "BaseNeuralNet.h"
 #include <iostream>
 
-using flexnnet::BasicNeuralNet;
+using flexnnet::BaseNeuralNet;
 using flexnnet::BasicLayer;
 
-BasicNeuralNet::BasicNeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
-   : NamedObject(_name), network_layers(_layers), recurrent_network_flag(_recurrent)
+BaseNeuralNet::BaseNeuralNet(const std::string& _name, const std::vector<std::shared_ptr<BasicLayer>>& _layers)
+   : NamedObject(_name), network_layers(_layers)
 {
    std::map<std::string, std::valarray<double>> omap = init_network_output_layer();
-   //network_output_pattern.set_weights(omap);
 
    for (auto& item : _layers)
       layer_name_set.insert(item->name());
 }
 
-BasicNeuralNet::~BasicNeuralNet()
+BaseNeuralNet::~BaseNeuralNet()
 {
 }
 
-void BasicNeuralNet::initialize_weights(void)
+void BaseNeuralNet::initialize_weights(void)
 {
-   std::cout << "BasicNeuralNet::initialize_weights() - entry\n";
+   std::cout << "BaseNeuralNet::initialize_weights() - entry\n";
 
    // TODO - implement
 }
 
-void BasicNeuralNet::reset(void)
+void BaseNeuralNet::reset(void)
 {
    // TODO - implement
 }
 
-std::map<std::string, std::valarray<double>> BasicNeuralNet::init_network_output_layer(void)
+std::map<std::string, std::valarray<double>> BaseNeuralNet::init_network_output_layer(void)
 {
    size_t sz = 0;
    std::map<std::string, std::valarray<double>> opatt_map;
+/*
 
    for (auto& network_layer : network_layers)
       if (network_layer->is_output_layer())
@@ -48,11 +46,12 @@ std::map<std::string, std::valarray<double>> BasicNeuralNet::init_network_output
          network_output_conn.add_connection(*network_layer, LayerConnRecord::Forward);
          opatt_map[network_layer->name()] = std::valarray<double>(network_layer->size());
       }
+*/
 
    return opatt_map;
 }
 
-const flexnnet::NNetIO_Typ& BasicNeuralNet::activate(const NNetIO_Typ& _xdatum)
+const flexnnet::NNetIO_Typ& BaseNeuralNet::activate(const NNetIO_Typ& _xdatum)
 {
    /*
     * Activate all network layers
@@ -60,31 +59,33 @@ const flexnnet::NNetIO_Typ& BasicNeuralNet::activate(const NNetIO_Typ& _xdatum)
    for (int i = 0; i < network_layers.size(); i++)
    {
       // Get a network layer
-      NetworkLayer& layer = *network_layers[i];
+      BasicLayer& layer = *network_layers[i];
 
-      const std::valarray<double>& invec = layer.coelesce_input(_xdatum);
-      layer.activate(invec);
+      //const std::valarray<double>& invec = layer.coelesce_input(_xdatum);
+      //layer.activate(invec);
    }
 
    // Next add layer outputs
    for (auto nlayer : network_layers)
    {
+/*
       if (nlayer->is_output_layer())
       {
          const std::valarray<double>& layer_outputv = (*nlayer)();
          network_output[nlayer->name()] = layer_outputv;
       }
+*/
    }
    //return network_output_pattern;
    return network_output;
 }
 
-const void BasicNeuralNet::backprop(const std::valarray<double>& _gradient)
+const void BaseNeuralNet::backprop(const std::valarray<double>& _gradient)
 {
 
 }
 
-NetworkWeights BasicNeuralNet::get_weights(void) const
+NetworkWeights BaseNeuralNet::get_weights(void) const
 {
    NetworkWeights network_weights;
 
@@ -94,13 +95,13 @@ NetworkWeights BasicNeuralNet::get_weights(void) const
    return network_weights;
 }
 
-void BasicNeuralNet::set_weights(const NetworkWeights& _weights)
+void BaseNeuralNet::set_weights(const NetworkWeights& _weights)
 {
    for (auto alayer_ptr : network_layers)
       alayer_ptr->layer_weights.copy(_weights.at(alayer_ptr->name()));
 }
 
-std::string BasicNeuralNet::toJSON(void) const
+std::string BaseNeuralNet::toJSON(void) const
 {
-   return BasicNeuralNetSerializer::toJson(*this);
+   return "";
 }

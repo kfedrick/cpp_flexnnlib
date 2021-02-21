@@ -28,7 +28,7 @@ namespace flexnnet
       void clear(void);
 
       template<class _LayerType> std::shared_ptr<_LayerType>
-      add_layer(size_t _sz, const std::string& _name, BasicLayer::NetworkLayerType _type, const typename _LayerType::Parameters& _params = _LayerType::DEFAULT_PARAMS);
+      add_layer(size_t _sz, const std::string& _name, const typename _LayerType::Parameters& _params = _LayerType::DEFAULT_PARAMS);
 
       /**
        * Add connection to the layer, _to, from the layer, _from.
@@ -99,7 +99,7 @@ namespace flexnnet
    }
 
    template<class _TransFunc> std::shared_ptr<_TransFunc>
-   BasicNeuralNetFactory::add_layer(size_t _sz, const std::string& _name, BasicLayer::NetworkLayerType _type, const typename _TransFunc::Parameters& _params)
+   BasicNeuralNetFactory::add_layer(size_t _sz, const std::string& _name, const typename _TransFunc::Parameters& _params)
    {
       if (layers.find(_name) != layers.end())
       {
@@ -109,7 +109,7 @@ namespace flexnnet
          throw std::invalid_argument(sout.str());
       }
 
-      auto layer_ptr = std::shared_ptr<_TransFunc>(new _TransFunc(_sz, _name, _type));
+      auto layer_ptr = std::shared_ptr<_TransFunc>(new _TransFunc(_sz, _name));
       layer_ptr->set_params(_params);
 
       // Add the new layer to the collection of network layers

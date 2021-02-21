@@ -3,7 +3,6 @@
 //
 #include <gtest/gtest.h>
 
-#include "test_layer_activation.h"
 #include "LayerActivationTestCase.h"
 
 #include "SoftMax.h"
@@ -35,10 +34,10 @@ TEST_P(TestSoftMaxActivation, Activation)
 
       // Check dNdW
       EXPECT_PRED3(array_double_near, item.target.dNdW, test_case.layer_ptr->get_dNdW(), 0.000000001)
-                  << printArray("dNdW", test_case.layer_ptr->get_dNdW());
+                  << prettyPrintArray("dNdW", test_case.layer_ptr->get_dNdW());
 
       // Check dNdI
       EXPECT_PRED3(array_double_near, item.target.dNdI, test_case.layer_ptr->get_dNdI(), 0.000000001)
-                  << printArray("dNdI", test_case.layer_ptr->get_dNdI());
+                  << prettyPrintArray("dNdI", test_case.layer_ptr->get_dNdI());
    }
 }

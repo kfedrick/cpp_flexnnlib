@@ -35,7 +35,7 @@ size_t LayerInput::add_external_input(const Datum& _xdatum, const std::set<std::
    // If we already have an external input specified then throw exception.
    if (!external_inputs.empty())
    {
-      sout << "Error : LayerConnection::add_external_input() - external input already set_weights."
+      sout << "Error : LayerConnection::add_external_input_field() - external input already set_weights."
            << std::endl;
       throw std::invalid_argument(sout.str());
    }
@@ -46,7 +46,7 @@ size_t LayerInput::add_external_input(const Datum& _xdatum, const std::set<std::
    {
       if (keyset.find(field) == keyset.end())
       {
-         sout << "Error : LayerConnection::add_external_input() - field \""
+         sout << "Error : LayerConnection::add_external_input_field() - field \""
               << field << "\" not found in Datum." << std::endl;
          throw std::invalid_argument(sout.str());
       }

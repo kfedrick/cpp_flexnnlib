@@ -111,29 +111,29 @@ template<typename T> void TestFanoutFFNNActivation<T>::create_fanout_ffnnet(cons
 
    // Create hidden layer
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer_sz, HIDDEN_LAYER_ID, flexnnet::BasicLayer::Hidden)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.hlayer_sz, HIDDEN_LAYER_ID, flexnnet::NetworkLayer::Hidden)));
 
    // Add external input to hidden layer
    network_layers[0]->add_external_input(_testcase.input, {"input1"});
 
    // Set hidden layer weights
-   network_layers[0]->layer_weights.set_weights(_testcase.hlayer_weights);
+   network_layers[0]->layer_weights.set(_testcase.hlayer_weights);
 
    // Create output layer #1
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.olayer1_sz, FANOUT_OLAYER1_ID, flexnnet::BasicLayer::Output)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.olayer1_sz, FANOUT_OLAYER1_ID, flexnnet::NetworkLayer::Output)));
    network_layers[1]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
 
    // Set output layer #2 weights
-   network_layers[1]->layer_weights.set_weights(_testcase.olayer1_weights);
+   network_layers[1]->layer_weights.set(_testcase.olayer1_weights);
 
    // Create output layer #2
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.olayer2_sz, FANOUT_OLAYER2_ID, flexnnet::BasicLayer::Output)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.olayer2_sz, FANOUT_OLAYER2_ID, flexnnet::NetworkLayer::Output)));
    network_layers[2]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
 
    // Set output layer #2 weights
-   network_layers[2]->layer_weights.set_weights(_testcase.olayer2_weights);
+   network_layers[2]->layer_weights.set(_testcase.olayer2_weights);
 
    // Create neural net
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));

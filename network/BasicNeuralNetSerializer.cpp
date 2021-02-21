@@ -166,7 +166,7 @@ flexnnet::BasicNeuralNetSerializer::encodeConnectionFromLayer(rapidjson::Value& 
 
    std::string conn_type_str = connTypeToString(_conn.get_connection_type());
    conntype_strobj.SetString(conn_type_str.c_str(), conn_type_str.size(), allocator);
-   _obj.AddMember("conn_type", conntype_strobj, allocator);
+   _obj.AddMember("connection_type", conntype_strobj, allocator);
 
    _obj.AddMember("size", _conn.size(), allocator);
 

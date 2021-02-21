@@ -20,18 +20,12 @@ namespace flexnnet
    class BasicLayer : public NamedObject
    {
 
-   public:
-      enum NetworkLayerType
-      {
-         Output, Hidden
-      };
-
    protected:
 
       /* ********************************************************************
        * Constructors, destructors
        */
-      BasicLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
+      BasicLayer(size_t _sz, const std::string& _name);
 
    public:
       virtual ~BasicLayer();
@@ -41,9 +35,6 @@ namespace flexnnet
       // Return length of layer output valarray
       size_t size() const;
       virtual size_t input_size() const;
-
-      // Return length of layer input valarray
-      bool is_output_layer(void) const;
 
       const Array2D<double>& get_dAdN(void) const;
       const Array2D<double>& get_dNdW(void) const;
@@ -118,7 +109,6 @@ namespace flexnnet
        * Private layer configuration and provisioning data members
        */
       const size_t layer_output_size;
-      const NetworkLayerType network_layer_type;
 
    protected:
       /* ********************************************************************
@@ -150,10 +140,6 @@ namespace flexnnet
       return layer_input_size;
    }
 
-   inline bool BasicLayer::is_output_layer(void) const
-   {
-      return (network_layer_type == Output);
-   }
 
    inline const Array2D<double>& BasicLayer::get_dAdN(void) const
    {

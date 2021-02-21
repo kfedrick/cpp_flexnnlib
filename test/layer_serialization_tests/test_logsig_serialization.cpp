@@ -30,7 +30,7 @@ TEST_F(TestLayerSerialization, SerializeLogSig)
    initw.at(0, 0) = 1.0;
    initw.at(1, 2) = 2.0;
    initw.at(1, 2) = -1.0;
-   layer.layer_weights.set_weights(initw);
+   layer.layer_weights.set(initw);
 
    // Set gain
    layer.set_gain(0.33);

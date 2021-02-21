@@ -56,6 +56,28 @@ public:
    std::set<std::string> LAYER_IDS;
 
    std::shared_ptr<flexnnet::BasicNeuralNet> nnet;
+
+   std::string prettyPrintVector(const std::string& _label, const std::valarray<double>& _vec, int _prec=4)
+   {
+      std::stringstream ssout;
+      ssout.precision(_prec);
+
+      bool first = true;
+      ssout << "\n\"" << _label << "\" : \n";
+      ssout << "   [";
+      for (auto& val : _vec)
+      {
+         if (!first)
+            ssout << ", ";
+         else
+            first = false;
+
+         ssout << val;
+      }
+      ssout << "]";
+
+      return ssout.str();
+   };
 };
 
 TYPED_TEST_CASE_P
@@ -95,13 +117,13 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nn
    // Create layer
    std::vector<std::shared_ptr<flexnnet::NetworkLayer>> network_layers;
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Output)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::NetworkLayer::Output)));
 
    // Add external input to layer
    network_layers[0]->add_external_input(_testcase.input, {"input"});
 
    // Set layer weights
-   network_layers[0]->layer_weights.set_weights(_testcase.weights);
+   network_layers[0]->layer_weights.set(_testcase.weights);
 
    // Create neural net
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
@@ -119,17 +141,17 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnne
 
    // Create hidden layer
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::BasicLayer::Hidden)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::NetworkLayer::Hidden)));
 
    // Add external input to layer
    network_layers[0]->add_external_input(_testcase.input, {"input"});
 
    // Set layer weights
-   network_layers[0]->layer_weights.set_weights(_testcase.weights);
+   network_layers[0]->layer_weights.set(_testcase.weights);
 
    // Create output layer
    network_layers.push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(_testcase
-                                                                                        .layer_sz, "output", flexnnet::BasicLayer::Output)));
+                                                                                        .layer_sz, "output", flexnnet::NetworkLayer::Output)));
 
    // Add input from hidden layer
    network_layers[1]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
@@ -138,7 +160,7 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnne
    flexnnet::Array2D<double> diag(_testcase.layer_sz, _testcase.layer_sz + 1);
    for (int i = 0; i < _testcase.layer_sz; i++)
       diag.at(i, i) = 1.0;
-   network_layers[1]->layer_weights.set_weights(diag);
+   network_layers[1]->layer_weights.set(diag);
 
    // Create neural net
    nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));

@@ -24,7 +24,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      SoftMax(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      SoftMax(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
       ~SoftMax();
 
       void set_gain(double _val);

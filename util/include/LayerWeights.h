@@ -14,9 +14,9 @@ namespace flexnnet
     * LayerWeights holds the learned parameters of the layer, including:
     *
     *    weights - layer inter-connection weights
-    *    initial_value - the initial value of the layer neurons
+    *    initial_layer_value - the initial value of the layer neurons
     */
-   class LayerWeights : public NamedObject
+   class LayerWeights
    {
    public:
 
@@ -24,6 +24,11 @@ namespace flexnnet
        * Null constructor
        */
       LayerWeights(void);
+
+      /**
+       * Initializing constructor
+       */
+      LayerWeights(const std::vector<std::vector<double>>& _lweights);
 
       /**
        * Copy constructor
@@ -55,7 +60,14 @@ namespace flexnnet
       /**
        * Initialize layer weights to specified value.
        */
-      void set_weights(const Array2D<double>& _weights);
+      void set(const Array2D<double>& _weights);
+
+      /**
+       * Initialize layer weights to specified value.
+       *
+       * @param _weights
+       */
+      void set(const std::vector<std::vector<double>>& _lweights);
 
       /**
        * Set the initial value of the neurons upon layer reset.
@@ -83,6 +95,14 @@ namespace flexnnet
       LayerWeights& operator=(const LayerWeights& _lweights);
 
       /**
+       * Assignment operator overload
+       *
+       * @param _weights
+       * @return
+       */
+      LayerWeights& operator=(const std::vector<std::vector<double>>& _lweights);
+
+      /**
        * Adjust layer weights by the specified delta weight array.
        */
       void adjust_weights(const Array2D<double>& _delta);
@@ -102,38 +122,41 @@ namespace flexnnet
       const Array2D<double>& const_weights_ref = weights;
 
    private:
-      std::valarray<double> initial_value;
+      std::valarray<double> initial_layer_value;
       Array2D<double> weights;
    };
 
    inline void LayerWeights::zero(void)
    {
       weights = 0;
-      initial_value = 0;
+      initial_layer_value = 0;
    }
 
-   inline void LayerWeights::set_weights(const Array2D<double>& _weights)
+   inline void LayerWeights::set(const Array2D<double>& _weights)
    {
-      weights = _weights;
+      weights.set(_weights);
+   }
+
+   inline void LayerWeights::set(const std::vector<std::vector<double>>& _lweights)
+   {
+      weights.set(_lweights);
    }
 
    inline void LayerWeights::set_initial_value(const std::valarray<double>& _ival)
    {
-      initial_value = _ival;
+      initial_layer_value = _ival;
    }
 
    inline void LayerWeights::copy(const LayerWeights& _lweights)
    {
-      rename(_lweights.name());
       weights.set(_lweights.weights);
-      initial_value = _lweights.initial_value;
+      initial_layer_value = _lweights.initial_layer_value;
    }
 
    inline void LayerWeights::copy(const LayerWeights&& _lweights)
    {
-      rename(_lweights.name());
       weights.set(std::forward<const Array2D<double>>(_lweights.weights));
-      initial_value = std::move(_lweights.initial_value);
+      initial_layer_value = std::move(_lweights.initial_layer_value);
    }
 
    inline LayerWeights& LayerWeights::operator=(const LayerWeights& _lweights)
@@ -142,9 +165,14 @@ namespace flexnnet
       return *this;
    }
 
+   inline LayerWeights& LayerWeights::operator=(const std::vector<std::vector<double>>& _lweights)
+   {
+      weights = _lweights;
+   }
+
    inline void LayerWeights::adjust_weights(const Array2D<double>& _delta)
    {
-      this->weights += _delta;
+      weights += _delta;
    }
 }
 

@@ -23,7 +23,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      TanSig(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      TanSig(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
       ~TanSig();
 
       void set_gain(double _val);

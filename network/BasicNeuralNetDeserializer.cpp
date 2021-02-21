@@ -130,7 +130,7 @@ flexnnet::BasicNeuralNetSerializer::parseLayerConnections(const rapidjson::Value
 
       std::string id = _obj[i]["id"].GetString();
       size_t input_size = _obj[i]["size"].GetUint64();
-      LayerConnRecord::ConnectionType connection_type = StringToConnType(_obj[i]["conn_type"].GetString());
+      LayerConnRecord::ConnectionType connection_type = StringToConnType(_obj[i]["connection_type"].GetString());
 
       layer_input_info.layer_conn_info.push_back(LayerConnRecord(id, input_size, connection_type));
    }

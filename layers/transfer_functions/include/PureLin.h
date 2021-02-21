@@ -24,7 +24,7 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      PureLin(size_t _sz, const std::string& _id, NetworkLayerType _type, const Parameters& _params = DEFAULT_PARAMS);
+      PureLin(size_t _sz, const std::string& _id, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
       ~PureLin();
 
       void set_gain(double _val);
