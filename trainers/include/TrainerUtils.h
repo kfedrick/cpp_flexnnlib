@@ -63,10 +63,10 @@ namespace flexnnet
    private:
       TrainingStatistics training_stats;
 
-      // Cached layer weights (e.g. used to back out weight changes)
+      // Cached basiclayer weights (e.g. used to back out weight changes)
       std::map<std::string, NetworkWeights> cached_layer_weights;
 
-      // List of best layer weights
+      // List of best basiclayer weights
       std::vector<TrainedNNetRecord> best_nnets;
    };
 

@@ -12,7 +12,7 @@ using flexnnet::LayerSerializer;
 using flexnnet::SoftMax;
 
 /**
- * Test serialization of 2x5 PureLin layer
+ * Test serialization of 2x5 PureLin basiclayer
  */
 TEST_F(TestLayerSerialization, SerializeSoftMax)
 {
@@ -22,7 +22,7 @@ TEST_F(TestLayerSerialization, SerializeSoftMax)
    const int IN_SZ = 5;
    const std::string NAME = "test";
 
-   // Construct layer
+   // Construct basiclayer
    SoftMax layer(OUT_SZ, NAME, BasicLayer::Output);
    layer.resize_input(IN_SZ);
 
@@ -37,7 +37,7 @@ TEST_F(TestLayerSerialization, SerializeSoftMax)
    // Set gain
    layer.set_rescaled(false);
 
-   // Get serialized layer as Json string
+   // Get serialized basiclayer as Json string
    std::string output_json = layer.toJson();
    std::cout << "\n\n" << output_json << std::endl;
 
@@ -60,7 +60,7 @@ TEST_F(TestLayerSerialization, DeserializeSoftMax)
    ASSERT_EQ(RAWIN_SZ, layer.input_size());
    ASSERT_EQ(NAME, layer.name());
    ASSERT_EQ(GAIN, layer.get_gain());
-   //ASSERT_EQ(RESCALED, layer.is_rescaled());
+   //ASSERT_EQ(RESCALED, basiclayer.is_rescaled());
 
    // Set weights
    flexnnet::Array2D<double> target_weights(OUT_SZ, RAWIN_SZ + 1);

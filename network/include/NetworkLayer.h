@@ -1,82 +1,146 @@
 //
-// Created by kfedrick on 6/5/19.
+// Created by kfedrick on 2/21/21.
 //
 
-#ifndef FLEX_NEURALNET_LAYERCONNECTOR_H_
-#define FLEX_NEURALNET_LAYERCONNECTOR_H_
+#ifndef FLEX_NEURALNET_NETWORKLAYER_H_
+#define FLEX_NEURALNET_NETWORKLAYER_H_
 
-#include <stddef.h>
 #include <memory>
-#include <string>
-#include <vector>
-#include <set>
-#include <valarray>
-
-#include "Datum.h"
+#include "flexnnet_networks.h"
 #include "BasicLayer.h"
-#include "ExternalInputRecord.h"
-#include "LayerInput.h"
+#include "LayerConnRecord.h"
 
 namespace flexnnet
 {
-   class NetworkLayer : public BasicLayer, public LayerInput
+   class NetworkLayer
    {
-
    public:
-      enum NetworkLayerType
-      {
-         Output, Hidden
-      };
-
-   protected:
-      /* ********************************************************************
-       * Constructors, destructors
-       */
-
-      NetworkLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
-
-   public:
-
+      NetworkLayer();
+      NetworkLayer(bool _is_output);
+      NetworkLayer(std::shared_ptr<BasicLayer>& _layer, bool _is_output = false);
+      NetworkLayer(std::shared_ptr<BasicLayer>&& _layer, bool _is_output = false);
       ~NetworkLayer();
 
    public:
-      // Return true if this is an output layer
+      virtual const std::string& name() const;
+
+      /**
+       * Returns the size of the layer activity vector.
+       * @return
+       */
+      virtual size_t size() const;
+
+      virtual const std::valarray<double>& value() const;
+
+      // Return true if this is an output basiclayer
       bool is_output_layer(void) const;
 
-      /* ******************************************************************
-       * Public member functions to connect layers and external inputs.
+      virtual std::shared_ptr<BasicLayer>& layer();
+
+      const std::vector<LayerConnRecord>& get_activation_connections() const;
+      const std::vector<LayerConnRecord>& get_backprop_connections() const;
+      const std::vector<std::string>& get_external_input_fields() const;
+
+      /**
+       * Add a connection to this basiclayer from an external input vector.
+       * @param _vec
        */
-      size_t add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type);
-      size_t add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet);
+      void
+      add_external_input_field(const std::string& _field);
+
+      /**
+       * Add an activation connection to this layer from the layer, _from.
+       *
+       * @param _from - the name of the layer to send its output
+       */
+      void
+      add_activation_connection(std::shared_ptr<BasicLayer>& _from, LayerConnRecord::ConnectionType _type = LayerConnRecord::Forward);
+
+      /**
+       * Add a backprop connection to this layer from the layer, _from.
+       *
+       * @param _from - the name of the layer to send its output
+       */
+      void
+      add_backprop_connection(std::shared_ptr<BasicLayer>& _from, LayerConnRecord::ConnectionType _type = LayerConnRecord::Forward);
+
+      /**
+       * Marshal layer inputs, activate the base layer and return the
+       * layer output.
+       * @param _externin
+       * @return
+       */
+      virtual const std::valarray<double>& activate(const NNetIO_Typ& _externin);
+
+      /*
+       * Protected helper function
+       */
+   protected:
+      /**
+       * Marshal layer and external inputs into a single valarray.
+       * @param _externin
+       * @return
+       */
+      const std::valarray<double>& marshal_inputs(const NNetIO_Typ& _externin);
+
+      size_t append_virtual_vector(size_t start_ndx, const std::valarray<double>& vec);
 
    private:
-      const NetworkLayerType network_layer_type;
+      std::shared_ptr<BasicLayer> basiclayer;
+      bool output_layer_flag;
 
+      std::vector<LayerConnRecord> activation_connections;
+      std::vector<std::string> external_input_fields;
+      std::vector<LayerConnRecord> backprop_connections;
+
+   protected:
+      // Local valarray to contain the marshalled input vector for the layer
+      std::valarray<double> virtual_input_vector;
    };
+
+   inline std::shared_ptr<BasicLayer>& NetworkLayer::layer()
+   {
+      return basiclayer;
+   }
+
+   inline const std::string& NetworkLayer::name() const
+   {
+      return basiclayer->name();
+   }
+
+   inline size_t NetworkLayer::size() const
+   {
+      return basiclayer->size();
+   }
 
    inline bool NetworkLayer::is_output_layer(void) const
    {
-      return (network_layer_type == Output);
+      return output_layer_flag;
    }
 
-   inline size_t NetworkLayer::add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type)
+   inline
+   const std::valarray<double>& NetworkLayer::value() const
    {
-      LayerInput::add_connection(_layer, _type);
-
-      // Resize input for basic layer
-      resize_input(virtual_input_size());
+      return basiclayer->const_value;
    }
 
-   inline size_t NetworkLayer::add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet)
+   inline
+   const std::vector<LayerConnRecord>& NetworkLayer::get_activation_connections() const
    {
-      LayerInput::add_external_input(_xdatum, _indexSet);
-
-      // Resize input for basic layer
-      resize_input(virtual_input_size());
-
-      return virtual_input_size();
+      return activation_connections;
    }
 
+   inline
+   const std::vector<LayerConnRecord>& NetworkLayer::get_backprop_connections() const
+   {
+      return backprop_connections;
+   }
+
+   inline
+   const std::vector<std::string>& NetworkLayer::get_external_input_fields() const
+   {
+      return external_input_fields;
+   }
 }
 
-#endif //FLEX_NEURALNET_LAYERCONNECTOR_H_
+#endif //FLEX_NEURALNET_NETWORKLAYER_H_

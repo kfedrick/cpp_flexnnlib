@@ -5,11 +5,11 @@
 #ifndef FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 #define FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 namespace flexnnet
 {
-   class EuclideanDistLayer : public NetworkLayer
+   class EuclideanDistLayer : public OldNetworkLayer
    {
    protected:
       /* ********************************************************************

@@ -26,10 +26,10 @@ namespace flexnnet
 
       Datum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
 
-      std::map<std::string, std::shared_ptr<NetworkLayer>> layers;
+      std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
       layers = BasicNeuralNetSerializer::parseNetworkLayers(netdoc["network_layers"].GetArray());
 
-      std::vector<std::shared_ptr<NetworkLayer>> network_layers;
+      std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
       network_layers = BasicNeuralNetSerializer::parseNetworkTopology(netdoc["layer_topology"]
                                                                          .GetArray(), layers, network_input);
 

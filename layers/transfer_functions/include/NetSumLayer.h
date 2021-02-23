@@ -5,11 +5,11 @@
 #ifndef FLEX_NEURALNET_NETSUMLAYER_H_
 #define FLEX_NEURALNET_NETSUMLAYER_H_
 
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 namespace flexnnet
 {
-   class NetSumLayer : public NetworkLayer
+   class NetSumLayer : public OldNetworkLayer
    {
    protected:
       /* ********************************************************************

@@ -10,7 +10,7 @@
 using flexnnet::BasicNeuralNet;
 using flexnnet::BasicLayer;
 
-BasicNeuralNet::BasicNeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
+BasicNeuralNet::BasicNeuralNet(const std::vector<std::shared_ptr<OldNetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
    : NamedObject(_name), network_layers(_layers), recurrent_network_flag(_recurrent)
 {
    std::map<std::string, std::valarray<double>> omap = init_network_output_layer();
@@ -45,7 +45,7 @@ std::map<std::string, std::valarray<double>> BasicNeuralNet::init_network_output
       if (network_layer->is_output_layer())
       {
          sz += network_layer->size();
-         network_output_conn.add_connection(*network_layer, LayerConnRecord::Forward);
+         network_output_conn.add_connection(*network_layer, OldLayerConnRecord::Forward);
          opatt_map[network_layer->name()] = std::valarray<double>(network_layer->size());
       }
 
@@ -59,14 +59,14 @@ const flexnnet::NNetIO_Typ& BasicNeuralNet::activate(const NNetIO_Typ& _xdatum)
     */
    for (int i = 0; i < network_layers.size(); i++)
    {
-      // Get a network layer
-      NetworkLayer& layer = *network_layers[i];
+      // Get a network basiclayer
+      OldNetworkLayer& layer = *network_layers[i];
 
       const std::valarray<double>& invec = layer.coelesce_input(_xdatum);
       layer.activate(invec);
    }
 
-   // Next add layer outputs
+   // Next add basiclayer outputs
    for (auto nlayer : network_layers)
    {
       if (nlayer->is_output_layer())

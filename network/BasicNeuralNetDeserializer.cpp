@@ -9,12 +9,12 @@
 #include "SoftMax.h"
 #include "RadBas.h"
 
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 #include <iostream>
 
 using flexnnet::ExternalInputRecord;
-using flexnnet::LayerConnRecord;
+using flexnnet::OldLayerConnRecord;
 using flexnnet::BasicLayerSerializer;
 using flexnnet::BasicNeuralNetSerializer;
 
@@ -24,7 +24,7 @@ using flexnnet::TanSig;
 using flexnnet::SoftMax;
 using flexnnet::RadBas;
 
-using flexnnet::NetworkLayer;
+using flexnnet::OldNetworkLayer;
 
 std::shared_ptr<flexnnet::BasicNeuralNet> flexnnet::BasicNeuralNetSerializer::parse(const std::string& _json)
 {
@@ -33,10 +33,10 @@ std::shared_ptr<flexnnet::BasicNeuralNet> flexnnet::BasicNeuralNetSerializer::pa
 
    Datum network_input = parseNetworkInput(netdoc["network_input"].GetArray());
 
-   std::map<std::string, std::shared_ptr<NetworkLayer>> layers;
+   std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
    layers = parseNetworkLayers(netdoc["network_layers"].GetArray());
 
-   std::vector<std::shared_ptr<NetworkLayer>> network_layers;
+   std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
    network_layers = parseNetworkTopology(netdoc["layer_topology"].GetArray(), layers, network_input);
 
    std::shared_ptr<BasicNeuralNet> net = std::shared_ptr<BasicNeuralNet>(new BasicNeuralNet(network_layers, false));
@@ -44,29 +44,29 @@ std::shared_ptr<flexnnet::BasicNeuralNet> flexnnet::BasicNeuralNetSerializer::pa
    return net;
 }
 
-std::vector<std::shared_ptr<flexnnet::NetworkLayer>>
+std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>>
 flexnnet::BasicNeuralNetSerializer::parseNetworkTopology(const rapidjson::Value& _obj, std::map<std::string,
                                                                                                 std::shared_ptr<
-                                                                                                   NetworkLayer>>& _layers, const Datum& _network_input)
+                                                                                                   OldNetworkLayer>>& _layers, const Datum& _network_input)
 {
-   std::vector<std::shared_ptr<NetworkLayer>> network_layers;
+   std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
    std::map<std::string, LayerInputInfo> topology;
 
-   // Iterate through each layer connection entry
+   // Iterate through each basiclayer connection entry
    //
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {
       LayerInputInfo layerinfo;
 
-      // These connections are for layer "id"
+      // These connections are for basiclayer "id"
       std::string id = _obj[i]["id"].GetString();
 
-      // Create network layer
-      //NetworkLayer network_layer(_layers[id]);
-      //NetworkLayer network_layer(_layers[id]->size(), _layers[id]->name(), BasicLayer::Output);
-      std::shared_ptr<NetworkLayer> network_layer = _layers[id];
+      // Create network basiclayer
+      //OldNetworkLayer network_layer(_layers[id]);
+      //OldNetworkLayer network_layer(_layers[id]->size(), _layers[id]->name(), BasicLayer::Output);
+      std::shared_ptr<OldNetworkLayer> network_layer = _layers[id];
 
-      // Get the layers external inputs and add them to the network layer
+      // Get the layers external inputs and add them to the network basiclayer
       layerinfo = parseExternalInput(_obj[i]["external_inputs"]);
       network_layer->add_external_input(_network_input, layerinfo.external_input_fields);
 
@@ -118,7 +118,7 @@ flexnnet::BasicNeuralNetSerializer::LayerInputInfo
 flexnnet::BasicNeuralNetSerializer::parseLayerConnections(const rapidjson::Value& _obj)
 {
    LayerInputInfo layer_input_info;
-   std::vector<LayerConnRecord> input_layers;
+   std::vector<OldLayerConnRecord> input_layers;
 
    std::string layer_id;
    std::string conn_type_str;
@@ -126,21 +126,21 @@ flexnnet::BasicNeuralNetSerializer::parseLayerConnections(const rapidjson::Value
 
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {
-      LayerConnRecord ilayer_info;
+      OldLayerConnRecord ilayer_info;
 
       std::string id = _obj[i]["id"].GetString();
       size_t input_size = _obj[i]["size"].GetUint64();
-      LayerConnRecord::ConnectionType connection_type = StringToConnType(_obj[i]["connection_type"].GetString());
+      OldLayerConnRecord::ConnectionType connection_type = StringToConnType(_obj[i]["connection_type"].GetString());
 
-      layer_input_info.layer_conn_info.push_back(LayerConnRecord(id, input_size, connection_type));
+      layer_input_info.layer_conn_info.push_back(OldLayerConnRecord(id, input_size, connection_type));
    }
 
    return layer_input_info;
 }
-std::map<std::string, std::shared_ptr<flexnnet::NetworkLayer>>
+std::map<std::string, std::shared_ptr<flexnnet::OldNetworkLayer>>
 flexnnet::BasicNeuralNetSerializer::parseNetworkLayers(const rapidjson::Value& _obj)
 {
-   std::map<std::string, std::shared_ptr<NetworkLayer>> layers;
+   std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
 
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {
@@ -175,15 +175,15 @@ flexnnet::BasicNeuralNetSerializer::parseNetworkLayers(const rapidjson::Value& _
 
    return layers;
 }
-flexnnet::LayerConnRecord::ConnectionType
+flexnnet::OldLayerConnRecord::ConnectionType
 flexnnet::BasicNeuralNetSerializer::StringToConnType(const std::string& _typeStr)
 {
    if (_typeStr == "forward")
-      return LayerConnRecord::Forward;
+      return OldLayerConnRecord::Forward;
    else if (_typeStr == "recurrent")
-      return LayerConnRecord::Recurrent;
+      return OldLayerConnRecord::Recurrent;
    else if (_typeStr == "lateral")
-      return LayerConnRecord::Lateral;
+      return OldLayerConnRecord::Lateral;
 
    static std::stringstream sout;
    sout << "Error : BasicLayerSerializer::StringToConnType() - Bad connection type string \""

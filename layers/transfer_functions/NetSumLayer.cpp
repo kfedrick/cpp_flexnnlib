@@ -7,7 +7,7 @@
 using flexnnet::Array2D;
 using flexnnet::NetSumLayer;
 
-NetSumLayer::NetSumLayer(size_t _sz, const std::string& _name, NetworkLayerType _type) : NetworkLayer(_sz, _name, _type)
+NetSumLayer::NetSumLayer(size_t _sz, const std::string& _name, NetworkLayerType _type) : OldNetworkLayer(_sz, _name, _type)
 {
 }
 

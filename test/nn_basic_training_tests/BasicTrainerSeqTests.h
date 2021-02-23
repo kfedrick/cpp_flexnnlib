@@ -7,7 +7,7 @@
 
 #include "gtest/gtest.h"
 
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 #include "BasicTrainerTests.h"
 
 TYPED_TEST_P (BasicTrainerTests, BasicSequence)

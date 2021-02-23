@@ -9,7 +9,7 @@
 
 #include "BasicNeuralNetFactory.h"
 
-#include "LayerConnRecord.h"
+#include "OldLayerConnRecord.h"
 #include "BasicLayer.h"
 
 #include "PureLin.h"
@@ -36,7 +36,7 @@ using std::string;
 using flexnnet::Datum;
 using flexnnet::Array2D;
 
-using flexnnet::LayerConnRecord;
+using flexnnet::OldLayerConnRecord;
 using flexnnet::BasicLayer;;
 using flexnnet::BasicNeuralNetFactory;
 using flexnnet::BasicNeuralNetSerializer;

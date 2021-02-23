@@ -108,21 +108,21 @@ template<typename T> std::string TestSingleLayerNNActivation<T>::get_typeid()
 
 template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nnet(const TestCase& _testcase)
 {
-   // Set network layer names
+   // Set network basiclayer names
    SINGLE_LAYER_TYPE_ID = TestSingleLayerNNActivation<T>::get_typeid();
    SINGLE_LAYER_ID = SINGLE_LAYER_TYPE_ID;
    std::transform(SINGLE_LAYER_ID.begin(), SINGLE_LAYER_ID.end(), SINGLE_LAYER_ID.begin(), ::tolower);
    LAYER_IDS = {SINGLE_LAYER_ID};
 
-   // Create layer
-   std::vector<std::shared_ptr<flexnnet::NetworkLayer>> network_layers;
+   // Create basiclayer
+   std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>> network_layers;
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::NetworkLayer::Output)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::OldNetworkLayer::Output)));
 
-   // Add external input to layer
+   // Add external input to basiclayer
    network_layers[0]->add_external_input(_testcase.input, {"input"});
 
-   // Set layer weights
+   // Set basiclayer weights
    network_layers[0]->layer_weights.set(_testcase.weights);
 
    // Create neural net
@@ -131,32 +131,32 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nn
 
 template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnnet(const TestCase& _testcase)
 {
-   // Set network layer names
+   // Set network basiclayer names
    SINGLE_LAYER_TYPE_ID = TestSingleLayerNNActivation<T>::get_typeid();
    SINGLE_LAYER_ID = SINGLE_LAYER_TYPE_ID;
    std::transform(SINGLE_LAYER_ID.begin(), SINGLE_LAYER_ID.end(), SINGLE_LAYER_ID.begin(), ::tolower);
    LAYER_IDS = {SINGLE_LAYER_ID, "output"};
 
-   std::vector<std::shared_ptr<flexnnet::NetworkLayer>> network_layers;
+   std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>> network_layers;
 
-   // Create hidden layer
+   // Create hidden basiclayer
    network_layers
-      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::NetworkLayer::Hidden)));
+      .push_back(std::shared_ptr<T>(new T(_testcase.layer_sz, SINGLE_LAYER_ID, flexnnet::OldNetworkLayer::Hidden)));
 
-   // Add external input to layer
+   // Add external input to basiclayer
    network_layers[0]->add_external_input(_testcase.input, {"input"});
 
-   // Set layer weights
+   // Set basiclayer weights
    network_layers[0]->layer_weights.set(_testcase.weights);
 
-   // Create output layer
+   // Create output basiclayer
    network_layers.push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(_testcase
-                                                                                        .layer_sz, "output", flexnnet::NetworkLayer::Output)));
+                                                                                        .layer_sz, "output", flexnnet::OldNetworkLayer::Output)));
 
-   // Add input from hidden layer
-   network_layers[1]->add_connection(*network_layers[0], flexnnet::LayerConnRecord::Forward);
+   // Add input from hidden basiclayer
+   network_layers[1]->add_connection(*network_layers[0], flexnnet::OldLayerConnRecord::Forward);
 
-   // Create diagonal matrix for output layer weights
+   // Create diagonal matrix for output basiclayer weights
    flexnnet::Array2D<double> diag(_testcase.layer_sz, _testcase.layer_sz + 1);
    for (int i = 0; i < _testcase.layer_sz; i++)
       diag.at(i, i) = 1.0;

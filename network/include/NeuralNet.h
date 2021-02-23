@@ -15,7 +15,7 @@ namespace flexnnet
    {
 
    public:
-      NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      NeuralNet(const std::vector<std::shared_ptr<OldNetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
       virtual ~NeuralNet();
 
    public:
@@ -41,14 +41,14 @@ namespace flexnnet
        *
       for (int i = 0; i < network_layers.size (); i++)
       {
-         // Get a network layer
-         NetworkLayer& layer = *network_layers[i];
+         // Get a network basiclayer
+         OldNetworkLayer& basiclayer = *network_layers[i];
 
-         const std::valarray<double> &invec = layer.coelesce_input(_xdatum);
-         layer.activate (invec);
+         const std::valarray<double> &invec = basiclayer.coelesce_input(_xdatum);
+         basiclayer.activate (invec);
       }
 
-      // Next add layer outputs
+      // Next add basiclayer outputs
       for (auto nlayer : network_layers)
       {
          if (nlayer->is_output_layer ())
@@ -63,7 +63,7 @@ namespace flexnnet
 
    template<class _InType, class _OutType>
    NeuralNet<_InType,
-             _OutType>::NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
+             _OutType>::NeuralNet(const std::vector<std::shared_ptr<OldNetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
       : BasicNeuralNet(_layers, _recurrent, _name)
    {
 

@@ -32,7 +32,7 @@ namespace flexnnet
 
    public:
 
-      // Return length of layer output valarray
+      // Return length of basiclayer output valarray
       size_t size() const;
       virtual size_t input_size() const;
 
@@ -42,11 +42,11 @@ namespace flexnnet
 
    public:
       /* ********************************************************************
-       * Public layer operational methods
+       * Public basiclayer operational methods
        */
 
       /**
-       * Calculate the value of the layer neuron vector based on the specified
+       * Calculate the value of the basiclayer neuron vector based on the specified
        * raw input vectors.
        * @param inputVec
        * @return
@@ -54,14 +54,14 @@ namespace flexnnet
       virtual const std::valarray<double>& activate(const std::valarray<double>& inputVec);
 
       /**
-       * Accumulate error specified in _errorv into the current layer error
+       * Accumulate error specified in _errorv into the current basiclayer error
        * @param _errorv
        * @return
        */
       virtual const std::valarray<double>& accumulate_error(const std::valarray<double>& _errorv);
 
       /*
-       * Return the current value of the network layer as a std::valarray
+       * Return the current value of the network basiclayer as a std::valarray
        */
       virtual const std::valarray<double>& operator()() const;
 
@@ -80,7 +80,7 @@ namespace flexnnet
       virtual const std::valarray<double>& calc_netin(const std::valarray<double>& _rawin) = 0;
 
       /*
-       * Calculate and return the derivative of the layer output with respect to
+       * Calculate and return the derivative of the basiclayer output with respect to
        * the net input for the most recent activation.
        */
       virtual const Array2D<double>& calc_dAdN(const std::valarray<double>& _out) = 0;
@@ -101,18 +101,19 @@ namespace flexnnet
       void stale(void);
 
    public:
+      const std::valarray<double>& const_value = layer_state.outputv;
       const size_t& const_layer_output_size_ref = layer_output_size;
 
    private:
 
       /* ********************************************************************
-       * Private layer configuration and provisioning data members
+       * Private basiclayer configuration and provisioning data members
        */
       const size_t layer_output_size;
 
    protected:
       /* ********************************************************************
-       * Protected layer state data members
+       * Protected basiclayer state data members
        */
       size_t layer_input_size;
 

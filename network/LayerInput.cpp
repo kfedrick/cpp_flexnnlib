@@ -6,9 +6,9 @@
 
 using flexnnet::LayerInput;
 
-size_t LayerInput::add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type)
+size_t LayerInput::add_connection(BasicLayer& _layer, OldLayerConnRecord::ConnectionType _type)
 {
-   // If we already have a connection from this layer then throw exception.
+   // If we already have a connection from this basiclayer then throw exception.
    const std::string& x = _layer.name();
    if (input_layer_names.find(_layer.name()) != input_layer_names.end())
    {
@@ -18,7 +18,7 @@ size_t LayerInput::add_connection(BasicLayer& _layer, LayerConnRecord::Connectio
       throw std::invalid_argument(sout.str());
    }
 
-   input_layers.push_back(LayerConnRecord(&_layer, _type));
+   input_layers.push_back(OldLayerConnRecord(&_layer, _type));
    input_layer_names.insert(_layer.name());
 
    virtual_input_vector.resize(virtual_input_vector.size() + _layer.size());
@@ -73,10 +73,10 @@ const std::valarray<double>& LayerInput::coelesce_input(const Datum& _xdatum)
       virtual_ndx = append_virtual_vector(virtual_ndx, inputv);
    }
 
-   // Next add layer outputs
+   // Next add basiclayer outputs
    for (size_t map_ndx = 0; map_ndx < input_layers.size(); map_ndx++)
    {
-      LayerConnRecord& conn = input_layers[map_ndx];
+      OldLayerConnRecord& conn = input_layers[map_ndx];
 
       const BasicLayer& in_layer = conn.get_input_layer();
 
@@ -95,7 +95,7 @@ void LayerInput::backprop_scatter(const std::valarray<double> _errorv)
    int errv_ndx = 0;
    for (size_t map_ndx = 0; map_ndx < input_layers.size(); map_ndx++)
    {
-      LayerConnRecord& conn = input_layers[map_ndx];
+      OldLayerConnRecord& conn = input_layers[map_ndx];
       size_t backprop_errorv_sz;
 
       BasicLayer& in_layer = conn.get_input_layer();
@@ -104,7 +104,7 @@ void LayerInput::backprop_scatter(const std::valarray<double> _errorv)
       for (size_t backprop_errorv_ndx = 0; backprop_errorv_ndx < backprop_errorv_sz; backprop_errorv_ndx++)
          backprop_error_vector.at(map_ndx)[backprop_errorv_ndx] = _errorv[errv_ndx++];
 
-      // Tell layer to accumulate the new errorv
+      // Tell basiclayer to accumulate the new errorv
       in_layer.accumulate_error(backprop_error_vector[map_ndx]);
    }
 }

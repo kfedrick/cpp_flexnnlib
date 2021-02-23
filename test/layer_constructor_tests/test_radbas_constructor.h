@@ -23,7 +23,7 @@ TEST_F(TestLayerConstructors, ConstructRadBasWithDefaults)
    const string NAME = "test1";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create layer
+   // Create basiclayer
    RadBas layer(OUT_SZ, NAME, network_layer_type);
 
    // Name and size should be as set_weights in constructor
@@ -47,7 +47,7 @@ TEST_F(TestLayerConstructors, ConstructRadBasWithInputSize)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create layer
+   // Create basiclayer
    RadBas layer(OUT_SZ, NAME, network_layer_type);
    layer.resize_input(RAWIN_SZ);
 
@@ -71,7 +71,7 @@ TEST_F(TestLayerConstructors, ConstructRadBasWithLayerTypeHidden)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
 
-   // Create layer
+   // Create basiclayer
    RadBas layer(OUT_SZ, NAME, network_layer_type);
 
    // Layer type should be Hidden by default
@@ -85,7 +85,7 @@ TEST_F(TestLayerConstructors, ConstructRadBasWithParams)
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
    RadBas::Parameters PARAMS = {.rescaled_flag = true};
 
-   // Create layer
+   // Create basiclayer
    RadBas layer(OUT_SZ, NAME, network_layer_type, PARAMS);
 
    // Layer type should be Hidden by default

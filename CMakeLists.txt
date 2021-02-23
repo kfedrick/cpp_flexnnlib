@@ -87,9 +87,9 @@ add_library(flexneuralnet
         datasets/include/Datum.h
         util/include/Array2D.h
         util/include/Array3D.h
-        network/include/NetworkLayer.h
-        network/LayerConnRecord.cpp
-        network/include/LayerConnRecord.h
+        network/include/OldNetworkLayer.h
+        network/OldLayerConnRecord.cpp
+        network/include/OldLayerConnRecord.h
         network/ExternalInputRecord.cpp
         network/include/ExternalInputRecord.h
         network/BasicNeuralNetSerializer.cpp
@@ -102,9 +102,9 @@ add_library(flexneuralnet
         trainers/include/TrainerConfig.h
         network/LayerInput.cpp
         network/include/LayerInput.h
-        network/NetworkOutput.cpp
-        network/include/NetworkOutput.h
-        network/NetworkLayer.cpp
+        network/OldNetworkOutput.cpp
+        network/include/OldNetworkOutput.h
+        network/OldNetworkLayer.cpp
         trainers/include/PerformanceMetrics.h
         datasets/include/DataSet.h
         datasets/include/Exemplar.h
@@ -134,7 +134,13 @@ add_library(flexneuralnet
         trainers/include/BackpropAlgo.h
         util/include/NetworkError.cpp
         util/include/NetworkError.h
-        datasets/include/VectorMap.h datasets/include/NamedValarray.h datasets/include/VectorizableMap.h network/BaseNeuralNet.cpp network/include/BaseNeuralNet.h network/NetworkTopology.cpp network/include/NetworkTopology.h)
+        datasets/include/VectorMap.h
+        datasets/include/NamedValarray.h
+        datasets/include/VectorizableMap.h
+        network/BaseNeuralNet.cpp
+        network/include/BaseNeuralNet.h
+        network/NetworkTopology.cpp
+        network/include/NetworkTopology.h network/NetworkLayer.cpp network/include/NetworkLayer.h network/LayerConnRecord.cpp network/include/LayerConnRecord.h network/NetworkOutput.cpp network/include/NetworkOutput.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

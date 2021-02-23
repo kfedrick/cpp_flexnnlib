@@ -5,16 +5,13 @@
 #include "BaseNeuralNet.h"
 #include <iostream>
 
+using std::vector;
 using flexnnet::BaseNeuralNet;
 using flexnnet::BasicLayer;
 
-BaseNeuralNet::BaseNeuralNet(const std::string& _name, const std::vector<std::shared_ptr<BasicLayer>>& _layers)
-   : NamedObject(_name), network_layers(_layers)
+BaseNeuralNet::BaseNeuralNet(flexnnet::NetworkTopology& _topology)
 {
-   std::map<std::string, std::valarray<double>> omap = init_network_output_layer();
-
-   for (auto& item : _layers)
-      layer_name_set.insert(item->name());
+   network_topology = std::shared_ptr<NetworkTopology>(&_topology);
 }
 
 BaseNeuralNet::~BaseNeuralNet()
@@ -51,33 +48,22 @@ std::map<std::string, std::valarray<double>> BaseNeuralNet::init_network_output_
    return opatt_map;
 }
 
-const flexnnet::NNetIO_Typ& BaseNeuralNet::activate(const NNetIO_Typ& _xdatum)
+const std::valarray<double>& BaseNeuralNet::activate(const NNetIO_Typ& _externin)
 {
    /*
     * Activate all network layers
     */
+   vector<std::shared_ptr<NetworkLayer>>& network_layers = network_topology->get_ordered_layers();
    for (int i = 0; i < network_layers.size(); i++)
-   {
-      // Get a network layer
-      BasicLayer& layer = *network_layers[i];
+      network_layers[i]->activate(_externin);
 
-      //const std::valarray<double>& invec = layer.coelesce_input(_xdatum);
-      //layer.activate(invec);
-   }
+   /*
+    * Marshal output layer values into a single vector using the virtual
+    * network_output_layer object.
+    */
+   network_output_layer.activate(_externin);
 
-   // Next add layer outputs
-   for (auto nlayer : network_layers)
-   {
-/*
-      if (nlayer->is_output_layer())
-      {
-         const std::valarray<double>& layer_outputv = (*nlayer)();
-         network_output[nlayer->name()] = layer_outputv;
-      }
-*/
-   }
-   //return network_output_pattern;
-   return network_output;
+   return network_output_layer.layer()->const_value;
 }
 
 const void BaseNeuralNet::backprop(const std::valarray<double>& _gradient)
@@ -89,16 +75,18 @@ NetworkWeights BaseNeuralNet::get_weights(void) const
 {
    NetworkWeights network_weights;
 
-   for (auto alayer_ptr : network_layers)
-      network_weights[alayer_ptr->name()].copy(alayer_ptr->layer_weights);
+   vector<std::shared_ptr<NetworkLayer>>& network_layers = network_topology->get_ordered_layers();
+   for (auto& layer_ptr : network_layers)
+      network_weights[layer_ptr->name()].copy(layer_ptr->layer()->layer_weights);
 
    return network_weights;
 }
 
 void BaseNeuralNet::set_weights(const NetworkWeights& _weights)
 {
-   for (auto alayer_ptr : network_layers)
-      alayer_ptr->layer_weights.copy(_weights.at(alayer_ptr->name()));
+   vector<std::shared_ptr<NetworkLayer>>& network_layers = network_topology->get_ordered_layers();
+   for (auto& layer_ptr : network_layers)
+      layer_ptr->layer()->layer_weights.copy(_weights.at(layer_ptr->name()));
 }
 
 std::string BaseNeuralNet::toJSON(void) const

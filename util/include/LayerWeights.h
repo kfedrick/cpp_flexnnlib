@@ -11,10 +11,10 @@
 namespace flexnnet
 {
    /**
-    * LayerWeights holds the learned parameters of the layer, including:
+    * LayerWeights holds the learned parameters of the basiclayer, including:
     *
-    *    weights - layer inter-connection weights
-    *    initial_layer_value - the initial value of the layer neurons
+    *    weights - basiclayer inter-connection weights
+    *    initial_layer_value - the initial value of the basiclayer neurons
     */
    class LayerWeights
    {
@@ -45,7 +45,7 @@ namespace flexnnet
       LayerWeights(const LayerWeights&& _lweights);
 
       /**
-       * Resize the layer weights
+       * Resize the basiclayer weights
        *
        * @param _layer_sz
        * @param _layer_input_sz
@@ -53,36 +53,36 @@ namespace flexnnet
       void resize(size_t _layer_sz, size_t _layer_input_sz);
 
       /**
-       * Zero the layer weights.
+       * Zero the basiclayer weights.
        */
       void zero(void);
 
       /**
-       * Initialize layer weights to specified value.
+       * Initialize basiclayer weights to specified value.
        */
       void set(const Array2D<double>& _weights);
 
       /**
-       * Initialize layer weights to specified value.
+       * Initialize basiclayer weights to specified value.
        *
        * @param _weights
        */
       void set(const std::vector<std::vector<double>>& _lweights);
 
       /**
-       * Set the initial value of the neurons upon layer reset.
+       * Set the initial value of the neurons upon basiclayer reset.
        *
        * @param _ival
        */
       void set_initial_value(const std::valarray<double>& _ival);
 
       /**
-       * Initialize layer weights to specified value.
+       * Initialize basiclayer weights to specified value.
        */
       void copy(const LayerWeights& _weights);
 
       /**
-       * Initialize layer weights to specified value.
+       * Initialize basiclayer weights to specified value.
        */
       void copy(const LayerWeights&& _weights);
 
@@ -103,7 +103,7 @@ namespace flexnnet
       LayerWeights& operator=(const std::vector<std::vector<double>>& _lweights);
 
       /**
-       * Adjust layer weights by the specified delta weight array.
+       * Adjust basiclayer weights by the specified delta weight array.
        */
       void adjust_weights(const Array2D<double>& _delta);
 

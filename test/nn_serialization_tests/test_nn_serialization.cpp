@@ -59,7 +59,7 @@ TEST_F(TestBasicNeuralNet, Serializer)
 
    std::shared_ptr<flexnnet::BasicNeuralNet> net = factory.build("net");
 
-   cout << "Print network layer names\n";
+   cout << "Print network basiclayer names\n";
    std::set<std::string> names = net->get_layer_names();
    for (auto& layer_name : names)
       cout << layer_name << "\n";
@@ -97,7 +97,7 @@ TEST_F(TestBasicNeuralNet, Deserializer)
    cout << "deserialize\n";
    std::shared_ptr<flexnnet::NeuralNet<Datum, Datum>> net = NeuralNetSerializer<Datum, Datum>::parse(target_json);
 
-   cout << "Print network layer names\n";
+   cout << "Print network basiclayer names\n";
    std::set<std::string> names = net->get_layer_names();
    for (auto& layer_name : names)
       cout << layer_name << "\n";
@@ -114,7 +114,7 @@ TEST_F(TestBasicNeuralNet, SaveNetworkWeights)
    cout << "deserialize\n";
    std::shared_ptr<flexnnet::NeuralNet<Datum, Datum>> net = NeuralNetSerializer<Datum, Datum>::parse(target_json);
 
-   cout << "Print network layer names\n";
+   cout << "Print network basiclayer names\n";
    std::set<std::string> names = net->get_layer_names();
    for (auto& layer_name : names)
       cout << layer_name << "\n";

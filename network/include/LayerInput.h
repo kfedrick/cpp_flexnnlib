@@ -12,7 +12,7 @@
 #include "Datum.h"
 #include "BasicLayer.h"
 #include "ExternalInputRecord.h"
-#include "LayerConnRecord.h"
+#include "OldLayerConnRecord.h"
 
 namespace flexnnet
 {
@@ -20,15 +20,15 @@ namespace flexnnet
    {
    public:
       size_t virtual_input_size(void) const;
-      const std::vector<LayerConnRecord>& get_input_connections() const;
-      std::vector<LayerConnRecord>& get_input_connections();
+      const std::vector<OldLayerConnRecord>& get_input_connections() const;
+      std::vector<OldLayerConnRecord>& get_input_connections();
       const std::vector<ExternalInputRecord>& get_external_inputs() const;
 
    public:
       /* ******************************************************************
        * Public member functions to connect layers and external inputs.
        */
-      virtual size_t add_connection(BasicLayer& _layer, LayerConnRecord::ConnectionType _type);
+      virtual size_t add_connection(BasicLayer& _layer, OldLayerConnRecord::ConnectionType _type);
       virtual size_t add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet);
       const std::valarray<double>& coelesce_input(const Datum& _xdatum);
       void backprop_scatter(const std::valarray<double> _errorv);
@@ -42,9 +42,9 @@ namespace flexnnet
 
       /*
        * Contains on ordered list of references to the network layers that provide input this
-       * network layer.
+       * network basiclayer.
        */
-      std::vector<LayerConnRecord> input_layers;
+      std::vector<OldLayerConnRecord> input_layers;
 
       std::set<std::string> input_layer_names;
 
@@ -54,7 +54,7 @@ namespace flexnnet
       std::valarray<double> virtual_input_vector;
 
       /*
-       * Local valarray to hold the backpropogated error vector for each input layer
+       * Local valarray to hold the backpropogated error vector for each input basiclayer
        */
       std::vector<std::valarray<double> > backprop_error_vector;
    };
@@ -64,12 +64,12 @@ namespace flexnnet
       return virtual_input_vector.size();
    }
 
-   inline const std::vector<LayerConnRecord>& LayerInput::get_input_connections() const
+   inline const std::vector<OldLayerConnRecord>& LayerInput::get_input_connections() const
    {
       return input_layers;
    }
 
-   inline std::vector<LayerConnRecord>& LayerInput::get_input_connections()
+   inline std::vector<OldLayerConnRecord>& LayerInput::get_input_connections()
    {
       return input_layers;
    }

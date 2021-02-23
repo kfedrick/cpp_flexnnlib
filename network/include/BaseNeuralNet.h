@@ -6,18 +6,17 @@
 #define FLEX_NEURALNET_BASENEURALNET_H_
 
 #include "flexnnet.h"
+#include "NetworkTopology.h"
+#include "NetworkOutput.h"
 
 namespace flexnnet
 {
-   typedef  std::map<std::string, std::valarray<double>> NNetIO_Typ;
-
-   class BaseNeuralNet : public NamedObject
+   class BaseNeuralNet
    {
    public:
-      BaseNeuralNet(const std::string& _name = "BasicNeuralNet", const std::vector<std::shared_ptr<BasicLayer>>& _layers = {});
+      BaseNeuralNet(NetworkTopology& _topology);
       virtual ~BaseNeuralNet();
 
-   public:
       /**
        * BaseNeuralNet::size(void)
        *    Returns the size of the network output vector.
@@ -25,8 +24,6 @@ namespace flexnnet
        * @return - the size of the network output vector.
        */
       size_t size(void);
-
-   public:
 
       /**
        * Initialize network weights and other network state information
@@ -46,7 +43,7 @@ namespace flexnnet
        * @param _indatum - the input datum to the network
        * @return - the network output for the specified input data
        */
-      virtual const NNetIO_Typ& activate(const NNetIO_Typ& _input);
+      virtual const std::valarray<double>& activate(const NNetIO_Typ& _input);
 
       /**
        * Calculate the Jacobian for most recent network activation as the partial
@@ -65,9 +62,7 @@ namespace flexnnet
 
       const std::set<std::string>& get_layer_names(void);
 
-   public:
       std::string toJSON(void) const;
-      const std::vector<std::shared_ptr<BasicLayer>> get_layers(void) const;
 
    private:
       /**
@@ -81,10 +76,10 @@ namespace flexnnet
    private:
       size_t network_output_size;
 
-      // Network layers stored in proper activation order
-      std::vector<std::shared_ptr<BasicLayer>> network_layers;
+      // Network topology
+      std::shared_ptr<NetworkTopology> network_topology;
 
-      // Set containing layer names
+      // Set containing basiclayer names
       std::set<std::string> layer_name_set;
 
       // recurrent_network_flag - Set if this network has recurrent connections.
@@ -93,9 +88,7 @@ namespace flexnnet
       // network_output_conn - Used to coelesce network output from the output layers
       // and to scatter network backpropagation error to the output layers.
       //
-      NetworkOutput network_output_conn;
-
-      NNetIO_Typ network_output;
+      NetworkOutput network_output_layer;
    };
 
    inline const std::set<std::string>& BaseNeuralNet::get_layer_names(void)
@@ -105,12 +98,7 @@ namespace flexnnet
 
    inline size_t BaseNeuralNet::size(void)
    {
-      return network_output_conn.virtual_input_size();
-   }
-
-   inline const std::vector<std::shared_ptr<BasicLayer>> BaseNeuralNet::get_layers(void) const
-   {
-      return network_layers;
+      return network_output_layer.size();
    }
 }
 

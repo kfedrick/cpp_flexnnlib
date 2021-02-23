@@ -6,15 +6,14 @@
 #define FLEX_NEURALNET_BASICNEURALNET_H_
 
 #include "flexnnet.h"
+#include "OldNetworkOutput.h"
 
 namespace flexnnet
 {
-   typedef  std::map<std::string, std::valarray<double>> NNetIO_Typ;
-
    class BasicNeuralNet : public NamedObject
    {
    public:
-      BasicNeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      BasicNeuralNet(const std::vector<std::shared_ptr<OldNetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
       virtual ~BasicNeuralNet();
 
    public:
@@ -67,7 +66,7 @@ namespace flexnnet
 
    public:
       std::string toJSON(void) const;
-      const std::vector<std::shared_ptr<NetworkLayer>> get_layers(void) const;
+      const std::vector<std::shared_ptr<OldNetworkLayer>> get_layers(void) const;
 
    private:
       /**
@@ -82,9 +81,9 @@ namespace flexnnet
       size_t network_output_size;
 
       // Network layers stored in proper activation order
-      std::vector<std::shared_ptr<NetworkLayer> > network_layers;
+      std::vector<std::shared_ptr<OldNetworkLayer> > network_layers;
 
-      // Set containing layer names
+      // Set containing basiclayer names
       std::set<std::string> layer_name_set;
 
       // recurrent_network_flag - Set if this network has recurrent connections.
@@ -93,7 +92,7 @@ namespace flexnnet
       // network_output_conn - Used to coelesce network output from the output layers
       // and to scatter network backpropagation error to the output layers.
       //
-      NetworkOutput network_output_conn;
+      OldNetworkOutput network_output_conn;
       NNetIO_Typ network_output;
       // network_output_pattern - Cached value for the most recent network activation
       //
@@ -114,7 +113,7 @@ namespace flexnnet
       return network_output_conn.virtual_input_size();
    }
 
-   inline const std::vector<std::shared_ptr<NetworkLayer>> BasicNeuralNet::get_layers(void) const
+   inline const std::vector<std::shared_ptr<OldNetworkLayer>> BasicNeuralNet::get_layers(void) const
    {
       return network_layers;
    }

@@ -48,7 +48,7 @@ template<typename T>
 void BasicTrainerTests<T>::SetUp()
 {
    // Create neural network with no layers
-   std::vector<std::shared_ptr<flexnnet::NetworkLayer>> layers;
+   std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>> layers;
    nnet.reset(new NeuralNet<Datum, Datum>(layers, false));
 
    // Add entries to test data set_weights.

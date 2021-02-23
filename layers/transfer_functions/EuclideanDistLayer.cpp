@@ -8,7 +8,7 @@ using flexnnet::Array2D;
 using flexnnet::EuclideanDistLayer;
 
 EuclideanDistLayer::EuclideanDistLayer(size_t _sz, const std::string& _name, NetworkLayerType _type)
-   : NetworkLayer(_sz, _name, _type)
+   : OldNetworkLayer(_sz, _name, _type)
 {
    squared_euclidean_dist.resize(_sz);
    spread.resize(_sz);

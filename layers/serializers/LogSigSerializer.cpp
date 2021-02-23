@@ -39,15 +39,15 @@ namespace flexnnet
 
    template<> std::shared_ptr<LogSig> flexnnet::LayerSerializer<LogSig>::parse(const rapidjson::Value& _obj)
    {
-      // First get common network layer information
+      // First get common network basiclayer information
       BasicLayerInfo network_layer_info = BasicLayerSerializer::parseBasic(_obj);
 
       std::string type = _obj["transfer_function"]["type"].GetString();
       double gain = _obj["transfer_function"]["parameters"]["gain"].GetDouble();
 
-      NetworkLayer::NetworkLayerType network_layer_type = NetworkLayer::Output;
+      OldNetworkLayer::NetworkLayerType network_layer_type = OldNetworkLayer::Output;
       if (!network_layer_info.is_output_layer)
-         network_layer_type = NetworkLayer::Hidden;
+         network_layer_type = OldNetworkLayer::Hidden;
 
       std::shared_ptr<LogSig> layer_ptr = std::shared_ptr<LogSig>(new LogSig(network_layer_info.size, network_layer_info
          .id, network_layer_type));

@@ -25,7 +25,7 @@ TEST_F(TestLayerConstructors, ConstructPureLinWithDefaults)
    const string NAME = "test1";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create layer
+   // Create basiclayer
    PureLin layer(OUT_SZ, NAME, network_layer_type);
 
    // Name and size should be as set_weights in constructor
@@ -49,7 +49,7 @@ TEST_F(TestLayerConstructors, ConstructPureLinWithInputSize)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create layer
+   // Create basiclayer
    PureLin layer(OUT_SZ, NAME, network_layer_type);
    layer.resize_input(RAWIN_SZ);
 
@@ -73,7 +73,7 @@ TEST_F(TestLayerConstructors, ConstructPureLinWithLayerTypeHidden)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
 
-   // Create layer
+   // Create basiclayer
    PureLin layer(OUT_SZ, NAME, network_layer_type);
 
    // Layer type should be Hidden by default
@@ -87,7 +87,7 @@ TEST_F(TestLayerConstructors, ConstructPureLinWithParams)
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
    PureLin::Parameters PARAMS = {.gain = 1.33};
 
-   // Create layer
+   // Create basiclayer
    PureLin layer(OUT_SZ, NAME, network_layer_type, PARAMS);
 
    // Layer type should be Hidden by default

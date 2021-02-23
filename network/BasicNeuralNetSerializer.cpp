@@ -9,12 +9,12 @@
 #include "SoftMax.h"
 #include "RadBas.h"
 
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 #include <iostream>
 
 using flexnnet::ExternalInputRecord;
-using flexnnet::LayerConnRecord;
+using flexnnet::OldLayerConnRecord;
 using flexnnet::BasicLayerSerializer;
 using flexnnet::BasicNeuralNetSerializer;
 
@@ -24,7 +24,7 @@ using flexnnet::TanSig;
 using flexnnet::SoftMax;
 using flexnnet::RadBas;
 
-using flexnnet::NetworkLayer;
+using flexnnet::OldNetworkLayer;
 
 std::string BasicNeuralNetSerializer::toJson(const BasicNeuralNet& _neural_net)
 {
@@ -62,12 +62,12 @@ rapidjson::Value& BasicNeuralNetSerializer::encode(rapidjson::Value& _obj, const
 
    // Second encode network layers
    rapidjson::Value _network_layers_obj;
-   const std::vector<std::shared_ptr<NetworkLayer>>& network_layers = _neural_net.get_layers();
+   const std::vector<std::shared_ptr<OldNetworkLayer>>& network_layers = _neural_net.get_layers();
    encodeNetworkLayers(_network_layers_obj, network_layers);
 
    _obj.AddMember("network_layers", _network_layers_obj, allocator);
 
-   // Next encode layer connection information
+   // Next encode basiclayer connection information
    rapidjson::Value _network_conn_obj;
    encodeLayerTopology(_network_conn_obj, network_layers);
 
@@ -86,7 +86,7 @@ rapidjson::Value& BasicNeuralNetSerializer::encode(rapidjson::Value& _obj, const
 }
 
 rapidjson::Value&
-BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<NetworkLayer>>& _network_layers)
+BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers)
 {
    rapidjson::Document layerdoc;
 
@@ -94,11 +94,11 @@ BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std:
 
    for (auto& netlayer : _network_layers)
    {
-      // Get and parse the layer json string
+      // Get and parse the basiclayer json string
       std::string layer_json = netlayer->toJson();
       layerdoc.Parse(layer_json.c_str());
 
-      // Push the layer Value object unto the encoded network layers array
+      // Push the basiclayer Value object unto the encoded network layers array
       _obj.PushBack(layerdoc.GetObject(), allocator);
    }
 
@@ -106,7 +106,7 @@ BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std:
 }
 
 rapidjson::Value&
-BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<NetworkLayer>>& _network_layers)
+BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers)
 {
    _obj.SetArray();
 
@@ -121,7 +121,7 @@ BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std:
    return _obj;
 }
 
-rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::Value& _obj, const NetworkLayer& _layer)
+rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::Value& _obj, const OldNetworkLayer& _layer)
 {
    _obj.SetObject();
 
@@ -132,7 +132,7 @@ rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::
 
    rapidjson::Value layerobj;
 
-   // Add layer input connections
+   // Add basiclayer input connections
    layerobj.SetArray();
 
    rapidjson::Value conn_obj;
@@ -153,7 +153,7 @@ rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::
 }
 
 rapidjson::Value&
-flexnnet::BasicNeuralNetSerializer::encodeConnectionFromLayer(rapidjson::Value& _obj, const LayerConnRecord& _conn)
+flexnnet::BasicNeuralNetSerializer::encodeConnectionFromLayer(rapidjson::Value& _obj, const OldLayerConnRecord& _conn)
 {
    _obj.SetObject();
 
@@ -217,13 +217,13 @@ rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkInput(rapidjson::Value&
    return _obj;
 }
 
-std::string flexnnet::BasicNeuralNetSerializer::connTypeToString(LayerConnRecord::ConnectionType _type)
+std::string flexnnet::BasicNeuralNetSerializer::connTypeToString(OldLayerConnRecord::ConnectionType _type)
 {
    switch (_type)
    {
-      case LayerConnRecord::ConnectionType::Forward:return "forward";
-      case LayerConnRecord::ConnectionType::Recurrent:return "recurrent";
-      case LayerConnRecord::ConnectionType::Lateral:return "lateral";
+      case OldLayerConnRecord::ConnectionType::Forward:return "forward";
+      case OldLayerConnRecord::ConnectionType::Recurrent:return "recurrent";
+      case OldLayerConnRecord::ConnectionType::Lateral:return "lateral";
    };
 }
 
