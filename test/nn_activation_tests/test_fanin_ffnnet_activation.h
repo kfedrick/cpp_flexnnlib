@@ -95,7 +95,7 @@ template<typename T> std::string TestFaninFFNNActivation<T>::get_typeid()
 
 template<typename T> void TestFaninFFNNActivation<T>::create_fanin_ffnnet(const FaninTestCase& _testcase)
 {
-   // Set network basiclayer names
+   // Set network basic_layer names
    HIDDEN_LAYER_TYPE_ID = TestFaninFFNNActivation<T>::get_typeid();
    FANIN_LAYER1_ID = HIDDEN_LAYER_TYPE_ID + "1";
    FANIN_LAYER2_ID = HIDDEN_LAYER_TYPE_ID + "2";
@@ -106,36 +106,36 @@ template<typename T> void TestFaninFFNNActivation<T>::create_fanin_ffnnet(const 
 
    std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>> network_layers;
 
-   // Create hidden fanin basiclayer #1
+   // Create hidden fanin basic_layer #1
    network_layers
       .push_back(std::shared_ptr<T>(new T(_testcase.hlayer1_sz, FANIN_LAYER1_ID, flexnnet::OldNetworkLayer::Hidden)));
 
-   // Add external input to hidden fanin basiclayer #1
+   // Add external input to hidden fanin basic_layer #1
    network_layers[0]->add_external_input(_testcase.input, {"input1"});
 
-   // Set hidden fanin basiclayer #1 weights
+   // Set hidden fanin basic_layer #1 weights
    network_layers[0]->layer_weights.set(_testcase.hlayer1_weights);
 
-   // Create hidden fanin basiclayer #2
+   // Create hidden fanin basic_layer #2
    network_layers
       .push_back(std::shared_ptr<T>(new T(_testcase.hlayer2_sz, FANIN_LAYER2_ID, flexnnet::OldNetworkLayer::Hidden)));
 
-   // Add external input to hidden fanin basiclayer #2
+   // Add external input to hidden fanin basic_layer #2
    network_layers[1]->add_external_input(_testcase.input, {"input2"});
 
-   // Set hidden fanin basiclayer #2 weights
+   // Set hidden fanin basic_layer #2 weights
    network_layers[1]->layer_weights.set(_testcase.hlayer2_weights);
 
-   // Create output basiclayer
+   // Create output basic_layer
    size_t total_sz = _testcase.hlayer1_sz + _testcase.hlayer2_sz;
    network_layers
       .push_back(std::shared_ptr<flexnnet::PureLin>(new flexnnet::PureLin(total_sz, "output", flexnnet::OldNetworkLayer::Output)));
 
-   // Add input from both hidden basiclayer
+   // Add input from both hidden basic_layer
    network_layers[2]->add_connection(*network_layers[0], flexnnet::OldLayerConnRecord::Forward);
    network_layers[2]->add_connection(*network_layers[1], flexnnet::OldLayerConnRecord::Forward);
 
-   // Create diagonal matrix for output basiclayer weights
+   // Create diagonal matrix for output basic_layer weights
    flexnnet::Array2D<double> diag(total_sz, total_sz + 1);
    for (int i = 0; i < total_sz; i++)
       diag.at(i, i) = 1.0;

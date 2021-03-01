@@ -8,7 +8,7 @@ using flexnnet::LayerInput;
 
 size_t LayerInput::add_connection(BasicLayer& _layer, OldLayerConnRecord::ConnectionType _type)
 {
-   // If we already have a connection from this basiclayer then throw exception.
+   // If we already have a connection from this basic_layer then throw exception.
    const std::string& x = _layer.name();
    if (input_layer_names.find(_layer.name()) != input_layer_names.end())
    {
@@ -69,11 +69,11 @@ const std::valarray<double>& LayerInput::coelesce_input(const Datum& _xdatum)
    // First add external fields
    for (auto& inputrec : external_inputs)
    {
-      const std::valarray<double>& inputv = _xdatum[inputrec.get_index()];
+      const std::valarray<double>& inputv = _xdatum[inputrec.index()];
       virtual_ndx = append_virtual_vector(virtual_ndx, inputv);
    }
 
-   // Next add basiclayer outputs
+   // Next add basic_layer outputs
    for (size_t map_ndx = 0; map_ndx < input_layers.size(); map_ndx++)
    {
       OldLayerConnRecord& conn = input_layers[map_ndx];
@@ -104,7 +104,7 @@ void LayerInput::backprop_scatter(const std::valarray<double> _errorv)
       for (size_t backprop_errorv_ndx = 0; backprop_errorv_ndx < backprop_errorv_sz; backprop_errorv_ndx++)
          backprop_error_vector.at(map_ndx)[backprop_errorv_ndx] = _errorv[errv_ndx++];
 
-      // Tell basiclayer to accumulate the new errorv
+      // Tell basic_layer to accumulate the new errorv
       in_layer.accumulate_error(backprop_error_vector[map_ndx]);
    }
 }

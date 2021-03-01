@@ -11,7 +11,6 @@
 
 namespace flexnnet
 {
-   typedef std::map<std::string, std::valarray<double>> NNetIO_Typ;
 }
 
 #endif //FLEX_NEURALNET_FLEXNNET_NETWORKS_H_

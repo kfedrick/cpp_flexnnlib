@@ -25,8 +25,12 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      LogSig(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
+      LogSig(size_t _sz, const std::string& _name, const Parameters& _params = DEFAULT_PARAMS);
+      LogSig(const LogSig& _logsig);
       ~LogSig();
+
+      LogSig& operator=(const LogSig& _purelin);
+      std::shared_ptr<BasicLayer> clone(void) const override;
 
       void set_gain(double _val);
       double get_gain(void) const;
@@ -37,6 +41,9 @@ namespace flexnnet
    protected:
       const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
       const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
+
+   private:
+      void copy(const LogSig& _logsig);
 
    private:
       Parameters params;

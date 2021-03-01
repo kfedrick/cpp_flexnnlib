@@ -41,7 +41,7 @@ void BasicNeuralNetFactory::set_network_input(const Datum& _network_input)
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::set_network_input() - "
-         << "Can't reset network input after basiclayer external inputs have been set_weights."
+         << "Can't reset network input after basic_layer external inputs have been set_weights."
          << std::endl;
       throw std::logic_error(sout.str());
    }
@@ -56,8 +56,8 @@ std::shared_ptr<BasicNeuralNet> BasicNeuralNetFactory::build(const std::string& 
 
    validate();
 
-   // Create a list of basiclayer pointers sorted by activation order.
-   std::vector<std::shared_ptr<OldNetworkLayer>> ordered_layer_list;
+   // Create a list of basic_layer pointers sorted by activation order.
+   std::vector<std::shared_ptr<BasicLayer>> ordered_layer_list;
    for (auto& layer_name : layer_activation_order)
    {
       ordered_layer_list.push_back(layers[layer_name]);
@@ -74,10 +74,10 @@ std::shared_ptr<BasicNeuralNet> BasicNeuralNetFactory::build(const std::string& 
 }
 
 /**
- * Add connection to the basiclayer, _to, from the basiclayer, _from.
+ * Add connection to the basic_layer, _to, from the basic_layer, _from.
  *
- * @param _to - the name of the basiclayer to recieve input
- * @param _from - the name of the basiclayer to send its output
+ * @param _to - the name of the basic_layer to recieve input
+ * @param _from - the name of the basic_layer to send its output
  */
 void
 BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::string& _from, OldLayerConnRecord::ConnectionType _type)
@@ -87,7 +87,7 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
       static std::stringstream sout;
       sout.clear();
       sout << "Error : BasicNeuralNetFactory::add_layer_connection() - "
-           << "No such basiclayer, _to = \"" << _to.c_str() << "\"." << std::endl;
+           << "No such basic_layer, _to = \"" << _to.c_str() << "\"." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
@@ -96,7 +96,7 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
       static std::stringstream sout;
       sout.clear();
       sout << "Error : BasicNeuralNetFactory::add_layer_connection() - "
-           << "No such basiclayer, _from = \"" << _from.c_str() << "\"." << std::endl;
+           << "No such basic_layer, _from = \"" << _from.c_str() << "\"." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
@@ -113,9 +113,9 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
    switch (_type)
    {
       /*
-       * In order to set_weights a valid forward connection from basiclayer _from to basiclayer _to, the
-       * _from basiclayer must not have a forward activation dependency on output from the
-       * _to basiclayer as this would indicate a cycle. Likewise the _to and _from layers
+       * In order to set_weights a valid forward connection from basic_layer _from to basic_layer _to, the
+       * _from basic_layer must not have a forward activation dependency on output from the
+       * _to basic_layer as this would indicate a cycle. Likewise the _to and _from layers
        * must not be the same.
        */
       case OldLayerConnRecord::Forward:
@@ -135,9 +135,9 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
          break;
 
          /*
-          * To set_weights a valid recurrent connection from basiclayer _from to basiclayer _to, the
-          * _from basiclayer must already have a forward activation depencency from the
-          * _to basiclayer, or the _to and _from basiclayer must be the same.
+          * To set_weights a valid recurrent connection from basic_layer _from to basic_layer _to, the
+          * _from basic_layer must already have a forward activation depencency from the
+          * _to basic_layer, or the _to and _from basic_layer must be the same.
           */
       case OldLayerConnRecord::Recurrent:
          std::cout << _to.c_str() << " in set_weights? " << (dependencies.find(_to) != dependencies.end()) << std::endl;
@@ -159,8 +159,8 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
          break;
 
          /*
-          * To set_weights a valid lateral connection from basiclayer _from to basiclayer _to, the
-          * _to and _from basiclayer must be distinct.
+          * To set_weights a valid lateral connection from basic_layer _from to basic_layer _to, the
+          * _to and _from basic_layer must be distinct.
           */
       case OldLayerConnRecord::Lateral:std::set<std::string> d1, d2;
          if (_to == _from)
@@ -184,7 +184,7 @@ BasicNeuralNetFactory::add_layer_connection(const std::string& _to, const std::s
 }
 
 /**
- * Add a connection to the basiclayer, _to, from an external input vector.
+ * Add a connection to the basic_layer, _to, from an external input vector.
  * @param _to
  * @param _vec
  */
@@ -196,7 +196,7 @@ BasicNeuralNetFactory::set_layer_external_input(const std::string& _to, const Da
       static std::stringstream sout;
       sout.clear();
       sout << "Error : BasicNeuralNetFactory::add_layer_external_input() - "
-           << "No such basiclayer, _to = \"" << _to.c_str() << "\"." << std::endl;
+           << "No such basic_layer, _to = \"" << _to.c_str() << "\"." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
@@ -212,7 +212,7 @@ BasicNeuralNetFactory::set_layer_external_input(const std::string& _to, const Da
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::add_layer_external_input() - "
-         << "Can't add external basiclayer input - network input not yet specified"
+         << "Can't add external basic_layer input - network input not yet specified"
          << std::endl;
       throw std::logic_error (sout.str ());
    }
@@ -247,7 +247,7 @@ void BasicNeuralNetFactory::validate()
    }
 
    /*
-    * Check that at least one basiclayer receives external network input.
+    * Check that at least one basic_layer receives external network input.
     */
    if (!layer_external_input_set)
    {
@@ -255,13 +255,13 @@ void BasicNeuralNetFactory::validate()
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::validate_network() - "
-         << "No basiclayer external inputs have been set_weights."
+         << "No basic_layer external inputs have been set_weights."
          << std::endl;
       throw std::logic_error(sout.str());
    }
 
    /*
-    * Check that there is at least one network basiclayer designated as an network output basiclayer.
+    * Check that there is at least one network basic_layer designated as an network output basic_layer.
     */
    if (outputLayerCount() == 0)
    {
@@ -285,7 +285,7 @@ void BasicNeuralNetFactory::validate()
       sout.clear();
       sout
          << "Error : BasicNeuralNetFactory::validate_network() - "
-         << "basiclayer \"" << bad_layers.begin()->c_str() << "\" has no basiclayer inputs specified."
+         << "basic_layer \"" << bad_layers.begin()->c_str() << "\" has no basic_layer inputs specified."
          << std::endl;
       throw std::logic_error(sout.str());
    }
@@ -350,7 +350,7 @@ std::set<std::string> BasicNeuralNetFactory::checkLayerInputSize()
 
 /**
  * Return a set containing the names of layers directly through forward
- * connections, feeding activity into the basiclayer, _name.
+ * connections, feeding activity into the basic_layer, _name.
  *
  * @param _dependencies
  * @param _name
@@ -369,7 +369,7 @@ void BasicNeuralNetFactory::getForwardDependencies(std::set<std::string>& _depen
          continue;
 
       /*
-       * If this basiclayer is not already in our dependency list then
+       * If this basic_layer is not already in our dependency list then
        * add it and recurse; otherwise we've recursed this path already
        * so do nothing.
        */
@@ -384,7 +384,7 @@ void BasicNeuralNetFactory::getForwardDependencies(std::set<std::string>& _depen
 
 /**
  * Return a set containing the names of layers through forward or recurrent
- * connections, feeding activity into the basiclayer, _name.
+ * connections, feeding activity into the basic_layer, _name.
  *
  * @param _dependencies
  * @param _name
@@ -399,7 +399,7 @@ void BasicNeuralNetFactory::getAllDependencies(std::set<std::string>& _dependenc
    for (auto& record : layer_input_records)
    {
       /*
-       * If this basiclayer is not already in our dependency list then
+       * If this basic_layer is not already in our dependency list then
        * add it and recurse; otherwise we've recursed this path already
        * so do nothing.
        */
@@ -420,9 +420,9 @@ void BasicNeuralNetFactory::updateActivationOrder(void)
       std::string layer_name = item.first;
 
       /*
-       * Find the first (if any) basiclayer already in the ordered activation list
-       * that has a feedforward input dependency on the new basiclayer and insert the
-       * new basiclayer just in front of it.
+       * Find the first (if any) basic_layer already in the ordered activation list
+       * that has a feedforward input dependency on the new basic_layer and insert the
+       * new basic_layer just in front of it.
        */
       bool inserted = false;
       for (auto it = layer_activation_order.begin(); it != layer_activation_order.end(); ++it)

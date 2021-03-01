@@ -15,7 +15,7 @@ namespace flexnnet
 
    template<class _LayerType> class LayerSerializer : protected BasicLayerSerializer
    {
-      friend std::map<std::string, std::shared_ptr<OldNetworkLayer>>
+      friend std::map<std::string, std::shared_ptr<BasicLayer>>
       BasicNeuralNetSerializer::parseNetworkLayers(const rapidjson::Value& _obj);
 
    public:
@@ -32,7 +32,7 @@ namespace flexnnet
    {
       std::string json;
 
-      // First encode common network basiclayer information
+      // First encode common network basic_layer information
       rapidjson::Value network_json_obj;
       BasicLayerSerializer::encodeBasic(network_json_obj, _layer);
 

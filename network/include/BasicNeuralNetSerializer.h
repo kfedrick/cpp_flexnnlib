@@ -28,7 +28,7 @@ namespace flexnnet
 
       /**
        * Structure NetworkLayerInfo is used by the static parse method to
-       * return information regarding the common network basiclayer components.
+       * return information regarding the common network basic_layer components.
        */
       struct BasicNeuralNetInfo
       {
@@ -46,26 +46,26 @@ namespace flexnnet
    public:
       static rapidjson::Value& encode(rapidjson::Value& _obj, const BasicNeuralNet& _neural_net);
       static rapidjson::Value&
-      encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers);
+      encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<BasicLayer>>& _network_layers);
       static rapidjson::Value&
-      encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers);
-      static rapidjson::Value& encodeNetworkConnections(rapidjson::Value& _obj, const OldNetworkLayer& _layer);
+      encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<BasicLayer>>& _network_layers);
+      static rapidjson::Value& encodeNetworkConnections(rapidjson::Value& _obj, const BasicLayer& _layer);
       static rapidjson::Value&
       encodeExternalLayerInput(rapidjson::Value& _obj, const std::vector<ExternalInputRecord>& _xinput);
-      static rapidjson::Value& encodeConnectionFromLayer(rapidjson::Value& _obj, const OldLayerConnRecord& _conn);
+      static rapidjson::Value& encodeConnectionFromLayer(rapidjson::Value& _obj, const BasicLayer& _conn);
       static rapidjson::Value& encodeNetworkInput(rapidjson::Value& _obj, const Datum& _datum);
 
    public:
-      static std::vector<std::shared_ptr<OldNetworkLayer>>
+      static std::vector<std::shared_ptr<BasicLayer>>
       parseNetworkTopology(const rapidjson::Value& _obj, std::map<std::string,
                                                                   std::shared_ptr<
-                                                                     OldNetworkLayer>>& _layers, const Datum& _network_input);
+                                                                     BasicLayer>>& _layers, const Datum& _network_input);
       static LayerInputInfo parseLayerConnections(const rapidjson::Value& _obj);
       static Datum parseNetworkInput(const rapidjson::Value& _obj);
       static LayerInputInfo parseExternalInput(const rapidjson::Value& _obj);
       static std::string connTypeToString(OldLayerConnRecord::ConnectionType _type);
       static OldLayerConnRecord::ConnectionType StringToConnType(const std::string& _typeStr);
-      static std::map<std::string, std::shared_ptr<OldNetworkLayer>> parseNetworkLayers(const rapidjson::Value& _obj);
+      static std::map<std::string, std::shared_ptr<BasicLayer>> parseNetworkLayers(const rapidjson::Value& _obj);
 
    };
 }

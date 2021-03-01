@@ -41,14 +41,14 @@ namespace flexnnet
        *
       for (int i = 0; i < network_layers.size (); i++)
       {
-         // Get a network basiclayer
-         OldNetworkLayer& basiclayer = *network_layers[i];
+         // Get a network basic_layer
+         OldNetworkLayer& basic_layer = *network_layers[i];
 
-         const std::valarray<double> &invec = basiclayer.coelesce_input(_xdatum);
-         basiclayer.activate (invec);
+         const std::valarray<double> &invec = basic_layer.coelesce_input(_xdatum);
+         basic_layer.activate (invec);
       }
 
-      // Next add basiclayer outputs
+      // Next add basic_layer outputs
       for (auto nlayer : network_layers)
       {
          if (nlayer->is_output_layer ())

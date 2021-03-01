@@ -6,7 +6,7 @@
 
 using flexnnet::NetworkOutput;
 
-NetworkOutput::NetworkOutput() : NetworkLayer()
+NetworkOutput::NetworkOutput() : NetworkLayerImpl()
 {
    layer_name = "__network_output";
 }
@@ -23,5 +23,5 @@ std::shared_ptr<flexnnet::BasicLayer>& NetworkOutput::layer()
 const std::valarray<double>& NetworkOutput::activate(const NNetIO_Typ& _externin)
 {
    marshal_inputs(_externin);
-   return virtual_input_vector;
+   return virtual_input_vector_const_ref;
 }

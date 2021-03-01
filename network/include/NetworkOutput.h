@@ -6,23 +6,23 @@
 #define FLEX_NEURALNET_NETWORKOUTPUT_H_
 
 #include "flexnnet_networks.h"
-#include "NetworkLayer.h"
+#include "NetworkLayerImpl.h"
 
 namespace flexnnet
 {
-   class NetworkOutput : public NetworkLayer
+   class NetworkOutput : public NetworkLayerImpl
    {
    public:
       NetworkOutput();
       ~NetworkOutput();
 
-      const std::string& name() const;
+      const std::string& name() const override;
 
-      size_t size() const;
+      size_t size() const override;
 
-      const std::valarray<double>& value() const;
+      const std::valarray<double>& value() const override;
 
-      std::shared_ptr<BasicLayer>& layer();
+      std::shared_ptr<BasicLayer>& layer() override;
 
       /**
        * Marshal layer inputs, activate the base layer and return the
@@ -30,7 +30,7 @@ namespace flexnnet
        * @param _externin
        * @return
        */
-      const std::valarray<double>& activate(const NNetIO_Typ& _externin);
+      const std::valarray<double>& activate(const NNetIO_Typ& _externin) override;
 
    private:
       std::string layer_name;
@@ -46,13 +46,13 @@ namespace flexnnet
    inline
    size_t NetworkOutput::size() const
    {
-      return virtual_input_vector.size();
+      return virtual_input_vector_const_ref.size();
    }
 
    inline
    const std::valarray<double>& NetworkOutput::value() const
    {
-      return virtual_input_vector;
+      return virtual_input_vector_const_ref;
    }
 }
 #endif //FLEX_NEURALNET_NETWORKOUTPUT_H_

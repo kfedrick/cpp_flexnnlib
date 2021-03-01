@@ -11,7 +11,7 @@ using flexnnet::BasicLayer;
 using flexnnet::RadBas;
 
 /**
- * Test serialization of 2x5 RadBas basiclayer
+ * Test serialization of 2x5 RadBas basic_layer
  */
 TEST_F(TestLayerSerialization, SerializeRadBas)
 {
@@ -21,7 +21,7 @@ TEST_F(TestLayerSerialization, SerializeRadBas)
    const int IN_SZ = 5;
    const std::string NAME = "test";
 
-   // Construct basiclayer
+   // Construct basic_layer
    RadBas layer(OUT_SZ, NAME, BasicLayer::Output);
    layer.resize_input(IN_SZ);
 
@@ -36,7 +36,7 @@ TEST_F(TestLayerSerialization, SerializeRadBas)
    // Set gain
    layer.set_rescaled(false);
 
-   // Get serialized basiclayer as Json string
+   // Get serialized basic_layer as Json string
    std::string output_json = layer.toJson();
    std::cout << "\n\n" << output_json << std::endl;
 

@@ -34,6 +34,15 @@ add_executable(test_nn_activation nn_activation_tests/test_nn_activation.cpp nn_
 target_link_libraries(test_nn_activation gtest flexneuralnet)
 add_test(NAME nn_activation_tests COMMAND test_nn_activation)
 
+add_executable(test_basenn_activation
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        basenn_activation_tests/SingleLayerNNActivationTestFixture.h basenn_activation_tests/SingleLayerNNActivationTestFixture.cpp
+        basenn_activation_tests/FaninNNActivationTestFixture.h basenn_activation_tests/FaninNNActivationTestFixture.cpp
+        basenn_activation_tests/FanoutNNActivationTestFixture.h basenn_activation_tests/FanoutNNActivationTestFixture.cpp
+        basenn_activation_tests/test_main.cpp)
+target_link_libraries(test_basenn_activation gtest flexneuralnet)
+add_test(NAME test_basenn_activation COMMAND test_main)
+
 add_executable(test_nn_basic_training nn_basic_training_tests/BasicTrainerTests.cpp TestLayer.cpp include/TemplateTestFixtureExample.h nn_basic_training_tests/NNEvalConfigTests.h nn_basic_training_tests/BasicTrainerSeqTests.h)
 target_link_libraries(test_nn_basic_training gtest flexneuralnet)
 add_test(NAME nn_basic_training_tests COMMAND test_nn_basic_training)

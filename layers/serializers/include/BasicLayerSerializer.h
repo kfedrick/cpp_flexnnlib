@@ -18,14 +18,14 @@ namespace flexnnet
 
       /**
        * Structure BasicLayerInfo is used by the static parse method to
-       * return information regarding the common network basiclayer components.
+       * return information regarding the common network basic_layer components.
        */
       struct BasicLayerInfo
       {
-         // The basiclayer id
+         // The basic_layer id
          std::string id;
 
-         // The length of the basiclayer output vector
+         // The length of the basic_layer output vector
          size_t size;
 
          // The length of the input vector

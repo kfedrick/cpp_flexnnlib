@@ -5,17 +5,18 @@
 #ifndef FLEX_NEURALNET_NETSUMLAYER_H_
 #define FLEX_NEURALNET_NETSUMLAYER_H_
 
-#include "OldNetworkLayer.h"
+#include "BasicLayer.h"
 
 namespace flexnnet
 {
-   class NetSumLayer : public OldNetworkLayer
+   class NetSumLayer : public BasicLayer
    {
    protected:
       /* ********************************************************************
        * Constructors, destructors
        */
-      NetSumLayer(size_t sz, const std::string& _name, NetworkLayerType _type = Output);
+      NetSumLayer(size_t sz, const std::string& _name);
+      NetSumLayer(const NetSumLayer& _netsum);
 
    public:
       virtual ~NetSumLayer();

@@ -97,7 +97,7 @@ template<typename T> std::string TestFanoutFFNNActivation<T>::get_typeid()
 
 template<typename T> void TestFanoutFFNNActivation<T>::create_fanout_ffnnet(const FanoutTestCase& _testcase)
 {
-   // Set network basiclayer names
+   // Set network basic_layer names
    HIDDEN_LAYER_TYPE_ID = TestFanoutFFNNActivation<T>::get_typeid();
    HIDDEN_LAYER_ID = HIDDEN_LAYER_TYPE_ID;
    std::transform(HIDDEN_LAYER_ID.begin(), HIDDEN_LAYER_ID.end(), HIDDEN_LAYER_ID.begin(), ::tolower);
@@ -109,30 +109,30 @@ template<typename T> void TestFanoutFFNNActivation<T>::create_fanout_ffnnet(cons
 
    std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>> network_layers;
 
-   // Create hidden basiclayer
+   // Create hidden basic_layer
    network_layers
       .push_back(std::shared_ptr<T>(new T(_testcase.hlayer_sz, HIDDEN_LAYER_ID, flexnnet::OldNetworkLayer::Hidden)));
 
-   // Add external input to hidden basiclayer
+   // Add external input to hidden basic_layer
    network_layers[0]->add_external_input(_testcase.input, {"input1"});
 
-   // Set hidden basiclayer weights
+   // Set hidden basic_layer weights
    network_layers[0]->layer_weights.set(_testcase.hlayer_weights);
 
-   // Create output basiclayer #1
+   // Create output basic_layer #1
    network_layers
       .push_back(std::shared_ptr<T>(new T(_testcase.olayer1_sz, FANOUT_OLAYER1_ID, flexnnet::OldNetworkLayer::Output)));
    network_layers[1]->add_connection(*network_layers[0], flexnnet::OldLayerConnRecord::Forward);
 
-   // Set output basiclayer #2 weights
+   // Set output basic_layer #2 weights
    network_layers[1]->layer_weights.set(_testcase.olayer1_weights);
 
-   // Create output basiclayer #2
+   // Create output basic_layer #2
    network_layers
       .push_back(std::shared_ptr<T>(new T(_testcase.olayer2_sz, FANOUT_OLAYER2_ID, flexnnet::OldNetworkLayer::Output)));
    network_layers[2]->add_connection(*network_layers[0], flexnnet::OldLayerConnRecord::Forward);
 
-   // Set output basiclayer #2 weights
+   // Set output basic_layer #2 weights
    network_layers[2]->layer_weights.set(_testcase.olayer2_weights);
 
    // Create neural net

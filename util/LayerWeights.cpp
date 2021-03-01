@@ -21,6 +21,11 @@ LayerWeights::LayerWeights(const std::vector<std::vector<double>>& _lweights)
    set(_lweights);
 }
 
+LayerWeights::LayerWeights(const Array2D<double>& _lweights)
+{
+   set(_lweights);
+}
+
 LayerWeights::LayerWeights(const LayerWeights& _lweights)
 {
    copy(_lweights);

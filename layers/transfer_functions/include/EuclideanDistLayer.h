@@ -5,17 +5,17 @@
 #ifndef FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 #define FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 
-#include "OldNetworkLayer.h"
+#include "BasicLayer.h"
 
 namespace flexnnet
 {
-   class EuclideanDistLayer : public OldNetworkLayer
+   class EuclideanDistLayer : public BasicLayer
    {
    protected:
       /* ********************************************************************
        * Constructors, destructors
        */
-      EuclideanDistLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
+      EuclideanDistLayer(size_t _sz, const std::string& _name);
 
    public:
       virtual ~EuclideanDistLayer();

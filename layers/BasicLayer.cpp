@@ -14,8 +14,21 @@ BasicLayer::BasicLayer(size_t _sz, const std::string& _name)
    layer_state.netinv.resize(_sz);
 }
 
+BasicLayer::BasicLayer(const BasicLayer& _basic_layer) : NamedObject(_basic_layer.name()), layer_output_size(_basic_layer.layer_output_size)
+{
+   copy(_basic_layer);
+}
+
 BasicLayer::~BasicLayer()
 {
+}
+
+void BasicLayer::copy(const BasicLayer& _basic_layer)
+{
+   layer_input_size = _basic_layer.layer_input_size;
+   layer_state = _basic_layer.layer_state;
+   layer_derivatives = _basic_layer.layer_derivatives;
+   layer_weights = _basic_layer.layer_weights;
 }
 
 const std::valarray<double>& BasicLayer::activate(const std::valarray<double>& _rawin)

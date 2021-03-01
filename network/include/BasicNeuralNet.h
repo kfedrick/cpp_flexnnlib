@@ -13,7 +13,7 @@ namespace flexnnet
    class BasicNeuralNet : public NamedObject
    {
    public:
-      BasicNeuralNet(const std::vector<std::shared_ptr<OldNetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      BasicNeuralNet(const std::vector<std::shared_ptr<BasicLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
       virtual ~BasicNeuralNet();
 
    public:
@@ -66,7 +66,7 @@ namespace flexnnet
 
    public:
       std::string toJSON(void) const;
-      const std::vector<std::shared_ptr<OldNetworkLayer>> get_layers(void) const;
+      const std::vector<std::shared_ptr<BasicLayer>> get_layers(void) const;
 
    private:
       /**
@@ -81,9 +81,9 @@ namespace flexnnet
       size_t network_output_size;
 
       // Network layers stored in proper activation order
-      std::vector<std::shared_ptr<OldNetworkLayer> > network_layers;
+      std::vector<std::shared_ptr<BasicLayer> > network_layers;
 
-      // Set containing basiclayer names
+      // Set containing basic_layer names
       std::set<std::string> layer_name_set;
 
       // recurrent_network_flag - Set if this network has recurrent connections.
@@ -113,7 +113,7 @@ namespace flexnnet
       return network_output_conn.virtual_input_size();
    }
 
-   inline const std::vector<std::shared_ptr<OldNetworkLayer>> BasicNeuralNet::get_layers(void) const
+   inline const std::vector<std::shared_ptr<BasicLayer>> BasicNeuralNet::get_layers(void) const
    {
       return network_layers;
    }

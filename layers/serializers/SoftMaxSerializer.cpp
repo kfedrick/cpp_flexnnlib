@@ -40,7 +40,7 @@ namespace flexnnet
 
    template<> std::shared_ptr<SoftMax> flexnnet::LayerSerializer<SoftMax>::parse(const rapidjson::Value& _obj)
    {
-      // First get common network basiclayer information
+      // First get common network basic_layer information
       BasicLayerInfo network_layer_info = BasicLayerSerializer::parseBasic(_obj);
 
       std::string type = _obj["transfer_function"]["type"].GetString();
@@ -53,7 +53,7 @@ namespace flexnnet
 
       std::shared_ptr<SoftMax> layer_ptr = std::shared_ptr<SoftMax>(new SoftMax(network_layer_info
                                                                                    .size, network_layer_info
-                                                                                   .id, network_layer_type));
+                                                                                   .id));
       layer_ptr->resize_input(network_layer_info.input_size);
 
       layer_ptr->set_gain(gain);

@@ -38,12 +38,12 @@ TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
    std::valarray<double> invec(INPUT_SZ);
    Datum DATUM({{"input", invec}});
 
-   // Set target network basiclayer names
+   // Set target network basic_layer names
    std::set<string> LAYER_NAMES = {LAYER_ID};
 
    std::cout << "\n Single Layer (" << LAYER_ID.c_str() << ") NN Basic Build Test\n";
 
-   // Set target single network basiclayer weights size
+   // Set target single network basic_layer weights size
    Array2D<double>::Dimensions WEIGHTS_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size() + 1};
    Array2D<double>::Dimensions DADN_SZ = {.rows=LAYER_SZ, .cols=LAYER_SZ};
    Array2D<double>::Dimensions DNDW_SZ = {.rows=LAYER_SZ, .cols=DATUM[0].size() + 1};
@@ -59,17 +59,17 @@ TYPED_TEST_P (TestSingleLayerNNBuild, SingleLayerNNBuild)
 
    std::shared_ptr<BasicNeuralNet> nnet = factory.build("test_nn");
 
-   // Verify that network basiclayer names are identical
+   // Verify that network basic_layer names are identical
    std::set<string> layer_names = nnet->get_layer_names();
    ASSERT_EQ(LAYER_NAMES, layer_names);
 
    // Get list of network layers
    const std::vector<std::shared_ptr<OldNetworkLayer>>& layers = nnet->get_layers();
 
-   // There should be exactly one basiclayer
+   // There should be exactly one basic_layer
    ASSERT_EQ(1, layers.size());
 
-   // Verify basic basiclayer info: id, size, input size, is_output
+   // Verify basic basic_layer info: id, size, input size, is_output
    const BasicLayer& layer_ref = *layers[0];
    ASSERT_EQ(LAYER_ID, layer_ref.name());
    ASSERT_EQ(LAYER_SZ, layer_ref.size());

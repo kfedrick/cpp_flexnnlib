@@ -14,7 +14,7 @@ namespace flexnnet
    class BaseNeuralNet
    {
    public:
-      BaseNeuralNet(NetworkTopology& _topology);
+      BaseNeuralNet(const NetworkTopology& _topology = NetworkTopology({}));
       virtual ~BaseNeuralNet();
 
       /**
@@ -62,6 +62,8 @@ namespace flexnnet
 
       const std::set<std::string>& get_layer_names(void);
 
+      std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void);
+
       std::string toJSON(void) const;
 
    private:
@@ -71,15 +73,15 @@ namespace flexnnet
        *
        * @return - the size of the virtual output vector.
        */
-      std::map<std::string, std::valarray<double>> init_network_output_layer(void);
+      void init_network_output_layer(void);
 
    private:
       size_t network_output_size;
 
       // Network topology
-      std::shared_ptr<NetworkTopology> network_topology;
+      NetworkTopology network_topology;
 
-      // Set containing basiclayer names
+      // Set containing basic_layer names
       std::set<std::string> layer_name_set;
 
       // recurrent_network_flag - Set if this network has recurrent connections.
@@ -88,12 +90,18 @@ namespace flexnnet
       // network_output_conn - Used to coelesce network output from the output layers
       // and to scatter network backpropagation error to the output layers.
       //
-      NetworkOutput network_output_layer;
+      flexnnet::NetworkOutput& network_output_layer = network_topology.get_network_output_layer();
    };
 
    inline const std::set<std::string>& BaseNeuralNet::get_layer_names(void)
    {
       return layer_name_set;
+   }
+
+   inline
+   std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void)
+   {
+      return reinterpret_cast<std::map<std::string, std::shared_ptr<NetworkLayer>>&>(network_topology.get_layers());
    }
 
    inline size_t BaseNeuralNet::size(void)

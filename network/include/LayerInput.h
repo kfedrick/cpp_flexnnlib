@@ -42,7 +42,7 @@ namespace flexnnet
 
       /*
        * Contains on ordered list of references to the network layers that provide input this
-       * network basiclayer.
+       * network basic_layer.
        */
       std::vector<OldLayerConnRecord> input_layers;
 
@@ -54,7 +54,7 @@ namespace flexnnet
       std::valarray<double> virtual_input_vector;
 
       /*
-       * Local valarray to hold the backpropogated error vector for each input basiclayer
+       * Local valarray to hold the backpropogated error vector for each input basic_layer
        */
       std::vector<std::valarray<double> > backprop_error_vector;
    };

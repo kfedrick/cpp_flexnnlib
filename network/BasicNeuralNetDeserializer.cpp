@@ -33,10 +33,10 @@ std::shared_ptr<flexnnet::BasicNeuralNet> flexnnet::BasicNeuralNetSerializer::pa
 
    Datum network_input = parseNetworkInput(netdoc["network_input"].GetArray());
 
-   std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
+   std::map<std::string, std::shared_ptr<BasicLayer>> layers;
    layers = parseNetworkLayers(netdoc["network_layers"].GetArray());
 
-   std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
+   std::vector<std::shared_ptr<BasicLayer>> network_layers;
    network_layers = parseNetworkTopology(netdoc["layer_topology"].GetArray(), layers, network_input);
 
    std::shared_ptr<BasicNeuralNet> net = std::shared_ptr<BasicNeuralNet>(new BasicNeuralNet(network_layers, false));
@@ -44,36 +44,36 @@ std::shared_ptr<flexnnet::BasicNeuralNet> flexnnet::BasicNeuralNetSerializer::pa
    return net;
 }
 
-std::vector<std::shared_ptr<flexnnet::OldNetworkLayer>>
+std::vector<std::shared_ptr<flexnnet::BasicLayer>>
 flexnnet::BasicNeuralNetSerializer::parseNetworkTopology(const rapidjson::Value& _obj, std::map<std::string,
                                                                                                 std::shared_ptr<
-                                                                                                   OldNetworkLayer>>& _layers, const Datum& _network_input)
+                                                                                                   BasicLayer>>& _layers, const Datum& _network_input)
 {
-   std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
+   std::vector<std::shared_ptr<BasicLayer>> network_layers;
    std::map<std::string, LayerInputInfo> topology;
 
-   // Iterate through each basiclayer connection entry
+   // Iterate through each basic_layer connection entry
    //
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {
       LayerInputInfo layerinfo;
 
-      // These connections are for basiclayer "id"
+      // These connections are for basic_layer "id"
       std::string id = _obj[i]["id"].GetString();
 
-      // Create network basiclayer
+      // Create network basic_layer
       //OldNetworkLayer network_layer(_layers[id]);
       //OldNetworkLayer network_layer(_layers[id]->size(), _layers[id]->name(), BasicLayer::Output);
-      std::shared_ptr<OldNetworkLayer> network_layer = _layers[id];
+      std::shared_ptr<BasicLayer> network_layer = _layers[id];
 
-      // Get the layers external inputs and add them to the network basiclayer
+      // Get the layers external inputs and add them to the network basic_layer
       layerinfo = parseExternalInput(_obj[i]["external_inputs"]);
-      network_layer->add_external_input(_network_input, layerinfo.external_input_fields);
+      //network_layer->add_external_input(_network_input, layerinfo.external_input_fields);
 
       // Add the input connections from other layers.
       layerinfo = parseLayerConnections(_obj[i]["input_connections"]);
-      for (auto& item : layerinfo.layer_conn_info)
-         network_layer->add_connection(*_layers[item.get_input_layer_id()], item.get_connection_type());
+      //for (auto& item : layerinfo.layer_conn_info)
+      //   network_layer->add_connection(*_layers[item.get_input_layer_id()], item.get_connection_type());
 
       network_layers.push_back(network_layer);
    }
@@ -137,10 +137,10 @@ flexnnet::BasicNeuralNetSerializer::parseLayerConnections(const rapidjson::Value
 
    return layer_input_info;
 }
-std::map<std::string, std::shared_ptr<flexnnet::OldNetworkLayer>>
+std::map<std::string, std::shared_ptr<flexnnet::BasicLayer>>
 flexnnet::BasicNeuralNetSerializer::parseNetworkLayers(const rapidjson::Value& _obj)
 {
-   std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
+   std::map<std::string, std::shared_ptr<BasicLayer>> layers;
 
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {

@@ -2,12 +2,20 @@
 // Created by kfedrick on 6/10/19.
 //
 
+#include <cstddef>
+#include <string>
+
 #include "NetSumLayer.h"
 
 using flexnnet::Array2D;
+using flexnnet::BasicLayer;
 using flexnnet::NetSumLayer;
 
-NetSumLayer::NetSumLayer(size_t _sz, const std::string& _name, NetworkLayerType _type) : OldNetworkLayer(_sz, _name, _type)
+NetSumLayer::NetSumLayer(size_t _sz, const std::string& _name) : BasicLayer(_sz, _name)
+{
+}
+
+NetSumLayer::NetSumLayer(const NetSumLayer& _netsum) : BasicLayer(_netsum)
 {
 }
 

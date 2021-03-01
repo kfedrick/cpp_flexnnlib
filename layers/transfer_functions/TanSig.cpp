@@ -6,18 +6,41 @@
 #include <cmath>
 
 using flexnnet::Array2D;
+using flexnnet::BasicLayer;
 using flexnnet::TanSig;
 
 const TanSig::Parameters TanSig::DEFAULT_PARAMS = {.gain=1.0};
 
-flexnnet::TanSig::TanSig(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params)
-   : NetSumLayer(_sz, _name, _type)
+TanSig::TanSig(size_t _sz, const std::string& _name, const Parameters& _params)
+   : NetSumLayer(_sz, _name)
 {
    set_params(_params);
 }
 
+TanSig::TanSig(const TanSig& _tansig) : NetSumLayer(_tansig)
+{
+   copy(_tansig);
+}
+
 TanSig::~TanSig()
 {
+}
+
+TanSig& TanSig::operator=(const TanSig& _tansig)
+{
+   copy(_tansig);
+   return *this;
+}
+
+void TanSig::copy(const TanSig& _tansig)
+{
+   params = _tansig.params;
+}
+
+std::shared_ptr<BasicLayer> TanSig::clone(void) const
+{
+   std::shared_ptr<TanSig> clone = std::shared_ptr<TanSig>(new TanSig(*this));
+   return clone;
 }
 
 const std::valarray<double>& TanSig::calc_layer_output(const std::valarray<double>& _rawin)

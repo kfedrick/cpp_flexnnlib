@@ -5,6 +5,8 @@
 #ifndef _LAYERACTIVATIONTESTCASE_H_
 #define _LAYERACTIVATIONTESTCASE_H_
 
+#include <gtest/gtest.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -30,8 +32,8 @@ public:
    {}
 
    /**
-    * Test case includes basiclayer input and initial conditions and
-    * expected values for basiclayer output and derivatives for the
+    * Test case includes basic_layer input and initial conditions and
+    * expected values for basic_layer output and derivatives for the
     * specified inputs.
     */
    struct TestCaseRecord
@@ -105,7 +107,7 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::read(const 
    // Parse json file stream into rapidjson document
    doc.ParseStream(in_fswrapper);
 
-   //Save basiclayer identifier information
+   //Save basic_layer identifier information
    rapidjson::Value layer_def_obj = doc["layer_definition"].GetObject();
 
    rapidjson::StringBuffer strbuf;

@@ -22,9 +22,9 @@ TEST_P(TestPureLinActivation, Activation)
    printf("TEST Case %s\n", GetParam());
 
    /*
-    * Read a test case file. Each test case file contains a JSON basiclayer description
-    * suitable for building and configuring a network basiclayer along with a set_weights of
-    * test input/output pairs for that specific basiclayer configuration.
+    * Read a test case file. Each test case file contains a JSON basic_layer description
+    * suitable for building and configuring a network basic_layer along with a set_weights of
+    * test input/output pairs for that specific basic_layer configuration.
     */
    LayerActivationTestCase<flexnnet::PureLin> test_case;
    test_case.read(GetParam());
@@ -34,7 +34,7 @@ TEST_P(TestPureLinActivation, Activation)
       const valarray<double>& layer_out = test_case.layer_ptr->activate(item.input);
       printResults(*test_case.layer_ptr);
 
-      // Check basiclayer output
+      // Check basic_layer output
       EXPECT_PRED3(vector_double_near, item.target.output, layer_out, 0.000000001) << "ruh roh";
 
       // Check dAdN

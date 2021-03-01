@@ -31,16 +31,16 @@ namespace flexnnet
       add_layer(size_t _sz, const std::string& _name, const typename _LayerType::Parameters& _params = _LayerType::DEFAULT_PARAMS);
 
       /**
-       * Add connection to the basiclayer, _to, from the basiclayer, _from.
+       * Add connection to the basic_layer, _to, from the basic_layer, _from.
        *
-       * @param _to - the name of the basiclayer to recieve input
-       * @param _from - the name of the basiclayer to send its output
+       * @param _to - the name of the basic_layer to recieve input
+       * @param _from - the name of the basic_layer to send its output
        */
       void
       add_layer_connection(const std::string& _to, const std::string& _from, OldLayerConnRecord::ConnectionType _type = OldLayerConnRecord::Forward);
 
       /**
-       * Add a connection to the basiclayer, _to, from an external input vector.
+       * Add a connection to the basic_layer, _to, from an external input vector.
        * @param _to
        * @param _vec
        */
@@ -104,7 +104,7 @@ namespace flexnnet
       if (layers.find(_name) != layers.end())
       {
          static std::stringstream sout;
-         sout << "Error : BasicNeuralNetFactory::add_layer() - basiclayer \"" << _name.c_str() << "\" already exists."
+         sout << "Error : BasicNeuralNetFactory::add_layer() - basic_layer \"" << _name.c_str() << "\" already exists."
               << std::endl;
          throw std::invalid_argument(sout.str());
       }
@@ -112,7 +112,7 @@ namespace flexnnet
       auto layer_ptr = std::shared_ptr<_TransFunc>(new _TransFunc(_sz, _name));
       layer_ptr->set_params(_params);
 
-      // Add the new basiclayer to the collection of network layers
+      // Add the new basic_layer to the collection of network layers
 //      layers[_name] = OldNetworkLayer(layer_ptr);
       layers[_name] = layer_ptr;
 

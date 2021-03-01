@@ -40,7 +40,7 @@ namespace flexnnet
       ~OldNetworkLayer();
 
    public:
-      // Return true if this is an output basiclayer
+      // Return true if this is an output basic_layer
       bool is_output_layer(void) const;
 
       /* ******************************************************************
@@ -63,7 +63,7 @@ namespace flexnnet
    {
       LayerInput::add_connection(_layer, _type);
 
-      // Resize input for basic basiclayer
+      // Resize input for basic basic_layer
       resize_input(virtual_input_size());
    }
 
@@ -71,7 +71,7 @@ namespace flexnnet
    {
       LayerInput::add_external_input(_xdatum, _indexSet);
 
-      // Resize input for basic basiclayer
+      // Resize input for basic basic_layer
       resize_input(virtual_input_size());
 
       return virtual_input_size();

@@ -23,8 +23,12 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      TanSig(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
+      TanSig(size_t _sz, const std::string& _name, const Parameters& _params = DEFAULT_PARAMS);
+      TanSig(const TanSig& _tansig);
       ~TanSig();
+
+      TanSig& operator=(const TanSig& _tansig);
+      std::shared_ptr<BasicLayer> clone(void) const override;
 
       void set_gain(double _val);
       double get_gain(void) const;
@@ -35,6 +39,9 @@ namespace flexnnet
    protected:
       const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
       const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
+
+   private:
+      void copy(const TanSig& _tansig);
 
    private:
       Parameters params;

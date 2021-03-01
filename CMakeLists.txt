@@ -58,8 +58,8 @@ add_library(flexneuralnet
         util/include/LayerWeights.h
         network/BasicNeuralNet.cpp
         network/include/BasicNeuralNet.h
-        util/LayerDerivatives.cpp
         util/include/LayerDerivatives.h
+        util/LayerDerivatives.cpp
         util/include/LayerState.h
         layers/transfer_functions/PureLin.cpp
         layers/transfer_functions/include/PureLin.h
@@ -88,6 +88,12 @@ add_library(flexneuralnet
         util/include/Array2D.h
         util/include/Array3D.h
         network/include/OldNetworkLayer.h
+        network/include/NetworkLayerImpl.h
+        network/NetworkLayerImpl.cpp
+        network/include/NetworkLayer.h
+        network/NetworkLayer.cpp
+        network/include/NetworkOutput.h
+        network/NetworkOutput.cpp
         network/OldLayerConnRecord.cpp
         network/include/OldLayerConnRecord.h
         network/ExternalInputRecord.cpp
@@ -140,7 +146,9 @@ add_library(flexneuralnet
         network/BaseNeuralNet.cpp
         network/include/BaseNeuralNet.h
         network/NetworkTopology.cpp
-        network/include/NetworkTopology.h network/NetworkLayer.cpp network/include/NetworkLayer.h network/LayerConnRecord.cpp network/include/LayerConnRecord.h network/NetworkOutput.cpp network/include/NetworkOutput.h)
+        network/include/NetworkTopology.h
+        network/LayerConnRecord.cpp
+        network/include/LayerConnRecord.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

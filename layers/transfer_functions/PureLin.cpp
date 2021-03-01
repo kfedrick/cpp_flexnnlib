@@ -4,19 +4,44 @@
 
 #include "PureLin.h"
 
+#include <iostream>
+using flexnnet::Array2D;
+using flexnnet::BasicLayer;
 using flexnnet::PureLin;
 
 const PureLin::Parameters PureLin::DEFAULT_PARAMS = {.gain=1.0};
 
-PureLin::PureLin(size_t _sz, const std::string& _id, NetworkLayerType _type, const Parameters& _params)
-   : NetSumLayer(_sz, _id, _type)
+PureLin::PureLin(size_t _sz, const std::string& _id, const Parameters& _params)
+   : NetSumLayer(_sz, _id)
 {
    layer_derivatives.dAdN.resize(_sz, _sz);
    set_params(_params);
 }
 
+PureLin::PureLin(const PureLin& _purelin) : NetSumLayer(_purelin)
+{
+   copy(_purelin);
+}
+
 PureLin::~PureLin()
 {
+}
+
+PureLin& PureLin::operator=(const PureLin& _purelin)
+{
+   copy(_purelin);
+   return *this;
+}
+
+void PureLin::copy(const PureLin& _purelin)
+{
+   params = _purelin.params;
+}
+
+std::shared_ptr<BasicLayer> PureLin::clone(void) const
+{
+   std::shared_ptr<PureLin> clone = std::make_shared<PureLin>(PureLin(*this));
+   return clone;
 }
 
 const std::valarray<double>&
@@ -28,7 +53,7 @@ PureLin::calc_layer_output(const std::valarray<double>& _rawin)
    return layer_state.outputv;
 }
 
-const flexnnet::Array2D<double>& PureLin::calc_dAdN(const std::valarray<double>& _out)
+const Array2D<double>& PureLin::calc_dAdN(const std::valarray<double>& _out)
 {
    Array2D<double>& dAdN = layer_derivatives.dAdN;
 

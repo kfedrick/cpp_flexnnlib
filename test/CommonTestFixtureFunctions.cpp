@@ -1,12 +1,14 @@
 //
 // Created by kfedrick on 2/17/21.
 //
-
+#include <iostream>
 #include "test/include/CommonTestFixtureFunctions.h"
 
 using std::cout;
 using std::valarray;
 using flexnnet::Array2D;
+
+using flexnnet::NNetIO_Typ;
 
 bool
 CommonTestFixtureFunctions::valarray_double_near(const std::valarray<double>& _target, const std::valarray<double>& _test, double _epsilon)
@@ -128,4 +130,38 @@ std::string CommonTestFixtureFunctions::printResults(const flexnnet::BasicLayer&
 
    cout << ssout.str();
    return ssout.str();
+}
+
+flexnnet::NNetIO_Typ CommonTestFixtureFunctions::parse_datum(const rapidjson::Value& _obj)
+{
+   NNetIO_Typ datum_fields;
+   for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
+   {
+      std::string field = _obj[i]["field"].GetString();
+      size_t field_sz = _obj[i]["size"].GetUint64();
+      size_t field_index = _obj[i]["index"].GetUint64();
+
+      datum_fields[field] = std::valarray<double>(field_sz);
+
+      const rapidjson::Value& vec = _obj[i]["value"];
+      for (rapidjson::SizeType i = 0; i < vec.Size(); i++)
+         datum_fields[field][i] = vec[i].GetDouble();
+   }
+
+   return datum_fields;
+}
+
+Array2D<double> CommonTestFixtureFunctions::parse_weights(const rapidjson::Value& _obj, size_t _rows, size_t _cols)
+{
+   Array2D<double> weights(_rows, _cols);
+
+   for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
+   {
+      const rapidjson::Value& myrow = _obj[i];
+
+      for (rapidjson::SizeType j = 0; j < myrow.Size(); j++)
+         weights.at(i, j) = myrow[j].GetDouble();
+   }
+
+   return weights;
 }

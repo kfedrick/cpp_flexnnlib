@@ -14,13 +14,20 @@ namespace flexnnet
    public:
       LayerDerivatives();
       LayerDerivatives(size_t _out_sz, size_t _rawin_sz);
+      LayerDerivatives(const LayerDerivatives& _lderiv);
+      LayerDerivatives(LayerDerivatives&& _lderiv);
       ~LayerDerivatives();
 
       void resize(size_t _out_sz, size_t _rawin_sz);
       void stale();
 
+      LayerDerivatives& operator=(const LayerDerivatives& _lderiv);
+      LayerDerivatives& operator=(LayerDerivatives&& _lderiv);
+
    private:
       void initialize();
+      void copy(const LayerDerivatives& _weights);
+      void copy(LayerDerivatives&& _weights);
 
    public:
       const Array2D<double>& const_dAdN_ref = dAdN;
@@ -43,11 +50,6 @@ namespace flexnnet
       initialize();
    }
 
-   inline LayerDerivatives::LayerDerivatives()
-   {
-      initialize();
-   }
-
    inline void LayerDerivatives::initialize()
    {
       stale();
@@ -62,19 +64,6 @@ namespace flexnnet
       stale_dNdW = true;
       stale_dNdI = true;
    }
-
-   inline LayerDerivatives::~LayerDerivatives()
-   {
-
-   }
-
-   inline void LayerDerivatives::resize(size_t _out_sz, size_t _rawin_sz)
-   {
-      dAdN.resize(_out_sz, _out_sz);
-      dNdW.resize(_out_sz, _rawin_sz + 1);
-      dNdI.resize(_out_sz, _rawin_sz + 1);
-   }
-
 }
 
 #endif //FLEX_NEURALNET_LAYERDERIVATIVES_H_

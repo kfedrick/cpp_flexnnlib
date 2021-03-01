@@ -62,12 +62,12 @@ rapidjson::Value& BasicNeuralNetSerializer::encode(rapidjson::Value& _obj, const
 
    // Second encode network layers
    rapidjson::Value _network_layers_obj;
-   const std::vector<std::shared_ptr<OldNetworkLayer>>& network_layers = _neural_net.get_layers();
+   const std::vector<std::shared_ptr<BasicLayer>>& network_layers = _neural_net.get_layers();
    encodeNetworkLayers(_network_layers_obj, network_layers);
 
    _obj.AddMember("network_layers", _network_layers_obj, allocator);
 
-   // Next encode basiclayer connection information
+   // Next encode basic_layer connection information
    rapidjson::Value _network_conn_obj;
    encodeLayerTopology(_network_conn_obj, network_layers);
 
@@ -86,7 +86,7 @@ rapidjson::Value& BasicNeuralNetSerializer::encode(rapidjson::Value& _obj, const
 }
 
 rapidjson::Value&
-BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers)
+BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std::vector<std::shared_ptr<BasicLayer>>& _network_layers)
 {
    rapidjson::Document layerdoc;
 
@@ -94,11 +94,11 @@ BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std:
 
    for (auto& netlayer : _network_layers)
    {
-      // Get and parse the basiclayer json string
+      // Get and parse the basic_layer json string
       std::string layer_json = netlayer->toJson();
       layerdoc.Parse(layer_json.c_str());
 
-      // Push the basiclayer Value object unto the encoded network layers array
+      // Push the basic_layer Value object unto the encoded network layers array
       _obj.PushBack(layerdoc.GetObject(), allocator);
    }
 
@@ -106,7 +106,7 @@ BasicNeuralNetSerializer::encodeNetworkLayers(rapidjson::Value& _obj, const std:
 }
 
 rapidjson::Value&
-BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<OldNetworkLayer>>& _network_layers)
+BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std::vector<std::shared_ptr<BasicLayer>>& _network_layers)
 {
    _obj.SetArray();
 
@@ -121,7 +121,7 @@ BasicNeuralNetSerializer::encodeLayerTopology(rapidjson::Value& _obj, const std:
    return _obj;
 }
 
-rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::Value& _obj, const OldNetworkLayer& _layer)
+rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::Value& _obj, const BasicLayer& _layer)
 {
    _obj.SetObject();
 
@@ -132,8 +132,9 @@ rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::
 
    rapidjson::Value layerobj;
 
-   // Add basiclayer input connections
+   // Add basic_layer input connections
    layerobj.SetArray();
+/*
 
    rapidjson::Value conn_obj;
    for (auto& conn : _layer.get_input_connections())
@@ -141,31 +142,32 @@ rapidjson::Value& BasicNeuralNetSerializer::encodeNetworkConnections(rapidjson::
       encodeConnectionFromLayer(conn_obj, conn);
       layerobj.PushBack(conn_obj, allocator);
    }
+*/
 
    _obj.AddMember("input_connections", layerobj, allocator);
 
    rapidjson::Value xinputobj;
    xinputobj.SetObject();
-   encodeExternalLayerInput(xinputobj, _layer.get_external_inputs());
+   //encodeExternalLayerInput(xinputobj, _layer.get_external_inputs());
    _obj.AddMember("external_inputs", xinputobj, allocator);
 
    return _obj;
 }
 
 rapidjson::Value&
-flexnnet::BasicNeuralNetSerializer::encodeConnectionFromLayer(rapidjson::Value& _obj, const OldLayerConnRecord& _conn)
+flexnnet::BasicNeuralNetSerializer::encodeConnectionFromLayer(rapidjson::Value& _obj, const BasicLayer& _conn)
 {
    _obj.SetObject();
 
    rapidjson::Value externobj, inlayerobj, intype_strobj, conntype_strobj;
    std::string str;
 
-   str = _conn.get_input_layer().name();
+   //str = _conn.get_input_layer().name();
    inlayerobj.SetString(str.c_str(), str.size(), allocator);
    _obj.AddMember("id", inlayerobj, allocator);
 
-   std::string conn_type_str = connTypeToString(_conn.get_connection_type());
-   conntype_strobj.SetString(conn_type_str.c_str(), conn_type_str.size(), allocator);
+   //std::string conn_type_str = connTypeToString(_conn.get_connection_type());
+   //conntype_strobj.SetString(conn_type_str.c_str(), conn_type_str.size(), allocator);
    _obj.AddMember("connection_type", conntype_strobj, allocator);
 
    _obj.AddMember("size", _conn.size(), allocator);
@@ -185,10 +187,10 @@ flexnnet::BasicNeuralNetSerializer::encodeExternalLayerInput(rapidjson::Value& _
       rapidjson::Value externobj;
       externobj.SetObject();
 
-      strobj.SetString(a_input.get_field().c_str(), a_input.get_field().size(), allocator);
+      strobj.SetString(a_input.field().c_str(), a_input.field().size(), allocator);
       externobj.AddMember("field", strobj, allocator);
-      externobj.AddMember("index", a_input.get_index(), allocator);
-      externobj.AddMember("size", a_input.get_size(), allocator);
+      externobj.AddMember("index", a_input.index(), allocator);
+      externobj.AddMember("size", a_input.size(), allocator);
 
       _obj.PushBack(externobj, allocator);
    }

@@ -23,7 +23,7 @@ TEST_F(TestLayerConstructors, ConstructSoftMaxWithDefaults)
    const string NAME = "test1";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create basiclayer
+   // Create basic_layer
    SoftMax layer(OUT_SZ, NAME, network_layer_type);
 
    // Name and size should be as set_weights in constructor
@@ -47,7 +47,7 @@ TEST_F(TestLayerConstructors, ConstructSoftMaxWithInputSize)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Output;
 
-   // Create basiclayer
+   // Create basic_layer
    SoftMax layer(OUT_SZ, NAME, network_layer_type);
    layer.resize_input(RAWIN_SZ);
 
@@ -71,7 +71,7 @@ TEST_F(TestLayerConstructors, ConstructSoftMaxWithLayerTypeHidden)
    const string NAME = "test2";
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
 
-   // Create basiclayer
+   // Create basic_layer
    SoftMax layer(OUT_SZ, NAME, network_layer_type);
 
    // Layer type should be Hidden by default
@@ -85,7 +85,7 @@ TEST_F(TestLayerConstructors, ConstructSoftMaxWithParams)
    BasicLayer::NetworkLayerType network_layer_type = BasicLayer::Hidden;
    SoftMax::Parameters PARAMS = {.gain = 1.66, .rescaled_flag = true};
 
-   // Create basiclayer
+   // Create basic_layer
    SoftMax layer(OUT_SZ, NAME, network_layer_type, PARAMS);
 
    // Layer type should be Hidden by default

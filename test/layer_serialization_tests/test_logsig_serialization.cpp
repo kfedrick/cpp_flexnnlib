@@ -11,7 +11,7 @@ using flexnnet::BasicLayer;
 using flexnnet::LogSig;
 
 /**
- * Test serialization of 2x5 LogSig basiclayer
+ * Test serialization of 2x5 LogSig basic_layer
  */
 TEST_F(TestLayerSerialization, SerializeLogSig)
 {
@@ -20,7 +20,7 @@ TEST_F(TestLayerSerialization, SerializeLogSig)
    const int IN_SZ = 5;
    const std::string NAME = "test";
 
-   // Construct basiclayer
+   // Construct basic_layer
    LogSig layer(OUT_SZ, NAME, BasicLayer::Output);
    layer.resize_input(IN_SZ);
 
@@ -35,7 +35,7 @@ TEST_F(TestLayerSerialization, SerializeLogSig)
    // Set gain
    layer.set_gain(0.33);
 
-   // Get serialized basiclayer as Json string
+   // Get serialized basic_layer as Json string
    std::string output_json = layer.toJson();
    std::cout << "\n\n" << output_json << std::endl;
 

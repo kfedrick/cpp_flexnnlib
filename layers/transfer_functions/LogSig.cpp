@@ -7,18 +7,40 @@
 #include <cmath>
 
 using flexnnet::Array2D;
+using flexnnet::BasicLayer;
 using flexnnet::LogSig;
 
 const LogSig::Parameters LogSig::DEFAULT_PARAMS = {.gain=1.0};
 
-LogSig::LogSig(size_t _sz, const std::string& _name, NetworkLayerType _type, const Parameters& _params)
-   : NetSumLayer(_sz, _name, _type)
+LogSig::LogSig(size_t _sz, const std::string& _name, const Parameters& _params)
+   : NetSumLayer(_sz, _name)
 {
    set_params(_params);
 }
 
+LogSig::LogSig(const LogSig& _logsig) : NetSumLayer(_logsig)
+{
+   copy(_logsig);
+}
+
 LogSig::~LogSig()
 {
+}
+
+LogSig& LogSig::operator=(const LogSig& _logsig)
+{
+   return *this;
+}
+
+std::shared_ptr<BasicLayer> LogSig::clone(void) const
+{
+   std::shared_ptr<LogSig> clone = std::shared_ptr<LogSig>(new LogSig(*this));
+   return clone;
+}
+
+void LogSig::copy(const LogSig& _logsig)
+{
+   params = _logsig.params;
 }
 
 const std::valarray<double>& LogSig::calc_layer_output(const std::valarray<double>& _rawin)

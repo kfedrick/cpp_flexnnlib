@@ -97,12 +97,12 @@ template<typename T> std::vector<FaninTestCase> TestFaninFFNNActivation<T>::read
       size_t total_sz = test_case.hlayer1_sz + test_case.hlayer2_sz;
       static std::valarray<double> outputv(total_sz);
 
-      // Read hidden basiclayer #1 weights
+      // Read hidden basic_layer #1 weights
       const rapidjson::Value& weights_obj1 = a_tuple_obj["hlayer1_weights"];
       test_case.hlayer1_weights.resize(test_case.hlayer1_sz, test_case.hlayer1_input_sz + 1);
       test_case.hlayer1_weights = parse_weights(weights_obj1, test_case.hlayer1_sz, test_case.hlayer1_input_sz + 1);
 
-      // Read hidden basiclayer #1 weights
+      // Read hidden basic_layer #1 weights
       const rapidjson::Value& weights_obj2 = a_tuple_obj["hlayer2_weights"];
       test_case.hlayer2_weights.resize(test_case.hlayer2_sz, test_case.hlayer2_input_sz + 1);
       test_case.hlayer2_weights = parse_weights(weights_obj2, test_case.hlayer2_sz, test_case.hlayer2_input_sz + 1);
@@ -124,7 +124,7 @@ template<typename T> std::vector<FaninTestCase> TestFaninFFNNActivation<T>::read
 TYPED_TEST_P (TestFaninFFNNActivation, FaninFFNNActivation)
 {
 
-   // Set network basiclayer names
+   // Set network basic_layer names
    std::string layer_type_id = TestFaninFFNNActivation<TypeParam>::get_typeid();
 
    std::string layer_id = layer_type_id;
@@ -142,7 +142,7 @@ TYPED_TEST_P (TestFaninFFNNActivation, FaninFFNNActivation)
 
       Datum netout = TestFaninFFNNActivation<TypeParam>::nnet->activate(test_case.input);
 
-      // Check basiclayer output
+      // Check basic_layer output
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";
 
       std::cout.setf(std::ios::fixed, std::ios::floatfield);
@@ -165,7 +165,7 @@ TYPED_TEST_P (TestFaninFFNNActivation, FaninSaveWeights)
 {
    std::cout << ".... SaveNetworkWeights Test\n";
 
-   // Set network basiclayer names
+   // Set network basic_layer names
    std::string layer_type_id = TestFaninFFNNActivation<TypeParam>::get_typeid();
 
    std::string layer_id = layer_type_id;

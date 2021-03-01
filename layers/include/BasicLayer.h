@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <sstream>
 #include <functional>
+#include <memory>
 
 #include "NamedObject.h"
 #include "LayerWeights.h"
@@ -26,13 +27,15 @@ namespace flexnnet
        * Constructors, destructors
        */
       BasicLayer(size_t _sz, const std::string& _name);
+      BasicLayer(const BasicLayer& _basic_layer);
 
    public:
+      virtual std::shared_ptr<BasicLayer> clone(void) const = 0;
       virtual ~BasicLayer();
 
    public:
 
-      // Return length of basiclayer output valarray
+      // Return length of basic_layer output valarray
       size_t size() const;
       virtual size_t input_size() const;
 
@@ -42,11 +45,11 @@ namespace flexnnet
 
    public:
       /* ********************************************************************
-       * Public basiclayer operational methods
+       * Public basic_layer operational methods
        */
 
       /**
-       * Calculate the value of the basiclayer neuron vector based on the specified
+       * Calculate the value of the basic_layer neuron vector based on the specified
        * raw input vectors.
        * @param inputVec
        * @return
@@ -54,14 +57,14 @@ namespace flexnnet
       virtual const std::valarray<double>& activate(const std::valarray<double>& inputVec);
 
       /**
-       * Accumulate error specified in _errorv into the current basiclayer error
+       * Accumulate error specified in _errorv into the current basic_layer error
        * @param _errorv
        * @return
        */
       virtual const std::valarray<double>& accumulate_error(const std::valarray<double>& _errorv);
 
       /*
-       * Return the current value of the network basiclayer as a std::valarray
+       * Return the current value of the network basic_layer as a std::valarray
        */
       virtual const std::valarray<double>& operator()() const;
 
@@ -80,7 +83,7 @@ namespace flexnnet
       virtual const std::valarray<double>& calc_netin(const std::valarray<double>& _rawin) = 0;
 
       /*
-       * Calculate and return the derivative of the basiclayer output with respect to
+       * Calculate and return the derivative of the basic_layer output with respect to
        * the net input for the most recent activation.
        */
       virtual const Array2D<double>& calc_dAdN(const std::valarray<double>& _out) = 0;
@@ -100,6 +103,9 @@ namespace flexnnet
       // Mark all derivative arrays as stale (e.g. after new activation).
       void stale(void);
 
+   private:
+      void copy(const BasicLayer& _basic_layer);
+
    public:
       const std::valarray<double>& const_value = layer_state.outputv;
       const size_t& const_layer_output_size_ref = layer_output_size;
@@ -107,13 +113,13 @@ namespace flexnnet
    private:
 
       /* ********************************************************************
-       * Private basiclayer configuration and provisioning data members
+       * Private basic_layer configuration and provisioning data members
        */
-      const size_t layer_output_size;
+      size_t layer_output_size;
 
    protected:
       /* ********************************************************************
-       * Protected basiclayer state data members
+       * Protected basic_layer state data members
        */
       size_t layer_input_size;
 

@@ -11,7 +11,7 @@ using flexnnet::BasicLayer;
 using flexnnet::TanSig;
 
 /**
- * Test serialization of 2x5 TanSig basiclayer
+ * Test serialization of 2x5 TanSig basic_layer
  */
 TEST_F(TestLayerSerialization, SerializeTanSig)
 {
@@ -20,7 +20,7 @@ TEST_F(TestLayerSerialization, SerializeTanSig)
    const int IN_SZ = 5;
    const std::string NAME = "test";
 
-   // Construct basiclayer
+   // Construct basic_layer
    TanSig layer(OUT_SZ, NAME, BasicLayer::Output);
    layer.resize_input(IN_SZ);
 
@@ -35,7 +35,7 @@ TEST_F(TestLayerSerialization, SerializeTanSig)
    // Set gain
    layer.set_gain(0.33);
 
-   // Get serialized basiclayer as Json string
+   // Get serialized basic_layer as Json string
    std::string output_json = layer.toJson();
    std::cout << "\n\n" << output_json << std::endl;
 
