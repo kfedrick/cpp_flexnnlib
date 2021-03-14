@@ -87,7 +87,7 @@ EuclideanDistLayer::calc_dNdW(const std::valarray<double>& _rawin)
    for (size_t out_ndx = 0; out_ndx < const_layer_output_size_ref; out_ndx++)
    {
       // Calculate dNdW with respect to the spread parameter
-      dNdW.at(out_ndx, spread_param_ndx) += -squared_euclidean_dist[out_ndx] * spread[out_ndx];
+      dNdW.at(out_ndx, spread_param_ndx) = -squared_euclidean_dist[out_ndx] * spread[out_ndx];
 
       // Calculate dNdW with respect to RBF kernel
       for (size_t in_ndx = 0; in_ndx < layer_input_size; in_ndx++)

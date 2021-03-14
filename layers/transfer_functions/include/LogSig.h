@@ -8,7 +8,7 @@
 #include <memory>
 #include "Array2D.h"
 #include "NetSumLayer.h"
-#include "LayerSerializer.h"
+
 
 namespace flexnnet
 {
@@ -66,7 +66,7 @@ namespace flexnnet
 
    inline std::string LogSig::toJson(void) const
    {
-      return LayerSerializer<LogSig>::toJson(*this);
+      return "";
    }
 }
 

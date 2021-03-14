@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "DataSet.h"
+#include "EnumeratedDataSet.h"
 #include "Episode.h"
 #include "BasicEvalConfig.h"
 #include "NeuralNet.h"
@@ -22,8 +22,8 @@ namespace flexnnet
    protected:
       using _index_typ = size_t;
       using NN_Typ_ = NeuralNet<_NNIn, _NNOut>;
-      using DataSet_Typ_ = DataSet<_NNIn, _NNOut, _Sample>;
-      using Exemplar_Typ_ = Exemplar<_NNIn, _NNOut>;
+      using DataSet_Typ_ = EnumeratedDataSet<_NNIn, _NNOut>;
+      using Exemplar_Typ_ = std::tuple<_NNIn, _NNOut>;
       using Episode_Typ_ = Episode<_NNIn, _NNOut>;
 
    public:
@@ -80,7 +80,7 @@ namespace flexnnet
       // Vector to hold performance results for each sampling
       std::valarray<double> perf(_tstset.size());
 
-      // Iterate through all exemplars in the training set_weights. NOTE DataSet is
+      // Iterate through all exemplars in the training set_weights. NOTE EnumeratedDataSet is
       // only guaranteed to be iterable so we can't iterate by index.
       _index_typ exemplar_ndx = 0;
       for (const Exemplar_Typ_& asample : _tstset)

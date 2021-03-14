@@ -140,7 +140,7 @@ TYPED_TEST_P (FanoutNNActivationTestFixture, ReadTestCase)
 
       // Print out the network output
       const std::map<std::string, std::shared_ptr<flexnnet::NetworkLayer>> layers = this->nnet->get_layers();
-      flexnnet::NNetIO_Typ outmap({{"output1", layers.at("output1")->value()}, {"output2", layers.at("output2")->value()}});
+      flexnnet::ValarrMap outmap({{"output1", layers.at("output1")->value()}, {"output2", layers.at("output2")->value()}});
       std::cout << this->prettyPrintVector("output1", outmap.at("output1")).c_str() << "\n";
       std::cout << this->prettyPrintVector("output2", outmap.at("output2")).c_str() << "\n";
 
@@ -153,7 +153,8 @@ TYPED_TEST_P (FanoutNNActivationTestFixture, ReadTestCase)
    }
 }
 
+/*
 REGISTER_TYPED_TEST_CASE_P
 (FanoutNNActivationTestFixture, ReadTestCase);
 INSTANTIATE_TYPED_TEST_CASE_P
-(My, FanoutNNActivationTestFixture, MyTypes);
+(My, FanoutNNActivationTestFixture, MyTypes);*/

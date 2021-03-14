@@ -24,7 +24,7 @@ namespace flexnnet
    {
    protected:
       using NN_Typ_ = NeuralNet<_NNIn, _NNOut>;
-      using DataSet_Typ_ = DataSet<_NNIn, _NNOut, _TData>;
+      using DataSet_Typ_ = EnumeratedDataSet<_NNIn, _NNOut>;
       using TrainAlgo_Typ_ = _TrainAlgo<_NNIn, _NNOut, _TData, _ErrFunc>;
 
    public:

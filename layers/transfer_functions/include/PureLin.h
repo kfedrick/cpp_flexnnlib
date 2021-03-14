@@ -8,7 +8,6 @@
 #include <vector>
 #include "Array2D.h"
 #include "NetSumLayer.h"
-#include "LayerSerializer.h"
 
 namespace flexnnet
 {
@@ -65,7 +64,7 @@ namespace flexnnet
 
    inline std::string PureLin::toJson(void) const
    {
-      return LayerSerializer<PureLin>::toJson(*this);
+      return "";
    }
 }
 

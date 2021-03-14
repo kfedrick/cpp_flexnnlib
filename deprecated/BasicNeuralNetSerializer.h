@@ -8,7 +8,7 @@
 #include <memory>
 #include <map>
 
-#include "BasicNeuralNet.h"
+#include "BaseNeuralNet.h"
 #include "ExternalInputRecord.h"
 #include "BasicLayerSerializer.h"
 

@@ -8,7 +8,6 @@
 #include <memory>
 #include <document.h>
 #include <BasicLayerSerializer.h>
-#include "BasicNeuralNetSerializer.h"
 
 namespace flexnnet
 {

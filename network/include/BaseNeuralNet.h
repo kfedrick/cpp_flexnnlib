@@ -8,6 +8,7 @@
 #include "flexnnet.h"
 #include "NetworkTopology.h"
 #include "NetworkOutput.h"
+#include <ValarrayMap.h>
 
 namespace flexnnet
 {
@@ -24,6 +25,8 @@ namespace flexnnet
        * @return - the size of the network output vector.
        */
       size_t size(void);
+
+      virtual const ValarrMap& value_map() const;
 
       /**
        * Initialize network weights and other network state information
@@ -43,7 +46,7 @@ namespace flexnnet
        * @param _indatum - the input datum to the network
        * @return - the network output for the specified input data
        */
-      virtual const std::valarray<double>& activate(const NNetIO_Typ& _input);
+      virtual const ValarrMap& activate(const ValarrMap& _input);
 
       /**
        * Calculate the Jacobian for most recent network activation as the partial
@@ -66,6 +69,9 @@ namespace flexnnet
 
       std::string toJSON(void) const;
 
+   protected:
+      std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void);
+
    private:
       /**
        * Private helper function to initialize network_output_conn by adding connections
@@ -87,10 +93,8 @@ namespace flexnnet
       // recurrent_network_flag - Set if this network has recurrent connections.
       bool recurrent_network_flag;
 
-      // network_output_conn - Used to coelesce network output from the output layers
-      // and to scatter network backpropagation error to the output layers.
-      //
-      flexnnet::NetworkOutput& network_output_layer = network_topology.get_network_output_layer();
+      // network_output_layer - Used to gather network output from the output layers.
+      NetworkOutput& network_output_layer = network_topology.get_network_output_layer();
    };
 
    inline const std::set<std::string>& BaseNeuralNet::get_layer_names(void)
@@ -104,9 +108,20 @@ namespace flexnnet
       return reinterpret_cast<std::map<std::string, std::shared_ptr<NetworkLayer>>&>(network_topology.get_layers());
    }
 
+   inline
+   std::vector<std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_ordered_layers(void)
+   {
+      return reinterpret_cast<std::vector<std::shared_ptr<NetworkLayer>>&>(network_topology.get_ordered_layers());
+   }
+
    inline size_t BaseNeuralNet::size(void)
    {
       return network_output_layer.size();
+   }
+
+   inline const ValarrMap& BaseNeuralNet::value_map() const
+   {
+      return network_output_layer.input_value_map();
    }
 }
 

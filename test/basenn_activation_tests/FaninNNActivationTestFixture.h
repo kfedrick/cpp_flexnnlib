@@ -35,8 +35,8 @@ public:
       flexnnet::Array2D<double> hlayer2_weights;
       flexnnet::Array2D<double> output_weights;
 
-      flexnnet::NNetIO_Typ input;
-      flexnnet::NNetIO_Typ target_output;
+      flexnnet::ValarrMap input;
+      flexnnet::ValarrMap target_output;
    };
 
 public:

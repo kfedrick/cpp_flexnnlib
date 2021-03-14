@@ -33,7 +33,7 @@ namespace flexnnet
        * @param _externin
        * @return
        */
-      virtual const std::valarray<double>& activate(const NNetIO_Typ& _externin);
+      virtual const std::valarray<double>& activate(const ValarrMap& _externin);
 
 
    protected:

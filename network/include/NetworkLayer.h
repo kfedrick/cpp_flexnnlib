@@ -37,6 +37,17 @@ namespace flexnnet
 
       virtual const std::valarray<double>& value() const;
 
+      virtual const ValarrMap & input_value_map() const;
+
+      /**
+       * Marshal layer inputs, activate the base layer and return the
+       * layer output.
+       * @param _externin
+       * @return
+       */
+      virtual const std::valarray<double>& activate(const ValarrMap& _externin) = 0;
+
+
       // Return true if this is an output basic_layer
       virtual bool is_output_layer(void) const;
 
@@ -60,7 +71,8 @@ namespace flexnnet
        * @param _externin
        * @return
        */
-      const std::valarray<double>& marshal_inputs(const NNetIO_Typ& _externin);
+      const std::valarray<double>& concat_inputs(const ValarrMap& _externin);
+      const ValarrMap& marshal_inputs(const ValarrMap& _externin);
 
       size_t append_virtual_vector(size_t start_ndx, const std::valarray<double>& vec);
 
@@ -95,6 +107,7 @@ namespace flexnnet
 
    protected:
       const std::valarray<double>& virtual_input_vector_const_ref = virtual_input_vector;
+      const ValarrMap& input_map_const_ref = input_map;
 
    /* ***********************************************************
     * Private data members
@@ -109,6 +122,7 @@ namespace flexnnet
 
       // Local valarray to contain the marshalled input vector for the layer
       std::valarray<double> virtual_input_vector;
+      ValarrMap input_map;
    };
 
    inline std::shared_ptr<BasicLayer>& NetworkLayer::basiclayer()
@@ -135,6 +149,12 @@ namespace flexnnet
    const std::valarray<double>& NetworkLayer::value() const
    {
       return basic_layer->const_value;
+   }
+
+   inline
+   const ValarrMap& NetworkLayer::input_value_map() const
+   {
+      return input_map;
    }
 
    inline
@@ -165,6 +185,7 @@ namespace flexnnet
    void NetworkLayer::clear(void)
    {
       basic_layer.reset();
+      input_map.clear();
       virtual_input_vector.resize(0);
       activation_connections.clear();
       external_input_fields.clear();

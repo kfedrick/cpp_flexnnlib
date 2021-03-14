@@ -20,8 +20,10 @@ std::shared_ptr<flexnnet::BasicLayer>& NetworkOutput::layer()
    throw std::logic_error(sout.str());
 }
 
-const std::valarray<double>& NetworkOutput::activate(const NNetIO_Typ& _externin)
+const std::valarray<double>& NetworkOutput::activate(const ValarrMap& _externin)
 {
    marshal_inputs(_externin);
+   concat_inputs(_externin);
    return virtual_input_vector_const_ref;
 }
+

@@ -42,7 +42,6 @@ add_executable(sandbox sandbox/doit.cpp)
 
 
 add_library(flexneuralnet
-        datasets/include/Exemplar.h
         include/flexnnet.h
         network/include/SumSquaredError.h
         network/SumSquaredError.cpp
@@ -56,8 +55,6 @@ add_library(flexneuralnet
         layers/BasicLayer.cpp
         util/LayerWeights.cpp
         util/include/LayerWeights.h
-        network/BasicNeuralNet.cpp
-        network/include/BasicNeuralNet.h
         util/include/LayerDerivatives.h
         util/LayerDerivatives.cpp
         util/include/LayerState.h
@@ -71,18 +68,8 @@ add_library(flexneuralnet
         layers/transfer_functions/include/RadBas.h
         layers/transfer_functions/TanSig.cpp
         layers/transfer_functions/include/TanSig.h
-        layers/serializers/include/LayerSerializer.h
-        layers/serializers/PureLinSerializer.cpp
-        layers/serializers/BasicLayerSerializer.cpp
-        layers/serializers/include/BasicLayerSerializer.h
-        layers/serializers/TanSigSerializer.cpp
-        layers/serializers/RadBasSerializer.cpp
-        layers/serializers/LogSigSerializer.cpp
         layers/transfer_functions/SoftMax.cpp
         layers/transfer_functions/include/SoftMax.h
-        layers/serializers/SoftMaxSerializer.cpp
-        network/BasicNeuralNetFactory.cpp
-        network/include/BasicNeuralNetFactory.h
         datasets/Datum.cpp
         datasets/include/Datum.h
         util/include/Array2D.h
@@ -98,9 +85,6 @@ add_library(flexneuralnet
         network/include/OldLayerConnRecord.h
         network/ExternalInputRecord.cpp
         network/include/ExternalInputRecord.h
-        network/BasicNeuralNetSerializer.cpp
-        network/include/BasicNeuralNetSerializer.h
-        network/BasicNeuralNetDeserializer.cpp
         layers/transfer_functions/NetSumLayer.cpp
         layers/transfer_functions/include/NetSumLayer.h
         layers/transfer_functions/EuclideanDistLayer.cpp
@@ -111,19 +95,14 @@ add_library(flexneuralnet
         network/OldNetworkOutput.cpp
         network/include/OldNetworkOutput.h
         network/OldNetworkLayer.cpp
-        trainers/include/PerformanceMetrics.h
-        datasets/include/DataSet.h
-        datasets/include/Exemplar.h
+        datasets/include/EnumeratedDataSet.h
         datasets/include/Episode.h
         network/include/NeuralNet.h
         trainers/include/TrainerUtils.h
-        trainers/FATrainer.cpp
-        trainers/include/FATrainer.h
         evaluators/include/BasicEvaluator.h
         network/include/NeuralNetSerializer.h
         datasets/include/VectorConcatenator.h
         datasets/include/Vectorizable.h
-        datasets/include/A.h
         datasets/include/VectorizableSet.h
         evaluators/include/ActorCriticEvaluator.h
         evaluators/include/BasicEvalConfig.h
@@ -148,13 +127,29 @@ add_library(flexneuralnet
         network/NetworkTopology.cpp
         network/include/NetworkTopology.h
         network/LayerConnRecord.cpp
-        network/include/LayerConnRecord.h)
+        network/include/LayerConnRecord.h
+        trainers/SuperviseTrainingAlgo.cpp
+        trainers/include/SuperviseTrainingAlgo.h
+        evaluators/include/Evaluator.h
+        evaluators/include/DerivedEvaluator.h
+        evaluators/include/FitnessFunction.h
+        datasets/CartesianCoord.cpp
+        datasets/include/CartesianCoord.h
+        datasets/include/NNetIOValue.h
+        util/JSONStream.cpp
+        util/include/JSONStream.h
+        util/Globals.cpp
+        util/include/Globals.h
+        datasets/stream/CartesianCoordStream.cpp
+        datasets/stream/include/EnumeratedDataSetStream.h datasets/ValarrayMap.cpp datasets/ValarrayMap.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
         actor_critic/include
         datasets
         datasets/include
+        datasets/stream
+        datasets/stream/include
         include
         layers
         layers/include
@@ -162,11 +157,15 @@ target_include_directories(flexneuralnet PUBLIC
         layers/transfer_functions/include
         network
         network/include
+        evaluators
+        evaluators/include
         trainers
         trainers/include
         util
         util/include
-        rapidjson)
+        rapidjson
+        picojson
+        )
 
 #enable_testing()
 add_subdirectory(test)

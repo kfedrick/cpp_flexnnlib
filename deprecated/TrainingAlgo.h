@@ -5,7 +5,7 @@
 #ifndef FLEX_NEURALNET_TRAININGALGO_H_
 #define FLEX_NEURALNET_TRAININGALGO_H_
 
-#include "DataSet.h"
+#include "EnumeratedDataSet.h"
 #include "TrainingRecord.h"
 #include "TrainerConfig.h"
 

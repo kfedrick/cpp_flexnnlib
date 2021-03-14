@@ -30,7 +30,7 @@ namespace flexnnet
        * @param _externin
        * @return
        */
-      const std::valarray<double>& activate(const NNetIO_Typ& _externin) override;
+      const std::valarray<double>& activate(const ValarrMap& _externin) override;
 
    private:
       std::string layer_name;

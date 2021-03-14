@@ -30,14 +30,32 @@ class SingleLayerNNActivationTestFixture : public CommonTestFixtureFunctions, pu
 
 public:
 
-   struct TestCase
+   struct ActivationTestCase
    {
       size_t layer_sz;
       size_t input_sz;
       flexnnet::Array2D<double> weights;
 
-      flexnnet::NNetIO_Typ input;
-      flexnnet::NNetIO_Typ target_output;
+      flexnnet::ValarrMap input;
+      flexnnet::ValarrMap target_output;
+   };
+
+   struct DerivativesTestCase
+   {
+      size_t layer_sz;
+      size_t input_sz;
+      flexnnet::Array2D<double> weights;
+
+      flexnnet::ValarrMap input;
+
+      struct Target
+      {
+         flexnnet::Array2D<double> dAdN;
+         flexnnet::Array2D<double> dNdW;
+         flexnnet::Array2D<double> dNdI;
+      };
+
+      Target target;
    };
 
 public:
@@ -46,8 +64,11 @@ public:
    virtual void TearDown()
    {}
 
-   std::vector<TestCase> read_samples(std::string _fpath);
-   void create_nnet(const TestCase& _testcase);
+   std::vector<ActivationTestCase> read_activation_samples(std::string _fpath);
+   std::vector<DerivativesTestCase> read_derivatives_samples(std::string _fpath);
+
+   void create_nnet(const ActivationTestCase& _testcase);
+   std::shared_ptr<flexnnet::BaseNeuralNet> create_deriv_nnet(const DerivativesTestCase& _testcase);
 
    std::shared_ptr<flexnnet::BaseNeuralNet> nnet;
 };

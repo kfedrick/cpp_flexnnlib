@@ -11,7 +11,7 @@
 namespace flexnnet
 {
    /**
-    * Vectorizable defines an interface for classes that may encode their
+    * Vectorizable defines an interface for classes that may parse their
     * internal state representation as a real valued vector.
     */
    class Vectorizable

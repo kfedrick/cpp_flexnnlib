@@ -31,7 +31,7 @@ public:
    virtual void TearDown()
    {}
 
-   flexnnet::NNetIO_Typ sample_external_input;
+   flexnnet::ValarrMap sample_external_input;
 };
 
 TEST_F(NNBuilderTestFixture, NetworkLayerDefaultCon)

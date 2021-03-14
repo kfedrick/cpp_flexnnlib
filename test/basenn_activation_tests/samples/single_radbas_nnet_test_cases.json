@@ -45,7 +45,7 @@
       ],
       "output": [
         {
-          "field": "radbas",
+          "field": "output",
           "size": 3,
           "index": 0,
           "value": [

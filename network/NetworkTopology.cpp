@@ -13,7 +13,7 @@ using flexnnet::NetworkLayerImpl;
 using flexnnet::NetworkTopology;
 using flexnnet::LayerConnRecord;
 
-NetworkTopology::NetworkTopology(const NNetIO_Typ& _xinput_sample)
+NetworkTopology::NetworkTopology(const ValarrMap& _xinput_sample)
 {
    sample_extern_input = _xinput_sample;
 }

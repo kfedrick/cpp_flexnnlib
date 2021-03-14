@@ -7,7 +7,6 @@
 
 #include "Array2D.h"
 #include "NetSumLayer.h"
-#include "LayerSerializer.h"
 
 namespace flexnnet
 {
@@ -99,7 +98,7 @@ namespace flexnnet
 
    inline std::string SoftMax::toJson(void) const
    {
-      return LayerSerializer<SoftMax>::toJson(*this);
+      return "";
    }
 }
 

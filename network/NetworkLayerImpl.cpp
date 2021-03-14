@@ -29,8 +29,8 @@ NetworkLayerImpl::NetworkLayerImpl(std::shared_ptr<BasicLayer>&& _layer, bool _i
 
 NetworkLayerImpl::~NetworkLayerImpl() {}
 
-const std::valarray<double>& NetworkLayerImpl::activate(const NNetIO_Typ& _externin)
+const std::valarray<double>& NetworkLayerImpl::activate(const ValarrMap& _externin)
 {
-   const std::valarray<double>& _externin_vec = marshal_inputs(_externin);
+   const std::valarray<double>& _externin_vec = concat_inputs(_externin);
    return basiclayer()->activate(_externin_vec);
 }

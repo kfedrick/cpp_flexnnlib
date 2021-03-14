@@ -157,7 +157,7 @@ TYPED_TEST_P (FaninNNActivationTestFixture, ReadTestCase)
    }
 }
 
-REGISTER_TYPED_TEST_CASE_P
+/*REGISTER_TYPED_TEST_CASE_P
 (FaninNNActivationTestFixture, ReadTestCase);
 INSTANTIATE_TYPED_TEST_CASE_P
-(My, FaninNNActivationTestFixture, MyTypes);
+(My, FaninNNActivationTestFixture, MyTypes);*/

@@ -10,9 +10,8 @@
 #include <iostream>
 
 #include "flexnnet.h"
-
+#include <BaseNeuralNet.h>
 #include "TrainingRecord.h"
-#include "BasicNeuralNet.h"
 
 namespace flexnnet
 {
@@ -56,9 +55,9 @@ namespace flexnnet
 
    protected:
 
-      void save_nnet_weights(const std::string& _label, const BasicNeuralNet& _nnet);
-      void restore_nnet_weights(const std::string& _label, BasicNeuralNet& _nnet);
-      void save_best_weights(TrainingRecord& _trec, const BasicNeuralNet& _nnet);
+      void save_nnet_weights(const std::string& _label, const BaseNeuralNet& _nnet);
+      void restore_nnet_weights(const std::string& _label, BaseNeuralNet& _nnet);
+      void save_best_weights(TrainingRecord& _trec, const BaseNeuralNet& _nnet);
 
    private:
       TrainingStatistics training_stats;
@@ -70,14 +69,14 @@ namespace flexnnet
       std::vector<TrainedNNetRecord> best_nnets;
    };
 
-   void TrainerUtils::save_nnet_weights(const std::string& _label, const BasicNeuralNet& _nnet)
+   void TrainerUtils::save_nnet_weights(const std::string& _label, const BaseNeuralNet& _nnet)
    {
       std::cout << "TrainerUtils::save_nnet_weights() - entry\n";
       cached_layer_weights.emplace(_label, _nnet.get_weights());
    }
 
    inline
-   void TrainerUtils::restore_nnet_weights(const std::string& _label, BasicNeuralNet& _nnet)
+   void TrainerUtils::restore_nnet_weights(const std::string& _label, BaseNeuralNet& _nnet)
    {
       std::cout << "TrainerUtils::restore_nnet_weights() - entry\n";
 
@@ -86,7 +85,7 @@ namespace flexnnet
    }
 
    inline
-   void TrainerUtils::save_best_weights(TrainingRecord& _trec, const BasicNeuralNet& _nnet)
+   void TrainerUtils::save_best_weights(TrainingRecord& _trec, const BaseNeuralNet& _nnet)
    {
       TrainedNNetRecord nnrec;
       nnrec.training_record = _trec;

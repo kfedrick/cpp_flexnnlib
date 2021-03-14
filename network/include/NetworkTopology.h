@@ -33,7 +33,7 @@ namespace flexnnet
        * input vectors, _xinput_sample.
        * @param _xinput
        */
-      NetworkTopology(const NNetIO_Typ& _xinput_sample);
+      NetworkTopology(const ValarrMap& _xinput_sample);
       NetworkTopology(const NetworkTopology& _topo);
       ~NetworkTopology();
 
@@ -172,7 +172,7 @@ namespace flexnnet
       std::vector<std::shared_ptr<NetworkLayerImpl>> network_output_layers;
 
       // Sample basic_layer input fields
-      NNetIO_Typ sample_extern_input;
+      ValarrMap sample_extern_input;
    };
 
    inline

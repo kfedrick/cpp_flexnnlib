@@ -30,7 +30,7 @@ public:
    std::string printResults(const flexnnet::BasicLayer& _layer, int _prec = 5);
 
    void gday() { std::cout << "g'day\n"; }
-   flexnnet::NNetIO_Typ parse_datum(const rapidjson::Value& _obj);
+   flexnnet::ValarrMap parse_datum(const rapidjson::Value& _obj);
    flexnnet::Array2D<double> parse_weights(const rapidjson::Value& _obj, size_t _rows, size_t _cols);
 };
 

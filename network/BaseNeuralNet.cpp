@@ -9,6 +9,7 @@ using std::vector;
 using flexnnet::BaseNeuralNet;
 using flexnnet::BasicLayer;
 using flexnnet::NetworkWeights;
+using flexnnet::ValarrMap;
 
 
 BaseNeuralNet::BaseNeuralNet(const flexnnet::NetworkTopology& _topology) : network_topology(_topology)
@@ -29,7 +30,7 @@ void BaseNeuralNet::reset(void)
    // TODO - implement
 }
 
-const std::valarray<double>& BaseNeuralNet::activate(const NNetIO_Typ& _externin)
+const ValarrMap& BaseNeuralNet::activate(const ValarrMap& _externin)
 {
    /*
     * Activate all network layers
@@ -43,7 +44,7 @@ const std::valarray<double>& BaseNeuralNet::activate(const NNetIO_Typ& _externin
     * network_output_layer object.
     */
    network_output_layer.activate(_externin);
-   return network_output_layer.value();
+   return network_output_layer.input_value_map();
 }
 
 const void BaseNeuralNet::backprop(const std::valarray<double>& _gradient)

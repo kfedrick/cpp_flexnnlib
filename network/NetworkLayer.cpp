@@ -4,6 +4,7 @@
 
 #include "NetworkLayer.h"
 
+using flexnnet::ValarrMap;
 using flexnnet::NetworkLayer;
 
 NetworkLayer::NetworkLayer() {}
@@ -27,7 +28,7 @@ NetworkLayer::NetworkLayer(std::shared_ptr<BasicLayer>&& _layer, bool _is_output
 
 NetworkLayer::~NetworkLayer() {}
 
-const std::valarray<double>& NetworkLayer::marshal_inputs(const NNetIO_Typ& _externin)
+const std::valarray<double>& NetworkLayer::concat_inputs(const ValarrMap& _externin)
 {
    size_t virtual_ndx = 0;
 
@@ -51,6 +52,24 @@ const std::valarray<double>& NetworkLayer::marshal_inputs(const NNetIO_Typ& _ext
 
    return virtual_input_vector;
 }
+
+const ValarrMap& NetworkLayer::marshal_inputs(const ValarrMap& _externin)
+{
+   // First append external input fields
+   for (auto& inputrec : external_input_fields)
+      input_map[inputrec.field()] = _externin.at(inputrec.field());
+
+   // Append input layer outputs to the virtual input vector for this layer.
+   for (size_t i = 0; i < activation_connections.size(); i++)
+   {
+      LayerConnRecord& conn = activation_connections[i];
+      const BasicLayer& source_layer = conn.layer();
+      input_map[source_layer.name()] = source_layer();
+   }
+
+   return input_map;
+}
+
 
 size_t NetworkLayer::append_virtual_vector(size_t start_ndx, const std::valarray<double>& vec)
 {
@@ -86,6 +105,8 @@ void NetworkLayer::add_external_input_field(const std::string& _field, size_t _s
    else
    {
       external_input_fields.push_back(ExternalInputRecord(_field, _sz, external_input_fields.size()));
+
+      input_map[_field] = {};
       virtual_input_vector.resize(virtual_input_vector.size() + _sz);
       basic_layer->resize_input(virtual_input_vector.size());
    }
@@ -118,6 +139,8 @@ NetworkLayer::add_activation_connection(std::shared_ptr<BasicLayer>& _from, Laye
    else
    {
       activation_connections.push_back(LayerConnRecord(_from, _type));
+
+      input_map[_from->name()] = {};
       virtual_input_vector.resize(virtual_input_vector.size() + _from->size());
       if (basiclayer().use_count() > 0)
          basic_layer->resize_input(virtual_input_vector.size());

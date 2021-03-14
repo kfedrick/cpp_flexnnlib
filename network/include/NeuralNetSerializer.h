@@ -6,7 +6,7 @@
 #define FLEX_NEURALNET_NEURALNETSERIALIZER_H_
 
 #include "NeuralNet.h"
-#include "BasicNeuralNetSerializer.h"
+#include "deprecated/BasicNeuralNetSerializer.h"
 
 namespace flexnnet
 {

@@ -45,7 +45,7 @@
       ],
       "output": [
         {
-          "field": "logsig",
+          "field": "output",
           "size": 3,
           "index": 0,
           "value": [
@@ -99,7 +99,7 @@
       ],
       "output": [
         {
-          "field": "logsig",
+          "field": "output",
           "size": 3,
           "index": 0,
           "value": [

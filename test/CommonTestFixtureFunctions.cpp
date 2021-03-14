@@ -8,8 +8,6 @@ using std::cout;
 using std::valarray;
 using flexnnet::Array2D;
 
-using flexnnet::NNetIO_Typ;
-
 bool
 CommonTestFixtureFunctions::valarray_double_near(const std::valarray<double>& _target, const std::valarray<double>& _test, double _epsilon)
 {
@@ -132,9 +130,9 @@ std::string CommonTestFixtureFunctions::printResults(const flexnnet::BasicLayer&
    return ssout.str();
 }
 
-flexnnet::NNetIO_Typ CommonTestFixtureFunctions::parse_datum(const rapidjson::Value& _obj)
+flexnnet::ValarrMap CommonTestFixtureFunctions::parse_datum(const rapidjson::Value& _obj)
 {
-   NNetIO_Typ datum_fields;
+   flexnnet::ValarrMap datum_fields;
    for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
    {
       std::string field = _obj[i]["field"].GetString();

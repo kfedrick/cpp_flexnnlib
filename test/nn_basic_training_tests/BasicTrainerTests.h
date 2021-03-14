@@ -39,9 +39,9 @@ public:
 protected:
    std::unique_ptr<NeuralNet<Datum, Datum>> nnet;
 
-   flexnnet::DataSet<Datum, Datum, Exemplar> trnset;
-   flexnnet::DataSet<Datum, Datum, Exemplar> vldset;
-   flexnnet::DataSet<Datum, Datum, Exemplar> tstset;
+   flexnnet::EnumeratedDataSet<Datum, Datum, Exemplar> trnset;
+   flexnnet::EnumeratedDataSet<Datum, Datum, Exemplar> vldset;
+   flexnnet::EnumeratedDataSet<Datum, Datum, Exemplar> tstset;
 };
 
 template<typename T>

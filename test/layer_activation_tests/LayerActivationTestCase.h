@@ -18,8 +18,6 @@
 #include <CommonTestFixtureFunctions.h>
 
 #include "Array2D.h"
-#include "LayerSerializer.h"
-
 #include "PureLin.h"
 #include "LogSig.h"
 
@@ -110,24 +108,45 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::read(const 
    //Save basic_layer identifier information
    rapidjson::Value layer_def_obj = doc["layer_definition"].GetObject();
 
-   rapidjson::StringBuffer strbuf;
-   rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
-   layer_def_obj.Accept(writer);
-   std::string layer_def_str = strbuf.GetString();
+   std::string layer_id = layer_def_obj["id"].GetString();
+   bool is_output;// = layer_def_obj["dimensions"]["is_output_layer"].GetBool();
+   int layer_sz = layer_def_obj["dimensions"]["layer_size"].GetUint();
+   int layer_input_sz = layer_def_obj["dimensions"]["layer_input_size"].GetUint();
 
-   std::cout << "\n" << layer_def_str << "\n";
+   std::cout << "\nCreate layer : " << layer_id.c_str() << " " << layer_sz << "\n" << std::flush;
+   layer_ptr = std::shared_ptr<_LayerType>(new _LayerType(layer_sz, layer_id));
+   std::cout << "\nDone create layer\n" << std::flush;
 
-   layer_ptr = flexnnet::LayerSerializer<_LayerType>::parse(layer_def_str);
+   flexnnet::ValarrMap io({{"input", std::valarray<double>(layer_input_sz)}});
+   layer_ptr->resize_input(layer_input_sz);
+
+   // Read layer weights and set them
+   const rapidjson::Value& weights_arr = layer_def_obj["learned_parameters"]["weights"];
+   flexnnet::Array2D<double> weights;
+
+   weights.resize(layer_sz, layer_input_sz + 1);
+   for (rapidjson::SizeType i = 0; i < weights_arr.Size(); i++)
+   {
+      const rapidjson::Value& myrow = weights_arr[i];
+      for (rapidjson::SizeType j = 0; j < myrow.Size(); j++)
+         weights.at(i, j) = myrow[j].GetDouble();
+   }
+   layer_ptr->layer_weights.set(weights);
 
    readTestCases();
+   std::cout << "\nDone reading test cases\n" << std::flush;
 
    in_fstream.close();
 }
 
 template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCases()
 {
+   samples.clear();
+
    size_t layer_size = layer_ptr->size();
    size_t input_size = layer_ptr->input_size();
+
+   std::cout << "\nLayer input size : " << input_size << "\n" << std::flush;
 
    const rapidjson::Value& test_cases_arr = doc["test_cases"].GetArray();
 
@@ -152,7 +171,7 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
          test_sample.input[i] = in_arr[i].GetDouble();
 
       // Read the test input vector
-      const rapidjson::Value& init_arr = a_tuple_obj["initial_layer_value"];
+      const rapidjson::Value& init_arr = a_tuple_obj["initial_value"];
       for (rapidjson::SizeType i = 0; i < init_arr.Size(); i++)
          test_sample.initial_value[i] = init_arr[i].GetDouble();
 

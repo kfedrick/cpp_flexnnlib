@@ -7,7 +7,6 @@
 
 #include "Array2D.h"
 #include "EuclideanDistLayer.h"
-#include "LayerSerializer.h"
 
 namespace flexnnet
 {
@@ -78,7 +77,7 @@ namespace flexnnet
 
    inline std::string RadBas::toJson(void) const
    {
-      return LayerSerializer<RadBas>::toJson(*this);
+      return "";
    }
 }
 
