@@ -15,7 +15,7 @@
 #include "OldNetworkLayer.h"
 
 using flexnnet::Array2D;
-using flexnnet::Datum;
+using flexnnet::OldDatum;
 using flexnnet::OldNetworkLayer;
 using flexnnet::BasicNeuralNet;
 
@@ -140,7 +140,7 @@ TYPED_TEST_P (TestFaninFFNNActivation, FaninFFNNActivation)
    {
       TestFaninFFNNActivation<TypeParam>::create_fanin_ffnnet(test_case);
 
-      Datum netout = TestFaninFFNNActivation<TypeParam>::nnet->activate(test_case.input);
+      OldDatum netout = TestFaninFFNNActivation<TypeParam>::nnet->activate(test_case.input);
 
       // Check basic_layer output
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";

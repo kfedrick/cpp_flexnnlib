@@ -74,6 +74,7 @@ namespace flexnnet
       type_ref operator+=(const_type_ref _arr);
       type_ref operator-=(const_type_ref arr);
       type_ref operator*=(const_type_ref _arr);
+      type_ref operator*=(value_type _val);
 
    private:
       static bool validate_dimensions(const_type_ref _arr1, const_type_ref arr2);
@@ -144,14 +145,14 @@ namespace flexnnet
    {
       std::ostringstream err_str;
 
-      if (_rowndx > dimensions.rows)
+      if (_rowndx >= dimensions.rows)
       {
          err_str
             << "Error : Array2<T>::at(rowndx, colndx) - row index " << _rowndx << " out-of-range\n";
          throw std::out_of_range(err_str.str());
       }
 
-      if (_colndx > dimensions.cols)
+      if (_colndx >= dimensions.cols)
       {
          err_str
             << "Error : Array2<T>::at(rowndx, colndx) - column index " << _colndx << " out-of-range\n";
@@ -165,14 +166,14 @@ namespace flexnnet
    {
       std::ostringstream err_str;
 
-      if (_rowndx > dimensions.rows)
+      if (_rowndx >= dimensions.rows)
       {
          err_str
             << "Error : Array2<T>::at(rowndx, colndx) - row index " << _rowndx << " out-of-range\n";
          throw std::out_of_range(err_str.str());
       }
 
-      if (_colndx > dimensions.cols)
+      if (_colndx >= dimensions.cols)
       {
          err_str
             << "Error : Array2<T>::at(rowndx, colndx) - column index " << _colndx << " out-of-range\n";
@@ -273,6 +274,13 @@ namespace flexnnet
    {
       validate_dimensions(*this, _arr);
       data *= _arr.data;
+
+      return *this;
+   }
+
+   template<class T> inline Array2D<T>& Array2D<T>::operator*=(value_type _val)
+   {
+      data *= _val;
 
       return *this;
    }

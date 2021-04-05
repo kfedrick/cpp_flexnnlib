@@ -4,16 +4,17 @@
 
 #include <gtest/gtest.h>
 #include <CommonTestFixtureFunctions.h>
+#include <fstream>
 
 #include "picojson.h"
 
 #include "flexnnet.h"
 #include "CartesianCoord.h"
-#include "EnumeratedDataSet.h"
-#include "EnumeratedDataSetStream.h"
+#include "DataSet.h"
+#include "DataSetStream.h"
 
 using flexnnet::CartesianCoord;
-using flexnnet::EnumeratedDataSet;
+using flexnnet::DataSet;
 
 class DataSetTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
 {
@@ -48,7 +49,7 @@ TEST_F(DataSetTestFixture, DatasetConstructor)
 {
    std::cout << "Test Empty Dataset Constructor\n" << std::flush;
 
-   EnumeratedDataSet<CartesianCoord, std::valarray<double>> dataset;
+   DataSet<CartesianCoord, std::valarray<double>> dataset;
 
    ASSERT_EQ(dataset.size(), 0);
 }
@@ -57,7 +58,7 @@ TEST_F(DataSetTestFixture, DatasetPushback)
 {
    std::cout << "Test Empty Dataset Pushback\n" << std::flush;
 
-   EnumeratedDataSet<CartesianCoord, std::valarray<double>> dataset;
+   DataSet<CartesianCoord, std::valarray<double>> dataset;
 
    dataset.push_back(std::pair<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
    ASSERT_EQ(dataset.size(), 1);
@@ -177,7 +178,7 @@ TEST_F(DataSetTestFixture, OStream)
 {
    std::cout << "Test Dataset Console Stream\n" << std::flush;
 
-   EnumeratedDataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord> dataset;
 
    dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
    dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
@@ -192,7 +193,7 @@ TEST_F(DataSetTestFixture, Write)
 
    std::string fname = "test_write.txt";
 
-   EnumeratedDataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord> dataset;
 
    dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
    dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
@@ -209,7 +210,7 @@ TEST_F(DataSetTestFixture, IStream)
 
    std::string fname = "test_write.txt";
 
-   EnumeratedDataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord> dataset;
 
    // Open file for writing
    std::ifstream if_strm(fname);

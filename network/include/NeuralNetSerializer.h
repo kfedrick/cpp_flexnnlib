@@ -24,7 +24,7 @@ namespace flexnnet
       rapidjson::Document netdoc;
       netdoc.Parse(_json.c_str());
 
-      Datum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
+      OldDatum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
 
       std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
       layers = BasicNeuralNetSerializer::parseNetworkLayers(netdoc["network_layers"].GetArray());

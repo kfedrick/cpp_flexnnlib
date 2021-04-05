@@ -20,18 +20,16 @@ std::istream& operator>>(std::istream& _istrm, flexnnet::CartesianCoord& _coord)
 
 namespace flexnnet
 {
-   class CartesianCoord : public NNetIOValue
+   class CartesianCoord : public NNetIOInterface
    {
    public:
       CartesianCoord();
       CartesianCoord(double _x, double _y);
 
-      /**
-       * Return the coordinate encoded as a NNetIO_Map for use as an
-       * input to a neural network.
-       *
-       * @return
-       */
+      virtual size_t size(void) const;
+
+      const std::valarray<double>& value(void) const override;
+
       const flexnnet::ValarrMap& value_map(void) const override;
 
       void parse(const flexnnet::ValarrMap& _vmap) override;
@@ -53,8 +51,16 @@ namespace flexnnet
       unsigned int N{11};
       double x;
       double y;
-      mutable ValarrayMap kernel_coord;
+      mutable ValarrMap kernel_coord;
+      mutable std::valarray<double> virtual_vector;
    };
+
+   inline
+   size_t CartesianCoord::size(void) const
+   {
+      return virtual_vector.size();
+   }
+
 } // end of flexnnet namespace
 
 

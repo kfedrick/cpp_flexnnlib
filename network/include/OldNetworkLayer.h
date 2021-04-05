@@ -12,7 +12,7 @@
 #include <set>
 #include <valarray>
 
-#include "Datum.h"
+#include "OldDatum.h"
 #include "BasicLayer.h"
 #include "ExternalInputRecord.h"
 #include "LayerInput.h"
@@ -47,7 +47,7 @@ namespace flexnnet
        * Public member functions to connect layers and external inputs.
        */
       size_t add_connection(BasicLayer& _layer, OldLayerConnRecord::ConnectionType _type);
-      size_t add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet);
+      size_t add_external_input(const OldDatum& _xdatum, const std::set<std::string>& _indexSet);
 
    private:
       const NetworkLayerType network_layer_type;
@@ -67,7 +67,7 @@ namespace flexnnet
       resize_input(virtual_input_size());
    }
 
-   inline size_t OldNetworkLayer::add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet)
+   inline size_t OldNetworkLayer::add_external_input(const OldDatum& _xdatum, const std::set<std::string>& _indexSet)
    {
       LayerInput::add_external_input(_xdatum, _indexSet);
 

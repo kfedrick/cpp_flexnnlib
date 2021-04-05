@@ -37,7 +37,7 @@ namespace flexnnet
 
    protected:
       const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
-      const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
+      const Array2D<double>& calc_dy_dnet(const std::valarray<double>& _out);
 
 
    private:

@@ -16,7 +16,11 @@ namespace flexnnet
    {
    public:
       BaseNeuralNet(const NetworkTopology& _topology = NetworkTopology({}));
+      BaseNeuralNet(const BaseNeuralNet& _nnet);
+
       virtual ~BaseNeuralNet();
+
+      void copy(const BaseNeuralNet& _nnet);
 
       /**
        * BaseNeuralNet::size(void)
@@ -58,28 +62,27 @@ namespace flexnnet
        *
        * @param _gradient
        */
-      virtual const void backprop(const std::valarray<double>& _gradient);
+      virtual const void backprop(const ValarrMap& _egradient);
+
+      const LayerWeights& get_weights(const std::string _layerid) const;
+
+      void set_weights(const std::string _layerid, const LayerWeights& _weight);
+
+      void adjust_weights(const std::string _layerid, const Array2D<double>& _deltaw);
 
       NetworkWeights get_weights(void) const;
+
       void set_weights(const NetworkWeights& _weight);
 
       const std::set<std::string>& get_layer_names(void);
 
       std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void);
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void) const;
 
       std::string toJSON(void) const;
 
    protected:
       std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void);
-
-   private:
-      /**
-       * Private helper function to initialize network_output_conn by adding connections
-       * from to network_output_conn from all output layers.
-       *
-       * @return - the size of the virtual output vector.
-       */
-      void init_network_output_layer(void);
 
    private:
       size_t network_output_size;
@@ -93,8 +96,8 @@ namespace flexnnet
       // recurrent_network_flag - Set if this network has recurrent connections.
       bool recurrent_network_flag;
 
-      // network_output_layer - Used to gather network output from the output layers.
-      NetworkOutput& network_output_layer = network_topology.get_network_output_layer();
+      // virtual_network_output_layer_ref - Used to gather network output from the output layers.
+      NetworkOutput& virtual_network_output_layer_ref;
    };
 
    inline const std::set<std::string>& BaseNeuralNet::get_layer_names(void)
@@ -105,23 +108,29 @@ namespace flexnnet
    inline
    std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void)
    {
-      return reinterpret_cast<std::map<std::string, std::shared_ptr<NetworkLayer>>&>(network_topology.get_layers());
+      return network_topology.get_layers();
+   }
+
+   inline
+   const std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void) const
+   {
+      return network_topology.get_layers();
    }
 
    inline
    std::vector<std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_ordered_layers(void)
    {
-      return reinterpret_cast<std::vector<std::shared_ptr<NetworkLayer>>&>(network_topology.get_ordered_layers());
+      return network_topology.get_ordered_layers();
    }
 
    inline size_t BaseNeuralNet::size(void)
    {
-      return network_output_layer.size();
+      return virtual_network_output_layer_ref.size();
    }
 
    inline const ValarrMap& BaseNeuralNet::value_map() const
    {
-      return network_output_layer.input_value_map();
+      return virtual_network_output_layer_ref.input_value_map();
    }
 }
 

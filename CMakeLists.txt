@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 project(cpp_flexnnlib)
 
 set(CMAKE_CXX_STANDARD 14)
-# set_weights(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
@@ -43,105 +44,55 @@ add_executable(sandbox sandbox/doit.cpp)
 
 add_library(flexneuralnet
         include/flexnnet.h
-        network/include/SumSquaredError.h
-        network/SumSquaredError.cpp
+        network/include/SumSquaredError.h network/SumSquaredError.cpp
         util/include/Array.h
-        util/include/ArrayInitializer.h
         util/include/NamedObject.h
-        util/include/URandArrayInitializer.h
-        util/ArrayInitializer.cpp
-        util/URandArrayInitializer.cpp
-        layers/include/BasicLayer.h
-        layers/BasicLayer.cpp
-        util/LayerWeights.cpp
-        util/include/LayerWeights.h
-        util/include/LayerDerivatives.h
-        util/LayerDerivatives.cpp
+        layers/include/BasicLayer.h layers/BasicLayer.cpp
+        util/include/LayerWeights.h util/LayerWeights.cpp
+        util/include/LayerDerivatives.h util/LayerDerivatives.cpp
         util/include/LayerState.h
-        layers/transfer_functions/PureLin.cpp
-        layers/transfer_functions/include/PureLin.h
-        util/JSONEncoder.cpp
-        util/include/JSONEncoder.h
-        layers/transfer_functions/LogSig.cpp
-        layers/transfer_functions/include/LogSig.h
-        layers/transfer_functions/RadBas.cpp
-        layers/transfer_functions/include/RadBas.h
-        layers/transfer_functions/TanSig.cpp
-        layers/transfer_functions/include/TanSig.h
-        layers/transfer_functions/SoftMax.cpp
-        layers/transfer_functions/include/SoftMax.h
-        datasets/Datum.cpp
-        datasets/include/Datum.h
+        layers/transfer_functions/include/PureLin.h layers/transfer_functions/PureLin.cpp
+        layers/transfer_functions/include/LogSig.h layers/transfer_functions/LogSig.cpp
+        layers/transfer_functions/include/RadBas.h layers/transfer_functions/RadBas.cpp
+        layers/transfer_functions/include/TanSig.h layers/transfer_functions/TanSig.cpp
+        layers/transfer_functions/include/SoftMax.h layers/transfer_functions/SoftMax.cpp
         util/include/Array2D.h
         util/include/Array3D.h
-        network/include/OldNetworkLayer.h
-        network/include/NetworkLayerImpl.h
-        network/NetworkLayerImpl.cpp
-        network/include/NetworkLayer.h
-        network/NetworkLayer.cpp
-        network/include/NetworkOutput.h
-        network/NetworkOutput.cpp
-        network/OldLayerConnRecord.cpp
-        network/include/OldLayerConnRecord.h
-        network/ExternalInputRecord.cpp
-        network/include/ExternalInputRecord.h
-        layers/transfer_functions/NetSumLayer.cpp
-        layers/transfer_functions/include/NetSumLayer.h
-        layers/transfer_functions/EuclideanDistLayer.cpp
-        layers/transfer_functions/include/EuclideanDistLayer.h
+        network/include/NetworkLayer.h network/NetworkLayer.cpp
+        network/include/NetworkOutput.h network/NetworkOutput.cpp
+        network/include/ExternalInputRecord.h network/ExternalInputRecord.cpp
+        layers/transfer_functions/include/NetSumLayer.h layers/transfer_functions/NetSumLayer.cpp
+        layers/transfer_functions/include/EuclideanDistLayer.h layers/transfer_functions/EuclideanDistLayer.cpp
         trainers/include/TrainerConfig.h
-        network/LayerInput.cpp
-        network/include/LayerInput.h
-        network/OldNetworkOutput.cpp
-        network/include/OldNetworkOutput.h
-        network/OldNetworkLayer.cpp
-        datasets/include/EnumeratedDataSet.h
-        datasets/include/Episode.h
+        datasets/include/DataSet.h
         network/include/NeuralNet.h
-        trainers/include/TrainerUtils.h
         evaluators/include/BasicEvaluator.h
-        network/include/NeuralNetSerializer.h
-        datasets/include/VectorConcatenator.h
-        datasets/include/Vectorizable.h
-        datasets/include/VectorizableSet.h
-        evaluators/include/ActorCriticEvaluator.h
-        evaluators/include/BasicEvalConfig.h
-        trainers/include/TDTrainerConfig.h
-        evaluators/include/TDEvaluatorConfig.h
-        trainers/include/ActorCriticTrainer.h
-        evaluators/include/RMSError.h
         trainers/include/TrainingRecord.h
-        trainers/include/flexnnet_trainers.h
-        util/include/flexnnet_utils.h
-        layers/include/flexnnet_layers.h
-        network/include/flexnnet_networks.h
         trainers/include/BasicTrainer.h
-        trainers/include/BackpropAlgo.h
-        util/include/NetworkError.cpp
-        util/include/NetworkError.h
-        datasets/include/VectorMap.h
-        datasets/include/NamedValarray.h
-        datasets/include/VectorizableMap.h
-        network/BaseNeuralNet.cpp
-        network/include/BaseNeuralNet.h
-        network/NetworkTopology.cpp
-        network/include/NetworkTopology.h
-        network/LayerConnRecord.cpp
-        network/include/LayerConnRecord.h
-        trainers/SuperviseTrainingAlgo.cpp
-        trainers/include/SuperviseTrainingAlgo.h
+        network/include/BaseNeuralNet.h network/BaseNeuralNet.cpp
+        network/include/NetworkTopology.h network/NetworkTopology.cpp
+        network/include/LayerConnRecord.h network/LayerConnRecord.cpp
+        trainers/include/SuperviseTrainingAlgo.h trainers/SuperviseTrainingAlgo.cpp
         evaluators/include/Evaluator.h
-        evaluators/include/DerivedEvaluator.h
-        evaluators/include/FitnessFunction.h
-        datasets/CartesianCoord.cpp
-        datasets/include/CartesianCoord.h
-        datasets/include/NNetIOValue.h
-        util/JSONStream.cpp
-        util/include/JSONStream.h
-        util/Globals.cpp
-        util/include/Globals.h
+        evaluators/include/RMSEFitnessFunc.h
+        datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
+        datasets/include/NNetIOInterface.h
+        util/include/JSONStream.h util/JSONStream.cpp
+        util/include/Globals.h util/Globals.cpp
         datasets/stream/CartesianCoordStream.cpp
-        datasets/stream/include/EnumeratedDataSetStream.h datasets/ValarrayMap.cpp datasets/ValarrayMap.h)
+        datasets/stream/include/DataSetStream.h
+        datasets/include/ValarrayMap.h datasets/ValarrayMap.cpp
+        evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
+        datasets/stream/ValarrayMapStream.cpp
+        trainers/include/BaseTraining.h trainers/BaseTraining.cpp
+        trainers/include/LearningRatePolicy.h
+        trainers/include/ConstantLearningRate.h
+        trainers/include/DeltaBarDeltaLearningRate.h
+        trainers/include/TrainingReport.cpp
+        trainers/include/TrainingReport.h
+        util/include/URandArray2DInitializer.h
+        util/include/NRandArray2DInitializer.h
+        )
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -153,7 +104,6 @@ target_include_directories(flexneuralnet PUBLIC
         include
         layers
         layers/include
-        layers/serializers/include
         layers/transfer_functions/include
         network
         network/include
@@ -167,5 +117,5 @@ target_include_directories(flexneuralnet PUBLIC
         picojson
         )
 
-#enable_testing()
+enable_testing()
 add_subdirectory(test)

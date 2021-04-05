@@ -65,14 +65,14 @@ EuclideanDistLayer::calc_netin(const std::valarray<double>& _rawin)
  * input std::vector and weights specified in the argument list and writes it into the _dNdW argument.
  */
 const Array2D<double>&
-EuclideanDistLayer::calc_dNdW(const std::valarray<double>& _rawin)
+EuclideanDistLayer::calc_dnet_dw(const std::valarray<double>& _rawin)
 {
    const Array2D<double>& weights = layer_weights.const_weights_ref;
-   Array2D<double>& dNdW = layer_derivatives.dNdW;
+   Array2D<double>& dnet_dw = layer_derivatives.dnet_dw;
    std::valarray<double>& netinv = layer_state.netinv;
 
    Array2D<double>::Dimensions wdim = weights.size();
-   Array2D<double>::Dimensions ddim = dNdW.size();
+   Array2D<double>::Dimensions ddim = dnet_dw.size();
 
    if (_rawin.size() + 1 != wdim.cols)
       throw std::invalid_argument("external input vector size doesn't match column dimension in weight array");
@@ -81,20 +81,20 @@ EuclideanDistLayer::calc_dNdW(const std::valarray<double>& _rawin)
       throw std::invalid_argument("net input vector size doesn't match row dimension in weight array");
 
    if (ddim.rows != netinv.size() || ddim.cols != _rawin.size() + 1)
-      throw std::invalid_argument("dNdW array dimensionality doesn't match weight array");
+      throw std::invalid_argument("dnet_dw array dimensionality doesn't match weight array");
 
    size_t spread_param_ndx = _rawin.size();
    for (size_t out_ndx = 0; out_ndx < const_layer_output_size_ref; out_ndx++)
    {
-      // Calculate dNdW with respect to the spread parameter
-      dNdW.at(out_ndx, spread_param_ndx) = -squared_euclidean_dist[out_ndx] * spread[out_ndx];
+      // Calculate dnet_dw with respect to the spread parameter
+      dnet_dw.at(out_ndx, spread_param_ndx) = -squared_euclidean_dist[out_ndx] * spread[out_ndx];
 
-      // Calculate dNdW with respect to RBF kernel
+      // Calculate dnet_dw with respect to RBF kernel
       for (size_t in_ndx = 0; in_ndx < layer_input_size; in_ndx++)
-         dNdW.at(out_ndx, in_ndx) = -2.0 * spread[out_ndx] * (_rawin[in_ndx] - weights.at(out_ndx, in_ndx));
+         dnet_dw.at(out_ndx, in_ndx) = -2.0 * spread[out_ndx] * (_rawin[in_ndx] - weights.at(out_ndx, in_ndx));
 
    }
-   return dNdW;
+   return dnet_dw;
 }
 
 /**
@@ -102,30 +102,26 @@ EuclideanDistLayer::calc_dNdW(const std::valarray<double>& _rawin)
  * input valarray and weights specified in the argument list and writes it into the _dNdW argument.
  */
 const Array2D<double>&
-EuclideanDistLayer::calc_dNdI(const std::valarray<double>& _rawin)
+EuclideanDistLayer::calc_dnet_dx(const std::valarray<double>& _rawin)
 {
    const Array2D<double>& weights = layer_weights.const_weights_ref;
-   Array2D<double>& dNdI = layer_derivatives.dNdI;
+   Array2D<double>& dnet_dx = layer_derivatives.dnet_dx;
    std::valarray<double>& netinv = layer_state.netinv;
 
    Array2D<double>::Dimensions wdim = weights.size();
-   Array2D<double>::Dimensions ddim = dNdI.size();
+   Array2D<double>::Dimensions ddim = dnet_dx.size();
 
    if (_rawin.size() + 1 != wdim.cols)
       throw std::invalid_argument("input vector size doesn't match column dimension in weight array");
 
-   if (ddim.rows != netinv.size() || ddim.cols != _rawin.size() + 1)
-      throw std::invalid_argument("dNdI array dimensionality doesn't match weight array");
+   if (ddim.rows != netinv.size() || ddim.cols != _rawin.size())
+      throw std::invalid_argument("dnet_dx array dimensionality doesn't match weight array");
 
-   size_t spread_param_ndx = _rawin.size();
    for (size_t out_ndx = 0; out_ndx < netinv.size(); out_ndx++)
    {
-      // TODO - probably not needed
-      dNdI.at(out_ndx, spread_param_ndx) = 0;
-
-      // Calculate dNdI with respect to input RBF kernel
+      // Calculate dnet_dx with respect to input RBF kernel
       for (size_t in_ndx = 0; in_ndx < _rawin.size(); in_ndx++)
-         dNdI.at(out_ndx, in_ndx) = 2.0 * spread[out_ndx] * (_rawin[in_ndx] - weights.at(out_ndx, in_ndx));
+         dnet_dx.at(out_ndx, in_ndx) = 2.0 * spread[out_ndx] * (_rawin[in_ndx] - weights.at(out_ndx, in_ndx));
    }
-   return dNdI;
+   return dnet_dx;
 }

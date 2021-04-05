@@ -26,8 +26,8 @@ namespace flexnnet
    class BasicEvalConfig
    {
    public:
-      static constexpr size_t DEFAULT_SAMPLE_SIZE = 0;
       static constexpr size_t DEFAULT_SAMPLING_COUNT = 1;
+      static constexpr size_t DEFAULT_SUBSAMPLE_FRACTION = 1.0;
 
    public:
       /**
@@ -42,25 +42,47 @@ namespace flexnnet
        * Set the size of the subsampling to draw
        * @param _size
        */
-      void set_sample_size(size_t _size);
-
-      size_t sample_size(void) const;
+      void set_subsample_fraction(double _frac);
 
       size_t sampling_count(void) const;
 
+      double subsample_fraction(void) const;
+
+      void randomize_order(bool _flag);
+
+      bool randomize_order(void) const;
+
    private:
+      bool randomize_order_flag{false};
       size_t num_samplings{DEFAULT_SAMPLING_COUNT};
-      size_t sampling_sz{DEFAULT_SAMPLE_SIZE};
+      double sub_sample_fraction{DEFAULT_SUBSAMPLE_FRACTION};
    };
+
+   inline bool BasicEvalConfig::randomize_order(void) const
+   {
+      return randomize_order_flag;
+   }
+
+   inline void BasicEvalConfig::randomize_order(bool _flag)
+   {
+      randomize_order_flag = _flag;
+   }
 
    inline void BasicEvalConfig::set_sampling_count(size_t _count)
    {
       num_samplings = _count;
    }
 
-   inline void BasicEvalConfig::set_sample_size(size_t _size)
+   inline void BasicEvalConfig::set_subsample_fraction(double _frac)
    {
-      sampling_sz = _size;
+      if (_frac <= 0 || _frac > 1.0)
+      {
+         static std::stringstream sout;
+         sout << "Error : BasicEvalConfig::set_subsample_fraction() - "
+              << "Bad value, must be 0 < _frac <= 1 : \"" << _frac << "\"\n";
+         throw std::invalid_argument(sout.str());
+      }
+      sub_sample_fraction = _frac;
    }
 
    inline size_t BasicEvalConfig::sampling_count(void) const
@@ -68,9 +90,9 @@ namespace flexnnet
       return num_samplings;
    }
 
-   inline size_t BasicEvalConfig::sample_size(void) const
+   inline double BasicEvalConfig::subsample_fraction(void) const
    {
-      return sampling_sz;
+      return sub_sample_fraction;
    }
 }
 

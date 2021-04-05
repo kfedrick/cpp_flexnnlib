@@ -28,7 +28,7 @@ size_t LayerInput::add_connection(BasicLayer& _layer, OldLayerConnRecord::Connec
    return virtual_input_vector.size();
 }
 
-size_t LayerInput::add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet)
+size_t LayerInput::add_external_input(const OldDatum& _xdatum, const std::set<std::string>& _indexSet)
 {
    static std::stringstream sout;
 
@@ -61,7 +61,7 @@ size_t LayerInput::add_external_input(const Datum& _xdatum, const std::set<std::
    return virtual_input_vector.size();
 }
 
-const std::valarray<double>& LayerInput::coelesce_input(const Datum& _xdatum)
+const std::valarray<double>& LayerInput::coelesce_input(const OldDatum& _xdatum)
 {
    int sz = virtual_input_vector.size();
    size_t virtual_ndx = 0;

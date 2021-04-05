@@ -30,18 +30,20 @@ namespace flexnnet
       void copy(LayerDerivatives&& _weights);
 
    public:
-      const Array2D<double>& const_dAdN_ref = dAdN;
-      const Array2D<double>& const_dNdW_ref = dNdW;
-      const Array2D<double>& const_dNdI_ref = dNdI;
+      const Array2D<double>& const_dy_dnet_ref = dy_dnet;
+      const Array2D<double>& const_dnet_dw_ref = dnet_dw;
+      const Array2D<double>& const_dnet_dx_ref = dnet_dx;
+      const Array2D<double>& const_dE_dw_ref = dE_dw;
 
-      bool stale_dAdN;
-      bool stale_dNdW;
-      bool stale_dNdI;
+      bool stale_dy_dnet;
+      bool stale_dnet_dw;
+      bool stale_dnet_dx;
+      bool stale_dE_dw;
 
-      Array2D<double> dAdN;
-      Array2D<double> dNdW;
-      Array2D<double> dNdI;
-
+      Array2D<double> dy_dnet;
+      Array2D<double> dnet_dw;
+      Array2D<double> dnet_dx;
+      Array2D<double> dE_dw;
    };
 
    inline LayerDerivatives::LayerDerivatives(size_t _out_sz, size_t _rawin_sz)
@@ -60,9 +62,10 @@ namespace flexnnet
     */
    inline void LayerDerivatives::stale()
    {
-      stale_dAdN = true;
-      stale_dNdW = true;
-      stale_dNdI = true;
+      stale_dy_dnet = true;
+      stale_dnet_dw = true;
+      stale_dnet_dx = true;
+      stale_dE_dw = true;
    }
 }
 

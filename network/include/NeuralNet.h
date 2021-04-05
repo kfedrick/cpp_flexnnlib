@@ -10,7 +10,7 @@
 namespace flexnnet
 {
    template<class _InType, class _OutType>
-   class NeuralNet : public BaseNeuralNet //, public BasicNeuralNetSerializer
+   class NeuralNet : public BaseNeuralNet
    {
 
    public:
@@ -20,7 +20,9 @@ namespace flexnnet
    public:
 
       const _OutType&
-      activate(const _InType& _indatum);
+      activate(const _InType& _nninput);
+
+
       const _InType&
       get_network_input(void) const;
 
@@ -36,15 +38,9 @@ namespace flexnnet
 
    template<class _InType, class _OutType>
    const _OutType&
-   NeuralNet<_InType, _OutType>::activate(const _InType& _xdatum)
+   NeuralNet<_InType, _OutType>::activate(const _InType& _nninput)
    {
-      std::cout << "NeuralNet.activate()\n" << std::flush;
-      /*
-       * Activate all network layers
-       */
-      std::vector<std::shared_ptr<NetworkLayer>>& network_layers = get_ordered_layers();
-      for (std::shared_ptr<NetworkLayer> nlayer : network_layers)
-         nlayer->activate(_xdatum.value_map());
+      BaseNeuralNet::activate(_nninput.value_map());
 
       network_output_pattern.parse(value_map());
       return network_output_pattern;
@@ -63,14 +59,6 @@ namespace flexnnet
    {
 
    }
-
-   /*
-   template<class _InType, class _OutType>
-   const _OutType & NeuralNet<_InType, _OutType>::activate (const _InType &_indatum)
-   {
-      return BasicNeuralNet::activate(_indatum);
-   }
-    */
 
    template<class _InType, class _OutType>
    const _InType&

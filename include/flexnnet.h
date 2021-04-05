@@ -18,35 +18,12 @@ namespace flexnnet
  * Global type definitions
  */
    typedef std::map<std::string, std::valarray<double>> ValarrMap;
-
    typedef unsigned int _index_typ;
-   //typedef std::map<std::string, std::valarray<double>> NNetIO_Map;
-   typedef  std::map<std::string, flexnnet::LayerWeights> NetworkWeights;
+   typedef std::map<std::string, flexnnet::LayerWeights> NetworkWeights;
 
-/*
-   class NNetIO_Map : public std::map<std::string, std::valarray<double>>
-   {
-   public:
+   typedef std::tuple<double, double> EvalResults;
 
-      NNetIO_Map() {}
-      NNetIO_Map(const std::map<std::string, std::valarray<double>>& _map)
-      {
-
-      }
-
-      const ValarrMap& value_map(void) const
-      {
-         return *this;
-      }
-
-      void encode(const flexnnet::ValarrMap& _vmap)
-      {
-      };
-
-   };
-*/
-
-   // Alias declaration for Exemplar (e.g. Exemplar<valarray<double>,valarray<double>>)
+   // Alias declaration for Exemplar (e.g. Exemplar<ValarrayMap,ValarrayMap>)
    template <typename _InTyp, typename _OutTyp>
    using Exemplar = std::pair<_InTyp, _OutTyp>;
 }

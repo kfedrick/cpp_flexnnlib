@@ -12,8 +12,8 @@
 
 template<class _InTyp, class _OutTyp>
 std::ostream&
-operator<<(std::ostream& _ostrm, const flexnnet::EnumeratedDataSet<_InTyp,
-                                                                   _OutTyp>& _dataset)
+operator<<(std::ostream& _ostrm, const flexnnet::DataSet<_InTyp,
+                                                         _OutTyp>& _dataset)
 {
    // Write json object opening parenthesis and header containing
    // the input and output data types.
@@ -92,7 +92,7 @@ operator>>(std::istream& _istrm, flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar)
 
 template<class _InTyp, class _OutTyp>
 std::istream&
-operator>>(std::istream& _istrm, flexnnet::EnumeratedDataSet<_InTyp, _OutTyp>& _dataset)
+operator>>(std::istream& _istrm, flexnnet::DataSet<_InTyp, _OutTyp>& _dataset)
 {
    picojson::value v;
 

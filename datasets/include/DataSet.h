@@ -2,52 +2,50 @@
 // Created by kfedrick on 9/9/19.
 //
 
-#ifndef FLEX_NEURALNET_ENUMERATEDDATASET_H_
-#define FLEX_NEURALNET_ENUMERATEDDATASET_H_
-
-#include <set>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <cxxabi.h>
-#include <Globals.h>
-#include <JSONStream.h>
-#include <document.h>
-#include <istream>
-#include <istreamwrapper.h>
-#include <stringbuffer.h>
+#ifndef FLEX_NEURALNET_DATASET_H_
+#define FLEX_NEURALNET_DATASET_H_
 
 #include <flexnnet.h>
-
+#include <vector>
+#include <iostream>
+#include <random>
 
 // Forward declaration for CartesianCoord
-namespace flexnnet {    template<class _InTyp, class _OutTyp>
-    class EnumeratedDataSet; }
+namespace flexnnet
+{
+   template<class _InTyp, class _OutTyp>
+   class DataSet;
+}
 
 // Forward declarations for stream operators
 template<class _InTyp, class _OutTyp>
-std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+std::ostream&
+operator<<(std::ostream& _ostrm, const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
 
 template<class _InTyp, class _OutTyp>
-std::istream& operator>>(std::istream& _istrm, flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+std::istream&
+operator>>(std::istream& _istrm, flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
 
 template<class _InTyp, class _OutTyp>
-std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::EnumeratedDataSet<_InTyp, _OutTyp>& _dataset);
+std::ostream&
+operator<<(std::ostream& _ostrm, const flexnnet::DataSet<_InTyp, _OutTyp>& _dataset);
 
 template<class _InTyp, class _OutTyp>
-std::istream& operator>>(std::istream& _istrm, flexnnet::EnumeratedDataSet<_InTyp, _OutTyp>& _dataset);
+std::istream&
+operator>>(std::istream& _istrm, flexnnet::DataSet<_InTyp, _OutTyp>& _dataset);
 
 namespace flexnnet
 {
    template<class _InTyp, class _OutTyp>
-   class EnumeratedDataSet
+   class DataSet
    {
-      using _DataTyp = Exemplar<_InTyp,_OutTyp>;
+      using _DataTyp = Exemplar<_InTyp, _OutTyp>;
       using order_iterator = std::vector<int>::iterator;
       using order_const_iterator = std::vector<int>::const_iterator;
 
    public:
+      DataSet(void);
+
       void
       reset(void);
 
@@ -85,14 +83,25 @@ namespace flexnnet
       void
       normalize_order(void) const;
 
-      friend std::ostream& ::operator<<<_InTyp,_OutTyp>(std::ostream& _ostrm, const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+      friend std::ostream&::operator
+      <<<_InTyp,_OutTyp>(
+      std::ostream& _ostrm,
+      const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar
+      );
 
-      friend std::istream& ::operator>><_InTyp,_OutTyp>(std::istream& _istrm, flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+      friend std::istream&
+      ::operator>><_InTyp, _OutTyp>(std::istream& _istrm, flexnnet::Exemplar<_InTyp,
+                                                                             _OutTyp>& _exemplar);
 
-      friend std::ostream& ::operator<<<_InTyp,_OutTyp>(std::ostream& _ostrm, const EnumeratedDataSet<_InTyp, _OutTyp>& _dataset);
+      friend std::ostream&::operator
+      <<<_InTyp,_OutTyp>(
+      std::ostream& _ostrm,
+      const DataSet<_InTyp, _OutTyp>& _dataset
+      );
 
       template<typename _InTyp1, typename _OutTyp1>
-      friend std::istream& ::operator>>(std::istream& _istrm, EnumeratedDataSet<_InTyp1, _OutTyp1>& _dataset);
+      friend std::istream&
+      ::operator>>(std::istream& _istrm, DataSet<_InTyp1, _OutTyp1>& _dataset);
 
       /*
        * Public iterators
@@ -158,7 +167,8 @@ namespace flexnnet
          typedef const _DataTyp* pointer;
          typedef int difference_type;
          typedef std::forward_iterator_tag iterator_category;
-         const_iterator(const std::vector<_DataTyp>& _data, order_const_iterator ptr) : data(_data), it(ptr)
+         const_iterator(const std::vector<_DataTyp>& _data, order_const_iterator ptr)
+            : data(_data), it(ptr)
          {
          }
 
@@ -219,27 +229,37 @@ namespace flexnnet
       }
 
    private:
-      int urand(int n);
-      void write_exemplar(std::ostream& _ostrm, const _DataTyp& _exemplar) const;
+      void
+      write_exemplar(std::ostream& _ostrm, const _DataTyp& _exemplar) const;
 
    private:
       std::vector<_DataTyp> data;
       mutable std::vector<int> presentation_order;
 
+      //mutable std::default_random_engine rand_engine;
+      mutable std::mt19937_64 rand_engine;
+
    };
 
+   template<class _InTyp, class _OutTyp>
+   DataSet<_InTyp, _OutTyp>::DataSet(void)
+   {
+      std::random_device r;
+      std::seed_seq seed2{r(), r(), r(), r(), r(), r(), r(), r()};
+      rand_engine.seed(seed2);
+   }
 
 
    template<class _InTyp, class _OutTyp>
    inline size_t
-   EnumeratedDataSet<_InTyp, _OutTyp>::size(void) const
+   DataSet<_InTyp, _OutTyp>::size(void) const
    {
       return data.size();
    }
 
    template<class _InTyp, class _OutTyp>
    inline void
-   EnumeratedDataSet<_InTyp, _OutTyp>::clear(void)
+   DataSet<_InTyp, _OutTyp>::clear(void)
    {
       data.clear();
       presentation_order.clear();
@@ -247,57 +267,44 @@ namespace flexnnet
 
    template<class _InTyp, class _OutTyp>
    inline void
-   EnumeratedDataSet<_InTyp, _OutTyp>::push_back(const _DataTyp& _data)
+   DataSet<_InTyp, _OutTyp>::push_back(const _DataTyp& _data)
    {
       data.push_back(_data);
-      presentation_order.push_back(data.size()-1);
+      presentation_order.push_back(data.size() - 1);
    }
 
    template<class _InTyp, class _OutTyp>
    inline void
-   EnumeratedDataSet<_InTyp, _OutTyp>::randomize_order(void) const
+   DataSet<_InTyp, _OutTyp>::randomize_order(void) const
    {
       unsigned int new_ndx, temp;
       unsigned int sz = presentation_order.size();
 
-      for (unsigned int rounds = 0; rounds < 2; rounds++)
+      std::uniform_int_distribution<int> uniform_dist(1, sz-1);
+      for (unsigned int ndx = 0; ndx < sz; ndx++)
       {
-         for (unsigned int ndx = 0; ndx < sz; ndx++)
-         {
-            new_ndx = urand(sz);
+         new_ndx = uniform_dist(rand_engine);
 
-            temp = presentation_order[new_ndx];
-            presentation_order[new_ndx] = presentation_order[ndx];
-            presentation_order[ndx] = temp;
-         }
+         // Don't swap if new index is less than or equal to
+         // current index to avoid double swapping.
+         if (new_ndx <= ndx)
+            continue;
+
+         // Swap
+         temp = presentation_order[new_ndx];
+         presentation_order[new_ndx] = presentation_order[ndx];
+         presentation_order[ndx] = temp;
       }
    };
 
    template<class _InTyp, class _OutTyp>
    inline void
-   EnumeratedDataSet<_InTyp, _OutTyp>::normalize_order(void) const
+   DataSet<_InTyp, _OutTyp>::normalize_order(void) const
    {
       presentation_order.resize(data.size());
-      for (size_t i=0; i<presentation_order.size(); i++)
+      for (size_t i = 0; i < presentation_order.size(); i++)
          presentation_order[i] = i;
    };
-
-   template<class _InTyp, class _OutTyp>
-   inline int
-   EnumeratedDataSet<_InTyp, _OutTyp>::urand(int n)
-   {
-      if (n == 0)
-         return 0;
-
-      int top = ((((RAND_MAX - n) + 1) / n) * n - 1) + n;
-      int r;
-      do
-      {
-         r = rand();
-      }
-      while (r > top);
-      return (r % n);
-   }
 }
 
-#endif //FLEX_NEURALNET_ENUMERATEDDATASET_H_
+#endif //FLEX_NEURALNET_DATASET_H_

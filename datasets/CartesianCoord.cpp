@@ -3,8 +3,9 @@
 //
 #include "CartesianCoord.h"
 
+using flexnnet::CartesianCoord;
 
-flexnnet::CartesianCoord::CartesianCoord()
+CartesianCoord::CartesianCoord()
 {
    x = 0;
    y = 0;
@@ -13,7 +14,7 @@ flexnnet::CartesianCoord::CartesianCoord()
    kernel_coord["y"] = std::valarray<double>(N);
 }
 
-flexnnet::CartesianCoord::CartesianCoord(double _x, double _y)
+CartesianCoord::CartesianCoord(double _x, double _y)
 {
    x = _x;
    y = _y;
@@ -22,8 +23,13 @@ flexnnet::CartesianCoord::CartesianCoord(double _x, double _y)
    kernel_coord["y"] = std::valarray<double>(N);
 }
 
+const std::valarray<double>& CartesianCoord::value(void) const
+{
+   return virtual_vector;
+}
+
 const flexnnet::ValarrMap&
-flexnnet::CartesianCoord::value_map(void) const
+CartesianCoord::value_map(void) const
 {
    kernel_coord["x"] = 0;
    kernel_coord["x"][(x + N / 2)] = 1;
@@ -35,12 +41,12 @@ flexnnet::CartesianCoord::value_map(void) const
 }
 
 void
-flexnnet::CartesianCoord::parse(const flexnnet::ValarrMap& _vmap)
+CartesianCoord::parse(const flexnnet::ValarrMap& _vmap)
 {
 }
 
-flexnnet::CartesianCoord&
-flexnnet::CartesianCoord::operator=(const CartesianCoord& _value)
+CartesianCoord&
+CartesianCoord::operator=(const CartesianCoord& _value)
 {
    N = _value.N;
 

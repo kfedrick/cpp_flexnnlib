@@ -5,6 +5,10 @@
 #ifndef FLEX_NEURALNET_LAYERWEIGHTS_H_
 #define FLEX_NEURALNET_LAYERWEIGHTS_H_
 
+#include <functional>
+#include <stdexcept>
+#include <iostream>
+
 #include "NamedObject.h"
 #include "Array2D.h"
 
@@ -50,6 +54,12 @@ namespace flexnnet
       LayerWeights(const LayerWeights&& _lweights);
 
       /**
+       * Return dimensionality of the layer weight matrix
+       * @return
+       */
+      Array2D<double>::Dimensions size(void) const;
+
+      /**
        * Resize the basic_layer weights
        *
        * @param _layer_sz
@@ -61,6 +71,8 @@ namespace flexnnet
        * Zero the basic_layer weights.
        */
       void zero(void);
+
+      void set(double _val);
 
       /**
        * Initialize basic_layer weights to specified value.
@@ -75,7 +87,21 @@ namespace flexnnet
       void set(const std::vector<std::vector<double>>& _lweights);
 
       /**
-       * Set the initial value of the neurons upon basic_layer reset.
+       * Set the bias values.
+       *
+       * @param _ival
+       */
+      void set_biases(double _val);
+
+      /**
+       * Set the bias values.
+       *
+       * @param _ival
+       */
+      void set_biases(const std::valarray<double>& _biases);
+
+      /**
+       * Set the initial value of the neurons upon basic_layer clear.
        *
        * @param _ival
        */
@@ -131,10 +157,20 @@ namespace flexnnet
       Array2D<double> weights;
    };
 
+   inline Array2D<double>::Dimensions LayerWeights::size(void) const
+   {
+      return weights.size();
+   }
+
    inline void LayerWeights::zero(void)
    {
       weights = 0;
       initial_layer_value = 0;
+   }
+
+   inline void LayerWeights::set(double _val)
+   {
+      weights.set(_val);
    }
 
    inline void LayerWeights::set(const Array2D<double>& _weights)
@@ -145,6 +181,33 @@ namespace flexnnet
    inline void LayerWeights::set(const std::vector<std::vector<double>>& _lweights)
    {
       weights.set(_lweights);
+   }
+
+   inline
+   void LayerWeights::set_biases(double _val)
+   {
+      Array2D<double>::Dimensions dims = weights.size();
+
+      for (unsigned int i = 0; i<dims.rows; i++)
+         weights.at(i,dims.cols-1) = _val;
+   }
+
+   inline
+   void LayerWeights::set_biases(const std::valarray<double>& _biases)
+   {
+      Array2D<double>::Dimensions dims = weights.size();
+
+      if (_biases.size() != dims.rows)
+      {
+         std::ostringstream err_str;
+         err_str
+            << "Error : LayerWeights::set_biases size - argument size : "
+            << _biases.size() << " doesn't match expected (" << dims.cols << ").\n";
+         throw std::invalid_argument(err_str.str());
+      }
+
+      for (unsigned int i = 0; i<dims.rows; i++)
+         weights.at(i,dims.cols-1) = _biases[i];
    }
 
    inline void LayerWeights::set_initial_value(const std::valarray<double>& _ival)

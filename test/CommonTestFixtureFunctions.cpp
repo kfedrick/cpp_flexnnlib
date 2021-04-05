@@ -122,9 +122,9 @@ std::string CommonTestFixtureFunctions::printResults(const flexnnet::BasicLayer&
    ssout.precision(_prec);
 
    ssout << prettyPrintVector("output", _layer(), _prec) << "\n";
-   ssout << prettyPrintArray("dAdN", _layer.get_dAdN(), _prec) << "\n";
-   ssout << prettyPrintArray("dNdW", _layer.get_dNdW(), _prec) << "\n";
-   ssout << prettyPrintArray("dNdI", _layer.get_dNdI(), _prec) << "\n";
+   ssout << prettyPrintArray("dy_dnet", _layer.get_dy_dnet(), _prec) << "\n";
+   ssout << prettyPrintArray("dnet_dw", _layer.get_dnet_dw(), _prec) << "\n";
+   ssout << prettyPrintArray("dnet_dx", _layer.get_dnet_dx(), _prec) << "\n";
 
    cout << ssout.str();
    return ssout.str();

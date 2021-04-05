@@ -70,9 +70,9 @@ const std::valarray<double>& flexnnet::SoftMax::calc_layer_output(const std::val
       outputv[i] = output_range * exp_netin[i] / sum_exp + lower_bound;
 }
 
-const Array2D<double>& SoftMax::calc_dAdN(const std::valarray<double>& _out)
+const Array2D<double>& SoftMax::calc_dy_dnet(const std::valarray<double>& _out)
 {
-   Array2D<double>& dAdN = layer_derivatives.dAdN;
+   Array2D<double>& dAdN = layer_derivatives.dy_dnet;
 
    dAdN = 0;
 

@@ -14,7 +14,7 @@ const PureLin::Parameters PureLin::DEFAULT_PARAMS = {.gain=1.0};
 PureLin::PureLin(size_t _sz, const std::string& _id, const Parameters& _params)
    : NetSumLayer(_sz, _id)
 {
-   layer_derivatives.dAdN.resize(_sz, _sz);
+   layer_derivatives.dy_dnet.resize(_sz, _sz);
    set_params(_params);
 }
 
@@ -53,14 +53,14 @@ PureLin::calc_layer_output(const std::valarray<double>& _rawin)
    return layer_state.outputv;
 }
 
-const Array2D<double>& PureLin::calc_dAdN(const std::valarray<double>& _out)
+const Array2D<double>& PureLin::calc_dy_dnet(const std::valarray<double>& _out)
 {
-   Array2D<double>& dAdN = layer_derivatives.dAdN;
+   Array2D<double>& dy_dnet = layer_derivatives.dy_dnet;
 
-   dAdN = 0;
+   dy_dnet = 0.0;
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      dAdN.at(i, i) = 1;
+      dy_dnet.at(i, i) = 1.0;
 
-   return dAdN;
+   return dy_dnet;
 }
 

@@ -25,7 +25,7 @@ public:
    static bool
    valarray_double_near(const std::valarray<double>& _target, const std::valarray<double>& _test, double _epsilon);
 
-   std::string prettyPrintVector(const std::string& _label, const std::valarray<double>& _vec, int _prec = 4);
+   static std::string prettyPrintVector(const std::string& _label, const std::valarray<double>& _vec, int _prec = 4);
    std::string prettyPrintArray(const std::string& _label, const flexnnet::Array2D<double>& _vec, int _prec = 4);
    std::string printResults(const flexnnet::BasicLayer& _layer, int _prec = 5);
 

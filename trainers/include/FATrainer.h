@@ -12,7 +12,7 @@
 #include "TrainerConfig.h"
 #include "TrainerUtils.h"
 
-#include "EnumeratedDataSet.h"
+#include "DataSet.h"
 #include "Episode.h"
 #include "NeuralNet.h"
 

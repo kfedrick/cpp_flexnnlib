@@ -7,10 +7,11 @@
 
 #include <stddef.h>
 #include <memory>
-#include "BasicLayer.h"
 
 namespace flexnnet
 {
+   class NetworkLayer;
+
    class LayerConnRecord
    {
    public:
@@ -21,27 +22,27 @@ namespace flexnnet
 
    public:
       LayerConnRecord();
-      LayerConnRecord(std::shared_ptr<BasicLayer> _from_layer, ConnectionType _type);
+      LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type);
       ~LayerConnRecord();
 
-      BasicLayer& layer();
-      const BasicLayer& layer() const;
+      NetworkLayer& layer();
+      const NetworkLayer& layer() const;
       bool is_recurrent() const;
       ConnectionType get_connection_type() const;
 
    private:
-      std::shared_ptr<BasicLayer> from_layer;
+      std::shared_ptr<NetworkLayer> from_layer;
       ConnectionType connection_type;
    };
 
    inline
-   BasicLayer& LayerConnRecord::layer()
+   NetworkLayer& LayerConnRecord::layer()
    {
       return *from_layer;
    }
 
    inline
-   const BasicLayer& LayerConnRecord::layer() const
+   const NetworkLayer& LayerConnRecord::layer() const
    {
       return *from_layer;
    }

@@ -18,8 +18,9 @@
 #include <set>
 
 #include "BasicLayer.h"
-#include "NetworkLayerImpl.h"
+#include "NetworkLayer.h"
 #include "NetworkOutput.h"
+#include <URandArray2DInitializer.h>
 
 namespace flexnnet
 {
@@ -73,17 +74,17 @@ namespace flexnnet
       void
       add_external_input_field(const std::string& _to, const std::string& _field);
 
-      std::map<std::string, std::shared_ptr<NetworkLayerImpl>>& get_layers(void);
+      std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void);
 
-      const std::map<std::string, std::shared_ptr<NetworkLayerImpl>>& get_layers(void) const;
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void) const;
 
       NetworkOutput& get_network_output_layer(void);
 
       const NetworkOutput& get_network_output_layer(void) const;
 
-      const std::vector<std::shared_ptr<NetworkLayerImpl>>& get_output_layers(void) const;
+      const std::vector<std::shared_ptr<NetworkLayer>>& get_output_layers(void) const;
 
-      std::vector<std::shared_ptr<NetworkLayerImpl>>& get_output_layers(void);
+      std::vector<std::shared_ptr<NetworkLayer>>& get_output_layers(void);
 
       /**
        * Get an ordered list of input basic_layer connections for the specified
@@ -115,13 +116,13 @@ namespace flexnnet
        * Return an list of layers in the correct activation order.
        * @return
        */
-      const std::vector<std::shared_ptr<NetworkLayerImpl>>& get_ordered_layers(void) const;
+      const std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void) const;
 
       /**
        * Return an list of layers in the correct activation order.
        * @return
        */
-      std::vector<std::shared_ptr<NetworkLayerImpl>>& get_ordered_layers(void);
+      std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void);
 
    /*
     * Private helper functions
@@ -129,12 +130,11 @@ namespace flexnnet
    private:
       void copy(const NetworkTopology& _topo);
       std::map<std::string, std::shared_ptr<BasicLayer>> clone_baselayers(const NetworkTopology& _topo);
-      std::shared_ptr<NetworkLayerImpl> copy_netlayer(const std::shared_ptr<NetworkLayerImpl>& _netlayer, const std::map<std::string, std::shared_ptr<BasicLayer>>& _baselayers);
-      std::vector<LayerConnRecord> copy_connections(const std::vector<LayerConnRecord>& _conns, const std::map<std::string, std::shared_ptr<BasicLayer>>& _baselayers);
+      void copy_layer_connections(std::vector<LayerConnRecord>& _to, const std::vector<LayerConnRecord>& _from);
 
-      void add_forward_connection(NetworkLayerImpl& _to, NetworkLayerImpl& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _from_dependencies);
-      void add_recurrent_connection(NetworkLayerImpl& _to, NetworkLayerImpl& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _from_dependencies);
-      void add_lateral_connection(NetworkLayerImpl& _to, NetworkLayerImpl& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _to_dependencies, std::set<std::string>& _from_dependencies);
+      void add_forward_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _from_dependencies);
+      void add_recurrent_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _from_dependencies);
+      void add_lateral_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<std::string>& _to_dependencies, std::set<std::string>& _from_dependencies);
 
       /**
        * Return a set containing the names of layers directly through forward
@@ -150,39 +150,39 @@ namespace flexnnet
        */
       void update_activation_order(void);
 
-      void update_network_output(void);
+      void config_virtual_network_output_layer(void);
 
       /*
        * Private member data
        */
    private:
       // Network layers
-      std::map<std::string, std::shared_ptr<NetworkLayerImpl>> network_layers;
+      std::map<std::string, std::shared_ptr<NetworkLayer>> network_layers;
 
       // network_output_conn - Used to coelesce network output from the output layers
       // and to scatter network backpropagation error to the output layers.
       //
-      NetworkOutput network_output_layer;
+      NetworkOutput virtual_network_output_layer;
 
       // List of layers in order they will be activated during forward
       // network activation.
-      std::vector<std::shared_ptr<NetworkLayerImpl>> ordered_layers;
+      std::vector<std::shared_ptr<NetworkLayer>> ordered_layers;
 
       // List of network output layers.
-      std::vector<std::shared_ptr<NetworkLayerImpl>> network_output_layers;
+      std::vector<std::shared_ptr<NetworkLayer>> network_output_layers;
 
       // Sample basic_layer input fields
       ValarrMap sample_extern_input;
    };
 
    inline
-   std::map<std::string, std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_layers(void)
+   std::map<std::string, std::shared_ptr<NetworkLayer>>& NetworkTopology::get_layers(void)
    {
       return network_layers;
    }
 
    inline
-   const std::map<std::string, std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_layers(void) const
+   const std::map<std::string, std::shared_ptr<NetworkLayer>>& NetworkTopology::get_layers(void) const
    {
       return network_layers;
    }
@@ -190,23 +190,23 @@ namespace flexnnet
    inline
    NetworkOutput& NetworkTopology::get_network_output_layer(void)
    {
-      return network_output_layer;
+      return virtual_network_output_layer;
    }
 
    inline
    const NetworkOutput& NetworkTopology::get_network_output_layer(void) const
    {
-      return network_output_layer;
+      return virtual_network_output_layer;
    }
 
    inline
-   const std::vector<std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_output_layers(void) const
+   const std::vector<std::shared_ptr<NetworkLayer>>& NetworkTopology::get_output_layers(void) const
    {
       return network_output_layers;
    }
 
    inline
-   std::vector<std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_output_layers(void)
+   std::vector<std::shared_ptr<NetworkLayer>>& NetworkTopology::get_output_layers(void)
    {
       return network_output_layers;
    }
@@ -253,25 +253,25 @@ namespace flexnnet
       auto layer_ptr = std::shared_ptr<_LayerType>(new _LayerType(_sz, _name));
       layer_ptr->set_params(_params);
 
-      network_layers[_name] = std::shared_ptr<NetworkLayerImpl>(new NetworkLayerImpl(layer_ptr, _output));
+      network_layers[_name] = std::shared_ptr<NetworkLayer>(new NetworkLayer(layer_ptr, _output));
 
       if (_output)
       {
          network_output_layers.push_back(network_layers[_name]);
-         update_network_output();
+         config_virtual_network_output_layer();
       }
 
       return layer_ptr;
    }
 
    inline
-   const std::vector<std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_ordered_layers(void) const
+   const std::vector<std::shared_ptr<NetworkLayer>>& NetworkTopology::get_ordered_layers(void) const
    {
       return ordered_layers;
    }
 
    inline
-   std::vector<std::shared_ptr<NetworkLayerImpl>>& NetworkTopology::get_ordered_layers(void)
+   std::vector<std::shared_ptr<NetworkLayer>>& NetworkTopology::get_ordered_layers(void)
    {
       return ordered_layers;
    }

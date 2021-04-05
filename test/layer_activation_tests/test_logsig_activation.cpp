@@ -31,17 +31,17 @@ TEST_P(TestLogSigActivation, Activate)
       // Check basic_layer output
       EXPECT_PRED3(vector_double_near, item.target.output, layer_out, 0.000000001) << "ruh roh";
 
-      // Check dAdN
-      EXPECT_PRED3(array_double_near, item.target.dAdN, test_case.layer_ptr->get_dAdN(), 0.000000001)
-                  << prettyPrintArray("dAdN", test_case.layer_ptr->get_dAdN());
+      // Check dy_dnet
+      EXPECT_PRED3(array_double_near, item.target.dAdN, test_case.layer_ptr->get_dy_dnet(), 0.000000001)
+                  << prettyPrintArray("dy_dnet", test_case.layer_ptr->get_dy_dnet());
 
-      // Check dNdW
-      EXPECT_PRED3(array_double_near, item.target.dNdW, test_case.layer_ptr->get_dNdW(), 0.000000001)
-                  << prettyPrintArray("dNdW", test_case.layer_ptr->get_dNdW());
+      // Check dnet_dw
+      EXPECT_PRED3(array_double_near, item.target.dNdW, test_case.layer_ptr->get_dnet_dw(), 0.000000001)
+                  << prettyPrintArray("dnet_dw", test_case.layer_ptr->get_dnet_dw());
 
-      // Check dNdI
-      EXPECT_PRED3(array_double_near, item.target.dNdI, test_case.layer_ptr->get_dNdI(), 0.000000001)
-                  << prettyPrintArray("dNdI", test_case.layer_ptr->get_dNdI());
+      // Check dnet_dx
+      EXPECT_PRED3(array_double_near, item.target.dNdI, test_case.layer_ptr->get_dnet_dx(), 0.000000001)
+                  << prettyPrintArray("dnet_dx", test_case.layer_ptr->get_dnet_dx());
    }
 }
 
@@ -66,16 +66,16 @@ TEST_P(TestLogSigActivation, ActivateTwice)
       // Check basic_layer output
       EXPECT_PRED3(vector_double_near, item.target.output, layer_out, 0.000000001) << "ruh roh";
 
-      // Check dAdN
-      EXPECT_PRED3(array_double_near, item.target.dAdN, test_case.layer_ptr->get_dAdN(), 0.000000001)
-                  << prettyPrintArray("dAdN", test_case.layer_ptr->get_dAdN());
+      // Check dy_dnet
+      EXPECT_PRED3(array_double_near, item.target.dAdN, test_case.layer_ptr->get_dy_dnet(), 0.000000001)
+                  << prettyPrintArray("dy_dnet", test_case.layer_ptr->get_dy_dnet());
 
-      // Check dNdW
-      EXPECT_PRED3(array_double_near, item.target.dNdW, test_case.layer_ptr->get_dNdW(), 0.000000001)
-                  << prettyPrintArray("dNdW", test_case.layer_ptr->get_dNdW());
+      // Check dnet_dw
+      EXPECT_PRED3(array_double_near, item.target.dNdW, test_case.layer_ptr->get_dnet_dw(), 0.000000001)
+                  << prettyPrintArray("dnet_dw", test_case.layer_ptr->get_dnet_dw());
 
-      // Check dNdI
-      EXPECT_PRED3(array_double_near, item.target.dNdI, test_case.layer_ptr->get_dNdI(), 0.000000001)
-                  << prettyPrintArray("dNdI", test_case.layer_ptr->get_dNdI());
+      // Check dnet_dx
+      EXPECT_PRED3(array_double_near, item.target.dNdI, test_case.layer_ptr->get_dnet_dx(), 0.000000001)
+                  << prettyPrintArray("dnet_dx", test_case.layer_ptr->get_dnet_dx());
    }
 }

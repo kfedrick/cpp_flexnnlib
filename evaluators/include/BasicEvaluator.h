@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "EnumeratedDataSet.h"
+#include "DataSet.h"
 #include "Episode.h"
 #include "BasicEvalConfig.h"
 #include "NeuralNet.h"
@@ -22,7 +22,7 @@ namespace flexnnet
    protected:
       using _index_typ = size_t;
       using NN_Typ_ = NeuralNet<_NNIn, _NNOut>;
-      using DataSet_Typ_ = EnumeratedDataSet<_NNIn, _NNOut>;
+      using DataSet_Typ_ = DataSet<_NNIn, _NNOut>;
       using Exemplar_Typ_ = std::tuple<_NNIn, _NNOut>;
       using Episode_Typ_ = Episode<_NNIn, _NNOut>;
 

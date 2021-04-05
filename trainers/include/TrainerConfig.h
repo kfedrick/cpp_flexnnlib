@@ -75,6 +75,15 @@ namespace flexnnet
       void set_error_increase_limit(double _limit);
 
       /**
+       * Specifies whether the layer identified by _id will
+       * train the biases.
+       *
+       * @param _id
+       * @param _flag
+       */
+      void set_train_biases(const std::string& _id, bool _flag);
+
+      /**
        * set_batch_mode(size_t _size)
        *
        * Set training batch size:
@@ -125,6 +134,7 @@ namespace flexnnet
       size_t max_epochs(void) const;
       double error_goal(void) const;
       double error_increase_limit(void) const;
+      bool train_biases(const std::string& _id) const;
       size_t batch_mode(void) const;
       size_t max_validation_failures(void) const;
       size_t report_frequency(void) const;
@@ -142,6 +152,8 @@ namespace flexnnet
       size_t training_report_frequency{DEFAULT_REPORT_FREQ};
       size_t training_display_frequency{DEFAULT_DISPLAY_FREQ};
       size_t max_saved_nnet{DEFAULT_SAVED_NNET_LIMIT};
+
+      std::map<std::string, bool> train_biases_flags;
    };
 
    inline void TrainerConfig::set_training_runs(size_t _runs)
@@ -214,6 +226,12 @@ namespace flexnnet
       max_allowed_validation_failures = _count;
    }
 
+   inline
+   void TrainerConfig::set_train_biases(const std::string& _id, bool _flag)
+   {
+      train_biases_flags[_id] = _flag;
+   }
+
    inline void TrainerConfig::set_batch_mode(size_t _mode)
    {
       training_batch_mode = _mode;
@@ -261,6 +279,11 @@ namespace flexnnet
    inline double TrainerConfig::error_increase_limit(void) const
    {
       return failback_performance_delta;
+   }
+
+   inline bool TrainerConfig::train_biases(const std::string& _id) const
+   {
+      return train_biases_flags.at(_id);
    }
 
    inline size_t TrainerConfig::batch_mode(void) const

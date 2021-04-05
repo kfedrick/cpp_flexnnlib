@@ -6,19 +6,12 @@
 
 using flexnnet::NetworkOutput;
 
-NetworkOutput::NetworkOutput() : NetworkLayerImpl()
+NetworkOutput::NetworkOutput() : NetworkLayer()
 {
    layer_name = "__network_output";
 }
 
 NetworkOutput::~NetworkOutput() {}
-
-std::shared_ptr<flexnnet::BasicLayer>& NetworkOutput::layer()
-{
-   static std::stringstream sout;
-   sout << "Error : NetworkOutput::layer() - Invalid operation on object of this type.\n";
-   throw std::logic_error(sout.str());
-}
 
 const std::valarray<double>& NetworkOutput::activate(const ValarrMap& _externin)
 {

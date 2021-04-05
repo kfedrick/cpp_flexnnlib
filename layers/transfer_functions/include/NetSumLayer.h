@@ -33,13 +33,13 @@ namespace flexnnet
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdW(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dw(const std::valarray<double>& _rawin);
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdI(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dx(const std::valarray<double>& _rawin);
    };
 }
 

@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-#include "Datum.h"
+#include "OldDatum.h"
 #include "BasicLayer.h"
 #include "ExternalInputRecord.h"
 #include "OldLayerConnRecord.h"
@@ -29,8 +29,8 @@ namespace flexnnet
        * Public member functions to connect layers and external inputs.
        */
       virtual size_t add_connection(BasicLayer& _layer, OldLayerConnRecord::ConnectionType _type);
-      virtual size_t add_external_input(const Datum& _xdatum, const std::set<std::string>& _indexSet);
-      const std::valarray<double>& coelesce_input(const Datum& _xdatum);
+      virtual size_t add_external_input(const OldDatum& _xdatum, const std::set<std::string>& _indexSet);
+      const std::valarray<double>& coelesce_input(const OldDatum& _xdatum);
       void backprop_scatter(const std::valarray<double> _errorv);
 
    private:

@@ -121,7 +121,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //! Reset the writer with a new stream.
       /*!
-          This function reset the writer with a new stream and default settings,
+          This function clear the writer with a new stream and default settings,
           in order to make a Writer object reusable for output multiple JSONs.
 
           \param os New output stream.

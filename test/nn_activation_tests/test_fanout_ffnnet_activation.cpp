@@ -15,7 +15,7 @@
 #include "OldNetworkLayer.h"
 
 using flexnnet::Array2D;
-using flexnnet::Datum;
+using flexnnet::OldDatum;
 using flexnnet::OldNetworkLayer;
 using flexnnet::BasicNeuralNet;
 

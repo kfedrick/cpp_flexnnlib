@@ -20,8 +20,6 @@
 
 #include "TestLayer.h"
 
-using flexnnet::NNetIO_Typ;
-
 #define TESTCASE_PATH "test/nn_activation_tests/samples/"
 
 struct FaninTestCase

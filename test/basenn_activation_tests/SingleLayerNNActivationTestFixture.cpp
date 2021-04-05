@@ -110,18 +110,18 @@ SingleLayerNNActivationTestFixture<T>::read_derivatives_samples(std::string _fil
       const rapidjson::Value& indatum_obj = a_tuple_obj["input"];
       test_case.input = parse_datum(indatum_obj);
 
-      // Read basic_layer target dAdN
-      const rapidjson::Value& dAdN_obj = a_tuple_obj["dAdN"];
+      // Read basic_layer target dy_dnet
+      const rapidjson::Value& dAdN_obj = a_tuple_obj["dy_dnet"];
       test_case.target.dAdN.resize(layer_sz, layer_sz);
       test_case.target.dAdN = parse_weights(dAdN_obj, layer_sz, layer_sz);
 
-      // Read basic_layer target dNdW
-      const rapidjson::Value& dNdW_obj = a_tuple_obj["dNdW"];
+      // Read basic_layer target dnet_dw
+      const rapidjson::Value& dNdW_obj = a_tuple_obj["dnet_dw"];
       test_case.target.dNdW.resize(layer_sz, input_sz + 1);
       test_case.target.dNdW = parse_weights(dNdW_obj, layer_sz, input_sz + 1);
 
-      // Read basic_layer target dNdI
-      const rapidjson::Value& dNdI_obj = a_tuple_obj["dNdI"];
+      // Read basic_layer target dnet_dx
+      const rapidjson::Value& dNdI_obj = a_tuple_obj["dnet_dx"];
       test_case.target.dNdI.resize(layer_sz, input_sz + 1);
       test_case.target.dNdI = parse_weights(dNdI_obj, layer_sz, input_sz + 1);
 
@@ -241,14 +241,14 @@ TYPED_TEST_P (SingleLayerNNActivationTestFixture, ActivationTest)
       for (auto it = layers.begin(); it != layers.end(); it++)
       {
          const std::string id = it->first;
-         const flexnnet::Array2D<double>& dAdN = it->second->dAdN();
-         const flexnnet::Array2D<double>& dNdW = it->second->dNdW();
-         const flexnnet::Array2D<double>& dNdI = it->second->dNdI();
+         const flexnnet::Array2D<double>& dy_dnet = it->second->dy_dnet();
+         const flexnnet::Array2D<double>& dnet_dw = it->second->dnet_dw();
+         const flexnnet::Array2D<double>& dnet_dx = it->second->dnet_dx();
 
          std::cout << "------ " << id << " Derivatives " << " ------\n";
-         std::cout << this->prettyPrintArray("dAdN", dAdN).c_str() << "\n";
-         std::cout << this->prettyPrintArray("dNdW", dNdW).c_str() << "\n";
-         std::cout << this->prettyPrintArray("dNdI", dNdI).c_str() << "\n";
+         std::cout << this->prettyPrintArray("dy_dnet", dy_dnet).c_str() << "\n";
+         std::cout << this->prettyPrintArray("dnet_dw", dnet_dw).c_str() << "\n";
+         std::cout << this->prettyPrintArray("dnet_dx", dnet_dx).c_str() << "\n";
       }
    }
 }*/

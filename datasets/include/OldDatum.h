@@ -12,7 +12,7 @@
 
 namespace flexnnet
 {
-   class Datum
+   class OldDatum
    {
    private:
       struct Entry
@@ -22,10 +22,10 @@ namespace flexnnet
       };
 
    public:
-      Datum();
-      Datum(const std::map<std::string, std::valarray<double> >& _values);
+      OldDatum();
+      OldDatum(const std::map<std::string, std::valarray<double> >& _values);
 
-      virtual ~Datum();
+      virtual ~OldDatum();
 
       size_t size() const;
       size_t count() const;
@@ -34,8 +34,8 @@ namespace flexnnet
       const std::set<std::string>& key_set() const;
       size_t index(const std::string& _index) const;
 
-      Datum& operator=(const Datum& _datum);
-      Datum& operator=(const std::map<std::string, std::valarray<double> >& _values);
+      OldDatum& operator=(const OldDatum& _datum);
+      OldDatum& operator=(const std::map<std::string, std::valarray<double> >& _values);
 
       void insert(const std::string& _index, const std::valarray<double>& _value);
       void set(const std::map<std::string, std::valarray<double> >& _values);
@@ -58,7 +58,7 @@ namespace flexnnet
       const std::map<const std::string, Entry>& const_fields_ref = fields;
 
    private:
-      Datum& copy(const Datum& _datum);
+      OldDatum& copy(const OldDatum& _datum);
 
       void resize_virtual() const;
       void coelesce() const;
@@ -75,27 +75,27 @@ namespace flexnnet
       std::vector<std::valarray<double> > data;
    };
 
-   inline size_t Datum::size() const
+   inline size_t OldDatum::size() const
    {
       return virtual_array.size();
    }
 
-   inline size_t Datum::count() const
+   inline size_t OldDatum::count() const
    {
       return data.size();
    }
 
-   inline size_t Datum::hashval() const
+   inline size_t OldDatum::hashval() const
    {
       return fields_hashval;
    }
 
-   inline size_t Datum::index(const std::string& _index) const
+   inline size_t OldDatum::index(const std::string& _index) const
    {
       return fields.at(_index).index;
    }
 
-   inline std::valarray<double>& Datum::operator()(void)
+   inline std::valarray<double>& OldDatum::operator()(void)
    {
       if (stale)
          coelesce();
@@ -103,7 +103,7 @@ namespace flexnnet
       return virtual_array;
    }
 
-   inline const std::valarray<double>& Datum::operator()(void) const
+   inline const std::valarray<double>& OldDatum::operator()(void) const
    {
       if (stale)
          coelesce();
@@ -111,17 +111,17 @@ namespace flexnnet
       return virtual_array;
    }
 
-   inline const std::valarray<double>& Datum::operator[](const std::string& _index) const
+   inline const std::valarray<double>& OldDatum::operator[](const std::string& _index) const
    {
       return data[fields.at(_index).index];
    }
 
-   inline const std::valarray<double>& Datum::operator[](size_t _index) const
+   inline const std::valarray<double>& OldDatum::operator[](size_t _index) const
    {
       return data[_index];
    }
 
-   inline const std::valarray<double>& Datum::at(size_t _index) const
+   inline const std::valarray<double>& OldDatum::at(size_t _index) const
    {
       return data.at(_index);
    }

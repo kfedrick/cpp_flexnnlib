@@ -58,13 +58,13 @@ const std::valarray<double>& RadBas::calc_layer_output(const std::valarray<doubl
       outputv[i] = output_range * exp(-netinv[i]) + lower_bound;
 }
 
-const Array2D<double>& RadBas::calc_dAdN(const std::valarray<double>& _out)
+const Array2D<double>& RadBas::calc_dy_dnet(const std::valarray<double>& _out)
 {
-   Array2D<double>& dAdN = layer_derivatives.dAdN;
+   Array2D<double>& dy_dnet = layer_derivatives.dy_dnet;
 
-   dAdN = 0;
+   dy_dnet = 0;
    for (size_t i = 0; i < _out.size(); i++)
-      dAdN.at(i, i) = -output_range * _out[i];
+      dy_dnet.at(i, i) = -output_range * _out[i];
 
-   return dAdN;
+   return dy_dnet;
 }

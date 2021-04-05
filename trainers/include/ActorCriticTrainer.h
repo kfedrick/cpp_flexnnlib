@@ -9,7 +9,7 @@
 
 #include "TDTrainerConfig.h"
 #include "evaluators/include/TDEvaluatorConfig.h"
-#include "EnumeratedDataSet.h"
+#include "DataSet.h"
 #include "NeuralNet.h"
 
 namespace flexnnet
@@ -29,8 +29,8 @@ namespace flexnnet
        */
       template<class _NNIn, class _NNOut, template<class __NNIn, class __NNOut> class _NN,
          template<class _SampleIn, class _SampleOut> class _Sample>
-      void train(NeuralNet<_NNIn, _NNOut>& _nnet, const EnumeratedDataSet<_NNIn, _NNOut>& _trnset, const EnumeratedDataSet<_NNIn,
-                                                                                                                           _NNOut>& _tstset = EnumeratedDataSet<
+      void train(NeuralNet<_NNIn, _NNOut>& _nnet, const DataSet<_NNIn, _NNOut>& _trnset, const DataSet<_NNIn,
+                                                                                                       _NNOut>& _tstset = DataSet<
          _NNIn,
          _NNOut>());
 

@@ -2,34 +2,33 @@
 // Created by kfedrick on 5/31/19.
 //
 
-#include "Datum.h"
+#include "OldDatum.h"
 
 #include <sstream>
 #include <map>
 #include <functional>
 #include <algorithm>
 
-using flexnnet::Datum;
+using flexnnet::OldDatum;
 
-Datum::Datum(void)
+OldDatum::OldDatum(void)
 {}
 
-Datum::Datum(const std::map<std::string, std::valarray<double> >& _values)
+OldDatum::OldDatum(const std::map<std::string, std::valarray<double> >& _values)
 {
    set(_values);
 }
 
-Datum::~Datum()
+OldDatum::~OldDatum()
 {
 }
 
-const std::set<std::string>& Datum::key_set() const
+const std::set<std::string>& OldDatum::key_set() const
 {
-   //hash<std::set_weights<std::string>>(keyset);
    return keyset;
 }
 
-size_t Datum::hash()
+size_t OldDatum::hash()
 {
    std::hash<unsigned long> size_t_hash;
    std::hash<std::string> string_hash;
@@ -41,12 +40,12 @@ size_t Datum::hash()
    return hashval;
 }
 
-Datum& Datum::operator=(const Datum& _datum)
+OldDatum& OldDatum::operator=(const OldDatum& _datum)
 {
    return copy(_datum);
 }
 
-Datum& Datum::copy(const Datum& _datum)
+OldDatum& OldDatum::copy(const OldDatum& _datum)
 {
    fields = _datum.fields;
    data = _datum.data;
@@ -56,9 +55,9 @@ Datum& Datum::copy(const Datum& _datum)
    fields_hashval = _datum.fields_hashval;
 }
 
-void Datum::set(const std::map<std::string, std::valarray<double> >& _values)
+void OldDatum::set(const std::map<std::string, std::valarray<double> >& _values)
 {
-   // Clear existing Datum keyset and reset it using the specified map
+   // Clear existing Datum keyset and clear it using the specified map
    keyset.clear();
    for (auto& item : _values)
       keyset.insert(item.first);
@@ -81,7 +80,7 @@ void Datum::set(const std::map<std::string, std::valarray<double> >& _values)
    stale = true;
 }
 
-void Datum::set(const std::string _key, const std::valarray<double>& _value)
+void OldDatum::set(const std::string _key, const std::valarray<double>& _value)
 {
    // If key is doesn't exist, throw exception
    if (fields.count(_key) == 0)
@@ -107,7 +106,7 @@ void Datum::set(const std::string _key, const std::valarray<double>& _value)
 
 }
 
-void Datum::resize_virtual() const
+void OldDatum::resize_virtual() const
 {
    size_t sz = 0;
    for (auto& item : data)
@@ -116,7 +115,7 @@ void Datum::resize_virtual() const
    virtual_array.resize(sz);
 }
 
-void Datum::coelesce() const
+void OldDatum::coelesce() const
 {
    if (!stale)
       return;
@@ -129,7 +128,7 @@ void Datum::coelesce() const
    stale = false;
 }
 
-void Datum::insert(const std::string& _index, const std::valarray<double>& _value)
+void OldDatum::insert(const std::string& _index, const std::valarray<double>& _value)
 {
    // If key is already there, throw exception
    if (fields.count(_index) == 1)
