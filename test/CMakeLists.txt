@@ -50,8 +50,6 @@ add_executable(test_nn_basic_training
         nn_basic_training_tests/SimpleBinaryClassifierDataSet.h
         nn_basic_training_tests/SupervisedTrainerTestFixture.h
         nn_basic_training_tests/TrainerConfigTests.h
-        nn_basic_training_tests/BasicCallTreeTests.h
-        nn_basic_training_tests/BasicBackpropTests.h
         nn_basic_training_tests/test_main.cpp
         nn_basic_training_tests/ClassifierTrainingTests.h)
 target_link_libraries(test_nn_basic_training gtest flexneuralnet)

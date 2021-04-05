@@ -576,7 +576,7 @@ TEST_F (SupervisedTrainerTestFixture, LinHiddenClassifierTrainingTest)
                                    flexnnet::DataSet,
                                    flexnnet::Evaluator,
                                    flexnnet::RMSEFitnessFunc,
-                                   flexnnet::DeltaBarDeltaLearningRate> trainer(nnet);
+                                   flexnnet::ConstantLearningRate> trainer(nnet);
 
    trainer.set_batch_mode(0);
    trainer.set_training_runs(20);

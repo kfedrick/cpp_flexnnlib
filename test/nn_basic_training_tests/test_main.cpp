@@ -4,10 +4,8 @@
 
 #include "gtest/gtest.h"
 
-//#include "SupervisedTrainerTestFixture.h"
-//#include "TrainerConfigTests.h"
-//#include "BasicCallTreeTests.h"
-//#include "BasicBackpropTests.h"
+#include "SupervisedTrainerTestFixture.h"
+#include "TrainerConfigTests.h"
 #include "ClassifierTrainingTests.h"
 
 int main(int argc, char** argv)
