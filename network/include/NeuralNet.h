@@ -5,23 +5,26 @@
 #ifndef FLEX_NEURALNET_NEURALNET_H_
 #define FLEX_NEURALNET_NEURALNET_H_
 
-#include "BasicNeuralNet.h"
-#include "BasicNeuralNetSerializer.h"
+#include "BaseNeuralNet.h"
 
 namespace flexnnet
 {
    template<class _InType, class _OutType>
-   class NeuralNet : public BasicNeuralNet, public BasicNeuralNetSerializer
+   class NeuralNet : public BaseNeuralNet
    {
 
    public:
-      NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& layers, bool _recurrent, const std::string& _name = "BasicNeuralNet");
+      NeuralNet(const BaseNeuralNet& _nnet);
       virtual ~NeuralNet();
 
    public:
 
-      const _OutType& activate(const _InType& _indatum);
-      const _InType& get_network_input(void) const;
+      const _OutType&
+      activate(const _InType& _nninput);
+
+
+      const _InType&
+      get_network_input(void) const;
 
    private:
       // network_output_pattern - Cached value for the most recent network activation
@@ -34,37 +37,19 @@ namespace flexnnet
    };
 
    template<class _InType, class _OutType>
-   const _OutType& NeuralNet<_InType, _OutType>::activate(const _InType& _xdatum)
+   const _OutType&
+   NeuralNet<_InType, _OutType>::activate(const _InType& _nninput)
    {
-      /*
-       * Activate all network layers
-       *
-      for (int i = 0; i < network_layers.size (); i++)
-      {
-         // Get a network layer
-         NetworkLayer& layer = *network_layers[i];
+      BaseNeuralNet::activate(_nninput.value_map());
 
-         const std::valarray<double> &invec = layer.coelesce_input(_xdatum);
-         layer.activate (invec);
-      }
-
-      // Next add layer outputs
-      for (auto nlayer : network_layers)
-      {
-         if (nlayer->is_output_layer ())
-         {
-            const std::valarray<double> &layer_outputv = (*nlayer)();
-            network_output_pattern.set_weights (nlayer->name (), layer_outputv);
-         }
-      }
-       */
+      network_output_pattern.parse(value_map());
       return network_output_pattern;
    }
 
    template<class _InType, class _OutType>
    NeuralNet<_InType,
-             _OutType>::NeuralNet(const std::vector<std::shared_ptr<NetworkLayer>>& _layers, bool _recurrent, const std::string& _name)
-      : BasicNeuralNet(_layers, _recurrent, _name)
+             _OutType>::NeuralNet(const BaseNeuralNet& _nnet)
+      : BaseNeuralNet(_nnet)
    {
 
    }
@@ -75,16 +60,9 @@ namespace flexnnet
 
    }
 
-   /*
    template<class _InType, class _OutType>
-   const _OutType & NeuralNet<_InType, _OutType>::activate (const _InType &_indatum)
-   {
-      return BasicNeuralNet::activate(_indatum);
-   }
-    */
-
-   template<class _InType, class _OutType>
-   const _InType& NeuralNet<_InType, _OutType>::get_network_input(void) const
+   const _InType&
+   NeuralNet<_InType, _OutType>::get_network_input(void) const
    {
       return network_input;
    }

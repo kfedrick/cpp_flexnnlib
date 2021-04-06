@@ -11,11 +11,11 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include "TestLayer.h"
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 using flexnnet::Array2D;
-using flexnnet::Datum;
-using flexnnet::NetworkLayer;
+using flexnnet::OldDatum;
+using flexnnet::OldNetworkLayer;
 using flexnnet::BasicNeuralNet;
 using flexnnet::NNetIO_Typ;
 
@@ -87,7 +87,7 @@ template<typename T> std::vector<TestCase> TestSingleLayerNNActivation<T>::read_
       test_case.layer_sz = layer_sz;
       test_case.input_sz = input_sz;
 
-      // Read layer weights
+      // Read basic_layer weights
       const rapidjson::Value& weights_obj = a_tuple_obj["weights"];
       test_case.weights.resize(layer_sz, input_sz + 1);
       test_case.weights = parse_weights(weights_obj, layer_sz, input_sz + 1);
@@ -108,7 +108,7 @@ template<typename T> std::vector<TestCase> TestSingleLayerNNActivation<T>::read_
 
 TYPED_TEST_P (TestSingleLayerNNActivation, SingleLayerNNActivation)
 {
-   // Set network layer names
+   // Set network basic_layer names
    std::string layer_type_id = TestSingleLayerNNActivation<TypeParam>::get_typeid();
 
    std::string layer_id = layer_type_id;
@@ -141,7 +141,7 @@ TYPED_TEST_P (TestSingleLayerNNActivation, SingleLayerNNActivation)
       TestSingleLayerNNActivation<TypeParam>::prettyPrintVector("stuff", test_case.input.at("input"));
       NNetIO_Typ netout = TestSingleLayerNNActivation<TypeParam>::nnet->activate(test_case.input);
 
-      // Check layer output
+      // Check basic_layer output
       std::cout << "check output\n";
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";
 
@@ -175,7 +175,7 @@ TYPED_TEST_P (TestSingleLayerNNActivation, SingleLayerNNActivation)
 
 TYPED_TEST_P (TestSingleLayerNNActivation, TwoLayerFFNActivation)
 {
-   // Set network layer names
+   // Set network basic_layer names
    std::string layer_type_id = TestSingleLayerNNActivation<TypeParam>::get_typeid();
 
    std::string layer_id = layer_type_id;
@@ -192,7 +192,7 @@ TYPED_TEST_P (TestSingleLayerNNActivation, TwoLayerFFNActivation)
       TestSingleLayerNNActivation<TypeParam>::create_two_layer_ffnnet(test_case);
       NNetIO_Typ netout = TestSingleLayerNNActivation<TypeParam>::nnet->activate(test_case.input);
 
-      // Check layer output
+      // Check basic_layer output
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";
 
       std::cout.setf(std::ios::fixed, std::ios::floatfield);

@@ -1,7 +1,7 @@
 //
 // Created by kfedrick on 2/17/21.
 //
-
+#include <iostream>
 #include "test/include/CommonTestFixtureFunctions.h"
 
 using std::cout;
@@ -122,10 +122,44 @@ std::string CommonTestFixtureFunctions::printResults(const flexnnet::BasicLayer&
    ssout.precision(_prec);
 
    ssout << prettyPrintVector("output", _layer(), _prec) << "\n";
-   ssout << prettyPrintArray("dAdN", _layer.get_dAdN(), _prec) << "\n";
-   ssout << prettyPrintArray("dNdW", _layer.get_dNdW(), _prec) << "\n";
-   ssout << prettyPrintArray("dNdI", _layer.get_dNdI(), _prec) << "\n";
+   ssout << prettyPrintArray("dy_dnet", _layer.get_dy_dnet(), _prec) << "\n";
+   ssout << prettyPrintArray("dnet_dw", _layer.get_dnet_dw(), _prec) << "\n";
+   ssout << prettyPrintArray("dnet_dx", _layer.get_dnet_dx(), _prec) << "\n";
 
    cout << ssout.str();
    return ssout.str();
+}
+
+flexnnet::ValarrMap CommonTestFixtureFunctions::parse_datum(const rapidjson::Value& _obj)
+{
+   flexnnet::ValarrMap datum_fields;
+   for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
+   {
+      std::string field = _obj[i]["field"].GetString();
+      size_t field_sz = _obj[i]["size"].GetUint64();
+      size_t field_index = _obj[i]["index"].GetUint64();
+
+      datum_fields[field] = std::valarray<double>(field_sz);
+
+      const rapidjson::Value& vec = _obj[i]["value"];
+      for (rapidjson::SizeType i = 0; i < vec.Size(); i++)
+         datum_fields[field][i] = vec[i].GetDouble();
+   }
+
+   return datum_fields;
+}
+
+Array2D<double> CommonTestFixtureFunctions::parse_weights(const rapidjson::Value& _obj, size_t _rows, size_t _cols)
+{
+   Array2D<double> weights(_rows, _cols);
+
+   for (rapidjson::SizeType i = 0; i < _obj.Size(); i++)
+   {
+      const rapidjson::Value& myrow = _obj[i];
+
+      for (rapidjson::SizeType j = 0; j < myrow.Size(); j++)
+         weights.at(i, j) = myrow[j].GetDouble();
+   }
+
+   return weights;
 }

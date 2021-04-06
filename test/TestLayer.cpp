@@ -7,7 +7,7 @@
 using std::cout;
 using std::valarray;
 using flexnnet::Array2D;
-using flexnnet::Datum;
+using flexnnet::OldDatum;
 
 bool
 TestLayer::valarray_double_near(const std::valarray<double>& _target, const std::valarray<double>& _test, double _epsilon)
@@ -53,7 +53,7 @@ TestLayer::array_double_near(const flexnnet::Array2D<double>& _target, const fle
 }
 
 bool
-TestLayer::datum_near(const flexnnet::Datum& _target, const flexnnet::Datum& _test, double _epsilon)
+TestLayer::datum_near(const flexnnet::OldDatum& _target, const flexnnet::OldDatum& _test, double _epsilon)
 {
    std::set<std::string> target_fields = _target.key_set();
    std::set<std::string> test_fields = _test.key_set();
@@ -86,9 +86,9 @@ std::string TestLayer::printResults(const flexnnet::BasicLayer& _layer, int _pre
    ssout.precision(_prec);
 
    ssout << prettyPrintVector("output", _layer(), _prec) << "\n";
-   ssout << printArray("dAdN", _layer.get_dAdN(), _prec) << "\n";
-   ssout << printArray("dNdW", _layer.get_dNdW(), _prec) << "\n";
-   ssout << printArray("dNdI", _layer.get_dNdI(), _prec) << "\n";
+   ssout << printArray("dy_dnet", _layer.get_dy_dnet(), _prec) << "\n";
+   ssout << printArray("dnet_dw", _layer.get_dnet_dw(), _prec) << "\n";
+   ssout << printArray("dnet_dx", _layer.get_dnet_dx(), _prec) << "\n";
 
    cout << ssout.str();
    return ssout.str();

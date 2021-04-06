@@ -122,7 +122,7 @@ namespace flexnnet
       // Reset environment to start state and get activate actor-critic
       // agent to determine initial action.
       //
-      _State state = _env.reset();
+      _State state = _env.clear();
       agent_rval = _agent.activate(state);
 
       // Iterate through remaining steps of episode until we reach a terminal state.

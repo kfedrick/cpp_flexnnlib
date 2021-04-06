@@ -5,17 +5,17 @@
 #ifndef FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 #define FLEX_NEURALNET_EUCLIDEANDISTLAYER_H_
 
-#include "NetworkLayer.h"
+#include "BasicLayer.h"
 
 namespace flexnnet
 {
-   class EuclideanDistLayer : public NetworkLayer
+   class EuclideanDistLayer : public BasicLayer
    {
    protected:
       /* ********************************************************************
        * Constructors, destructors
        */
-      EuclideanDistLayer(size_t _sz, const std::string& _name, NetworkLayerType _type = Output);
+      EuclideanDistLayer(size_t _sz, const std::string& _name);
 
    public:
       virtual ~EuclideanDistLayer();
@@ -32,13 +32,13 @@ namespace flexnnet
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdW(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dw(const std::valarray<double>& _rawin);
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdI(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dx(const std::valarray<double>& _rawin);
 
    private:
       std::valarray<double> squared_euclidean_dist;

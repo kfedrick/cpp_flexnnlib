@@ -7,7 +7,6 @@
 
 #include <cstddef>
 #include <network/include/NeuralNet.h>
-#include <datasets/include/Exemplar.h>
 #include <iostream>
 #include <util/include/NetworkError.h>
 
@@ -18,7 +17,7 @@ namespace flexnnet
    {
    protected:
       using NN_Typ_ = NeuralNet<_NNIn, _NNOut>;
-      using Exemplar_Typ_ = Exemplar<_NNIn, _NNOut>;
+      using Exemplar_Typ_ = std::tuple<_NNIn, _NNOut>;
 
    public:
       /**

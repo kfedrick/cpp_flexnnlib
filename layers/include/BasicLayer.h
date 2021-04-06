@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <sstream>
 #include <functional>
+#include <memory>
 
 #include "NamedObject.h"
 #include "LayerWeights.h"
@@ -26,44 +27,53 @@ namespace flexnnet
        * Constructors, destructors
        */
       BasicLayer(size_t _sz, const std::string& _name);
+      BasicLayer(const BasicLayer& _basic_layer);
 
    public:
+      virtual std::shared_ptr<BasicLayer> clone(void) const = 0;
       virtual ~BasicLayer();
 
    public:
 
-      // Return length of layer output valarray
+      // Return length of basic_layer output valarray
       size_t size() const;
       virtual size_t input_size() const;
 
-      const Array2D<double>& get_dAdN(void) const;
-      const Array2D<double>& get_dNdW(void) const;
-      const Array2D<double>& get_dNdI(void) const;
+      const LayerState& state(void) const;
+
+      const Array2D<double>& get_dy_dnet(void) const;
+      const Array2D<double>& get_dnet_dw(void) const;
+      const Array2D<double>& get_dnet_dx(void) const;
+      const Array2D<double>& get_dE_dw(void) const;
 
    public:
       /* ********************************************************************
-       * Public layer operational methods
+       * Public basic_layer operational methods
        */
 
       /**
-       * Calculate the value of the layer neuron vector based on the specified
+       * Calculate the value of the basic_layer neuron vector based on the specified
        * raw input vectors.
        * @param inputVec
        * @return
        */
-      virtual const std::valarray<double>& activate(const std::valarray<double>& inputVec);
+      virtual const std::valarray<double>& activate(const std::valarray<double>& _inputv);
 
       /**
-       * Accumulate error specified in _errorv into the current layer error
+       * Calculates the net input error vector and input error vector given
+       * the layer output error vector.
+       *
        * @param _errorv
        * @return
        */
-      virtual const std::valarray<double>& accumulate_error(const std::valarray<double>& _errorv);
+      virtual const std::valarray<double>& backprop(const std::valarray<double>& _errorv);
 
       /*
-       * Return the current value of the network layer as a std::valarray
+       * Return the current value of the network basic_layer as a std::valarray
        */
       virtual const std::valarray<double>& operator()() const;
+
+      virtual const std::valarray<double>& input_error(void) const;
 
       virtual std::string toJson(void) const;
 
@@ -80,39 +90,46 @@ namespace flexnnet
       virtual const std::valarray<double>& calc_netin(const std::valarray<double>& _rawin) = 0;
 
       /*
-       * Calculate and return the derivative of the layer output with respect to
+       * Calculate and return the derivative of the basic_layer output with respect to
        * the net input for the most recent activation.
        */
-      virtual const Array2D<double>& calc_dAdN(const std::valarray<double>& _out) = 0;
+      virtual const Array2D<double>& calc_dy_dnet(const std::valarray<double>& _out) = 0;
 
       /**
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      virtual const Array2D<double>& calc_dNdW(const std::valarray<double>& _rawin) = 0;
+      virtual const Array2D<double>& calc_dnet_dw(const std::valarray<double>& _rawin) = 0;
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      virtual const Array2D<double>& calc_dNdI(const std::valarray<double>& _rawin) = 0;
+      virtual const Array2D<double>& calc_dnet_dx(const std::valarray<double>& _rawin) = 0;
+
 
       // Mark all derivative arrays as stale (e.g. after new activation).
       void stale(void);
 
+      mutable std::mt19937_64 rand_engine;
+
+   private:
+      void copy(const BasicLayer& _basic_layer);
+
    public:
+      const std::valarray<double>& const_value = layer_state.outputv;
       const size_t& const_layer_output_size_ref = layer_output_size;
 
    private:
 
       /* ********************************************************************
-       * Private layer configuration and provisioning data members
+       * Private basic_layer configuration and provisioning data members
        */
-      const size_t layer_output_size;
+      size_t layer_output_size;
 
    protected:
       /* ********************************************************************
-       * Protected layer state data members
+       * Protected basic_layer state data members
        */
       size_t layer_input_size;
 
@@ -140,25 +157,48 @@ namespace flexnnet
       return layer_input_size;
    }
 
-
-   inline const Array2D<double>& BasicLayer::get_dAdN(void) const
+   inline const std::valarray<double>& BasicLayer::operator()() const
    {
-      return layer_derivatives.dAdN;
+      return layer_state.outputv;
    }
 
-   inline const Array2D<double>& BasicLayer::get_dNdW(void) const
+   inline const std::valarray<double>& BasicLayer::input_error(void) const
    {
-      return layer_derivatives.dNdW;
+      return layer_state.input_errorv;
    }
 
-   inline const Array2D<double>& BasicLayer::get_dNdI(void) const
+   inline const LayerState& BasicLayer::state(void) const
    {
-      return layer_derivatives.dNdI;
+      return layer_state;
+   }
+
+   inline const Array2D<double>& BasicLayer::get_dy_dnet(void) const
+   {
+      return layer_derivatives.dy_dnet;
+   }
+
+   inline const Array2D<double>& BasicLayer::get_dnet_dw(void) const
+   {
+      return layer_derivatives.dnet_dw;
+   }
+
+   inline const Array2D<double>& BasicLayer::get_dnet_dx(void) const
+   {
+      return layer_derivatives.dnet_dx;
+   }
+
+   inline const Array2D<double>& BasicLayer::get_dE_dw(void) const
+   {
+      return layer_derivatives.dE_dw;
    }
 
    inline void BasicLayer::resize_input(size_t _rawin_sz)
    {
       layer_input_size = _rawin_sz;
+
+      layer_state.rawinv.resize(layer_input_size);
+      layer_state.input_errorv.resize(layer_input_size);
+
       layer_weights.resize(layer_output_size, layer_input_size);
       layer_derivatives.resize(layer_output_size, layer_input_size);
    }

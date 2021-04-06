@@ -6,6 +6,5 @@
 #define FLEX_NEURALNET_FLEXNNET_LAYERS_H_
 
 #include "BasicLayer.h"
-#include "NetworkLayer.h"
 
 #endif //FLEX_NEURALNET_FLEXNNET_LAYERS_H_

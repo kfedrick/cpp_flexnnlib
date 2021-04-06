@@ -12,11 +12,11 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include "TestLayer.h"
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 
 using flexnnet::Array2D;
-using flexnnet::Datum;
-using flexnnet::NetworkLayer;
+using flexnnet::OldDatum;
+using flexnnet::OldNetworkLayer;
 using flexnnet::BasicNeuralNet;
 
 using flexnnet::NNetIO_Typ;
@@ -95,17 +95,17 @@ template<typename T> std::vector<FanoutTestCase> TestFanoutFFNNActivation<T>::re
       size_t total_sz = test_case.olayer1_sz + test_case.olayer2_sz;
       static std::valarray<double> outputv(total_sz);
 
-      // Read hidden layer weights
+      // Read hidden basic_layer weights
       const rapidjson::Value& weights_obj1 = a_tuple_obj["hlayer_weights"];
       test_case.hlayer_weights.resize(test_case.hlayer_sz, test_case.input1_sz + 1);
       test_case.hlayer_weights = parse_weights(weights_obj1, test_case.hlayer_sz, test_case.input1_sz + 1);
 
-      // Read output layer #1 weights
+      // Read output basic_layer #1 weights
       const rapidjson::Value& weights_obj2 = a_tuple_obj["olayer1_weights"];
       test_case.olayer1_weights.resize(test_case.olayer1_sz, test_case.hlayer_sz + 1);
       test_case.olayer1_weights = parse_weights(weights_obj2, test_case.olayer1_sz, test_case.hlayer_sz + 1);
 
-      // Read output layer #2 weights
+      // Read output basic_layer #2 weights
       const rapidjson::Value& weights_obj3 = a_tuple_obj["olayer2_weights"];
       test_case.olayer2_weights.resize(test_case.olayer2_sz, test_case.hlayer_sz + 1);
       test_case.olayer2_weights = parse_weights(weights_obj3, test_case.olayer2_sz, test_case.hlayer_sz + 1);
@@ -127,7 +127,7 @@ template<typename T> std::vector<FanoutTestCase> TestFanoutFFNNActivation<T>::re
 TYPED_TEST_P (TestFanoutFFNNActivation, FanoutFFNNActivation)
 {
 
-   // Set network layer names
+   // Set network basic_layer names
    std::string layer_type_id = TestFanoutFFNNActivation<TypeParam>::get_typeid();
 
    std::string layer_id = layer_type_id;
@@ -145,7 +145,7 @@ TYPED_TEST_P (TestFanoutFFNNActivation, FanoutFFNNActivation)
 
       NNetIO_Typ netout = TestFanoutFFNNActivation<TypeParam>::nnet->activate(test_case.input);
 
-      // Check layer output
+      // Check basic_layer output
       EXPECT_PRED3(TestLayer::datum_near, test_case.target_output, netout, 0.000000001) << "ruh roh";
 
       std::cout.setf(std::ios::fixed, std::ios::floatfield);

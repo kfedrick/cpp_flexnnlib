@@ -7,87 +7,94 @@
 
 #include "gtest/gtest.h"
 
-#include "BasicTrainerTests.h"
+#include "SupervisedTrainerTestFixture.h"
 
-TYPED_TEST_P (BasicTrainerTests, TrainerConfig)
+#include "flexnnet.h"
+#include "Evaluator.h"
+#include "NetworkTopology.h"
+#include "NeuralNet.h"
+#include "DataSet.h"
+#include "RMSEFitnessFunc.h"
+#include "Evaluator.h"
+#include <ValarrayMap.h>
+#include <fstream>
+#include <CommonTestFixtureFunctions.h>
+#include <SuperviseTrainingAlgo.h>
+#include <ConstantLearningRate.h>
+#include "MockNN.h"
+
+TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 {
-   std::cout << "\nBasicTrainerTests::TrainerConfig\n";
+   std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
-   TypeParam basic_trainer;
+   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
+   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::BaseNeuralNet basenet(flexnnet::NetworkTopology({}));
+   MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
+   flexnnet::Evaluator<flexnnet::ValarrayMap,
+                       flexnnet::ValarrayMap,
+                       MockNN,
+                       flexnnet::DataSet,
+                       flexnnet::RMSEFitnessFunc> eval;
 
-// ---   Set basic trainer configuration variables
+   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
+                                   flexnnet::ValarrayMap,
+                                   MockNN,
+                                   flexnnet::DataSet,
+                                   flexnnet::Evaluator,
+                                   flexnnet::RMSEFitnessFunc,
+                                   flexnnet::ConstantLearningRate> trainer(nnet);
 
-// Check default max epochs
-   size_t DEFAULT_MAX_EPOCHS = TypeParam::DEFAULT_MAX_EPOCHS;
-   ASSERT_EQ(basic_trainer.max_epochs(), DEFAULT_MAX_EPOCHS);
+   EXPECT_NO_THROW("Unexpected exception thrown.");
+}
 
-// Set and check max epochs
-   size_t MAX_EPOCHS = 2;
-   basic_trainer.set_max_epochs(MAX_EPOCHS);
-   ASSERT_EQ(basic_trainer.max_epochs(), MAX_EPOCHS);
+TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
+{
+   std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
-// Test default batch mode
-   size_t DEFAULT_BATCH_MODE = TypeParam::DEFAULT_BATCH_MODE;
-   ASSERT_EQ(basic_trainer.batch_mode(), DEFAULT_BATCH_MODE);
+   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
+   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::BaseNeuralNet basenet(flexnnet::NetworkTopology({}));
+   MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
+   flexnnet::Evaluator<flexnnet::ValarrayMap,
+                       flexnnet::ValarrayMap,
+                       MockNN,
+                       flexnnet::DataSet,
+                       flexnnet::RMSEFitnessFunc> eval;
 
-// Set and test batch mode
-   size_t BATCH_MODE = 13;
-   basic_trainer.set_batch_mode(BATCH_MODE);
-   ASSERT_EQ(basic_trainer.batch_mode(), BATCH_MODE);
+   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
+                                   flexnnet::ValarrayMap,
+                                   MockNN,
+                                   flexnnet::DataSet,
+                                   flexnnet::Evaluator,
+                                   flexnnet::RMSEFitnessFunc,
+                                   flexnnet::ConstantLearningRate> trainer(nnet);
 
-// Test default error goal
-   size_t DEFAULT_ERROR_GOAL = TypeParam::DEFAULT_ERROR_GOAL;
-   ASSERT_EQ(basic_trainer.error_goal(), DEFAULT_ERROR_GOAL);
+   size_t BATCH = 5;
+   trainer.set_batch_mode(BATCH);
+   EXPECT_EQ(trainer.batch_mode(), BATCH)
+               << "Batch mode = " << trainer.batch_mode() << " : expected " << BATCH
+               << "\n";
 
-// Set and test error goal
-   double ERR_GOAL = 1e-5;
-   basic_trainer.set_error_goal(ERR_GOAL);
-   ASSERT_EQ(basic_trainer.error_goal(), ERR_GOAL);
+   size_t RUNS = 10;
+   trainer.set_training_runs(RUNS);
+   EXPECT_EQ(trainer.training_runs(), RUNS)
+               << "training runs = " << trainer.training_runs() << " : expected " << RUNS
+               << "\n";
 
-// Test default max validation failures
-   size_t DEFAULT_MAX_VFAILURES = TypeParam::DEFAULT_MAX_VALIDATION_FAIL;
-   ASSERT_EQ(basic_trainer.max_validation_failures(), DEFAULT_MAX_VFAILURES);
+   size_t EPOCHS = 101;
+   trainer.set_max_epochs(EPOCHS);
+   EXPECT_EQ(trainer.max_epochs(), EPOCHS)
+               << "max epochs = " << trainer.max_epochs() << " : expected " << EPOCHS
+               << "\n";
 
-// Set and test max validation failures
-   size_t MAX_VFAIL = 5;
-   basic_trainer.set_max_validation_failures(MAX_VFAIL);
-   ASSERT_EQ(basic_trainer.max_validation_failures(), MAX_VFAIL);
+   double EGOAL = 0.000001;
+   trainer.set_error_goal(EGOAL);
+   EXPECT_NEAR(trainer.error_goal(), EGOAL, 0.1e-9)
+               << "error goal = " << trainer.error_goal() << " : expected " << EGOAL
+               << "\n";
 
-// Test default report frequency
-   size_t DEFAULT_RFREQ = TypeParam::DEFAULT_REPORT_FREQ;
-   ASSERT_EQ(basic_trainer.report_frequency(), DEFAULT_RFREQ);
-
-// Set and test report frequency
-   size_t RFREQ = 3;
-   basic_trainer.set_report_frequency(RFREQ);
-   ASSERT_EQ(basic_trainer.report_frequency(), RFREQ);
-
-// Test default display frequency
-   size_t DEFAULT_DFREQ = TypeParam::DEFAULT_DISPLAY_FREQ;
-   ASSERT_EQ(basic_trainer.display_frequency(), DEFAULT_DFREQ);
-
-// Set and test display frequency
-   size_t DFREQ = 3;
-   basic_trainer.set_display_frequency(DFREQ);
-   ASSERT_EQ(basic_trainer.display_frequency(), DFREQ);
-
-// Test default training runs
-   size_t DEFAULT_RUNS = TypeParam::DEFAULT_TRAINING_RUNS;
-   ASSERT_EQ(basic_trainer.training_runs(), DEFAULT_RUNS);
-
-// Set and test training runs
-   size_t RUNS = 3;
-   basic_trainer.set_training_runs(RUNS);
-   ASSERT_EQ(basic_trainer.training_runs(), RUNS);
-
-   // Test default saved neural network limit
-   size_t DEFAULT_SAVE_LIMIT = TypeParam::DEFAULT_SAVED_NNET_LIMIT;
-   ASSERT_EQ(basic_trainer.saved_nnet_limit(), DEFAULT_SAVE_LIMIT);
-
-// Set and test saved neural network limit
-   size_t SAVE_LIMIT = 3;
-   basic_trainer.set_saved_nnet_limit(SAVE_LIMIT);
-   ASSERT_EQ(basic_trainer.saved_nnet_limit(), SAVE_LIMIT);
+   EXPECT_NO_THROW("Unexpected exception thrown.");
 }
 
 #endif //_TRAINERCONFIGTESTS_H_

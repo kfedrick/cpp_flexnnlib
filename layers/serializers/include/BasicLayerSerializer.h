@@ -7,7 +7,7 @@
 
 #include <document.h>
 #include "BasicLayer.h"
-#include "NetworkLayer.h"
+#include "OldNetworkLayer.h"
 #include "JSONEncoder.h"
 
 namespace flexnnet
@@ -18,14 +18,14 @@ namespace flexnnet
 
       /**
        * Structure BasicLayerInfo is used by the static parse method to
-       * return information regarding the common network layer components.
+       * return information regarding the common network basic_layer components.
        */
       struct BasicLayerInfo
       {
-         // The layer id
+         // The basic_layer id
          std::string id;
 
-         // The length of the layer output vector
+         // The length of the basic_layer output vector
          size_t size;
 
          // The length of the input vector

@@ -15,30 +15,31 @@ namespace flexnnet
    public:
       ExternalInputRecord();
       ExternalInputRecord(const std::string& _field, size_t _sz, size_t _index);
+      ExternalInputRecord(const ExternalInputRecord& _rec);
 
-      const std::string& get_field(void) const;
-      size_t get_size(void) const;
-      size_t get_index(void) const;
+      const std::string& field(void) const;
+      size_t size(void) const;
+      size_t index(void) const;
 
    private:
-      std::string field;
-      size_t size;
-      size_t index;
+      std::string field_name;
+      size_t field_size;
+      size_t field_index;
    };
 
-   inline const std::string& ExternalInputRecord::get_field(void) const
+   inline const std::string& ExternalInputRecord::field(void) const
    {
-      return field;
+      return field_name;
    }
 
-   inline size_t ExternalInputRecord::get_size(void) const
+   inline size_t ExternalInputRecord::size(void) const
    {
-      return size;
+      return field_size;
    }
 
-   inline size_t ExternalInputRecord::get_index(void) const
+   inline size_t ExternalInputRecord::index(void) const
    {
-      return index;
+      return field_index;
    }
 }
 

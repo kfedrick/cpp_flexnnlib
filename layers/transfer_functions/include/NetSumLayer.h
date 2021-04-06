@@ -5,17 +5,18 @@
 #ifndef FLEX_NEURALNET_NETSUMLAYER_H_
 #define FLEX_NEURALNET_NETSUMLAYER_H_
 
-#include "NetworkLayer.h"
+#include "BasicLayer.h"
 
 namespace flexnnet
 {
-   class NetSumLayer : public NetworkLayer
+   class NetSumLayer : public BasicLayer
    {
    protected:
       /* ********************************************************************
        * Constructors, destructors
        */
-      NetSumLayer(size_t sz, const std::string& _name, NetworkLayerType _type = Output);
+      NetSumLayer(size_t sz, const std::string& _name);
+      NetSumLayer(const NetSumLayer& _netsum);
 
    public:
       virtual ~NetSumLayer();
@@ -32,13 +33,13 @@ namespace flexnnet
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdW(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dw(const std::valarray<double>& _rawin);
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dNdI(const std::valarray<double>& _rawin);
+      const Array2D<double>& calc_dnet_dx(const std::valarray<double>& _rawin);
    };
 }
 

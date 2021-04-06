@@ -1,0 +1,19 @@
+{
+  "input_type":"flexnnet::CartesianCoord",
+  "output_type":"flexnnet::CartesianCoord",
+  "exemplars":
+  [
+    {
+      "input":{"x":0,"y":0},
+      "target":{"x":0,"y":0}
+    },
+    {
+      "input":{"x":1,"y":3},
+      "target":{"x":0,"y":0}
+    },
+    {
+      "input":{"x":-1,"y":0.3},
+      "target":{"x":0,"y":13}
+    }
+  ]
+}

@@ -10,7 +10,7 @@
 
 #include "Array2D.h"
 #include "BasicLayer.h"
-#include "Datum.h"
+#include "OldDatum.h"
 
 class TestLayer
 {
@@ -18,7 +18,7 @@ class TestLayer
 public:
 
    static bool
-   datum_near(const flexnnet::Datum& _target, const flexnnet::Datum& _test, double _epsilon);
+   datum_near(const flexnnet::OldDatum& _target, const flexnnet::OldDatum& _test, double _epsilon);
 
    static bool
    vector_double_near(const std::valarray<double>& _target, const std::valarray<double>& _test, double _epsilon);

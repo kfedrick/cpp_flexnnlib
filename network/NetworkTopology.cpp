@@ -7,37 +7,152 @@
 using std::string;
 using std::vector;
 using std::map;
-using flexnnet::NetworkTopology;
 
-NetworkTopology::NetworkTopology(const std::map<std::string, std::vector<double>> _xinput_sample)
+using flexnnet::BasicLayer;
+using flexnnet::NetworkLayer;
+using flexnnet::NetworkTopology;
+using flexnnet::LayerConnRecord;
+
+NetworkTopology::NetworkTopology(const ValarrMap& _xinput_sample)
 {
    sample_extern_input = _xinput_sample;
 }
 
-NetworkTopology::~NetworkTopology() {}
+NetworkTopology::NetworkTopology(const NetworkTopology& _topo)
+{
+   network_layers.clear();
+   ordered_layers.clear();
+   network_output_layers.clear();
+
+   copy(_topo);
+}
+
+NetworkTopology::~NetworkTopology()
+{}
+
+NetworkTopology& NetworkTopology::operator=(const NetworkTopology& _topo)
+{
+   copy(_topo);
+   return *this;
+}
+
+void NetworkTopology::copy(const NetworkTopology& _topo)
+{
+   // Clone all base layer objects
+   std::map<std::string, std::shared_ptr<BasicLayer>> cloned_layers = clone_baselayers(_topo);
+
+   // Make certain current network layer map is cleared then create
+   // copies of the network layers and add them to the network layer map
+   //
+   network_layers.clear();
+   for (auto it = _topo.network_layers.begin(); it != _topo.network_layers.end(); it++)
+   {
+      // Get layer id
+      std::string id = it->first;
+
+      // Create a copy of the network layer for base layer [id]
+      network_layers[id] = std::make_shared<NetworkLayer>(NetworkLayer(cloned_layers.at(id)));
+   }
+
+   // Finish deep copy of network layer info
+   //
+   for (auto it = network_layers.begin(); it != network_layers.end(); it++)
+   {
+      std::string id = it->first;
+      std::shared_ptr<NetworkLayer>& new_network_layer = it->second;
+      const std::shared_ptr<NetworkLayer>& old_network_layer = _topo.network_layers.at(id);
+
+      // Copy layer activation/backprop connections
+      copy_layer_connections(new_network_layer->activation_connections, _topo
+         .network_layers.at(id)->activation_connections);
+      copy_layer_connections(new_network_layer->backprop_connections, _topo.network_layers
+         .at(id)->backprop_connections);
+
+      // Copy flag indicating whether this is a network output layer
+      new_network_layer->output_layer_flag = old_network_layer->output_layer_flag;
+
+      // Copy external input fields
+      new_network_layer->external_input_fields = old_network_layer->external_input_fields;
+
+      // Copy virtual input vector
+      new_network_layer->virtual_input_vector = old_network_layer->virtual_input_vector;
+
+      new_network_layer->input_map = old_network_layer->input_map;
+      new_network_layer->input_error_map = old_network_layer->input_error_map;
+   }
+
+   // Add the network layer copies to network_output_layers
+   const std::vector<std::shared_ptr<NetworkLayer>>& netout_layers = _topo.get_output_layers();
+   for (auto it = netout_layers.begin(); it != netout_layers.end(); it++)
+   {
+      std::string id = (*it)->name();
+      network_output_layers.push_back(network_layers.at(id));
+   }
+
+   // Add the network layer copies to ordered_layers
+   const std::vector<std::shared_ptr<NetworkLayer>>& olayers = _topo.get_ordered_layers();
+   for (auto it = olayers.begin(); it != olayers.end(); it++)
+   {
+      std::string id = (*it)->name();
+      ordered_layers.push_back(network_layers.at(id));
+   }
+
+   // Copy sample external inputs
+   sample_extern_input = _topo.sample_extern_input;
+
+   config_virtual_network_output_layer();
+}
+
+std::map<std::string, std::shared_ptr<BasicLayer>> NetworkTopology::clone_baselayers(const NetworkTopology& _topo)
+{
+   std::map<std::string, std::shared_ptr<BasicLayer>> cloned_layers;
+   for (auto it = _topo.network_layers.begin(); it != _topo.network_layers.end(); it++)
+   {
+      std::string id = it->first;
+      std::shared_ptr<NetworkLayer> netlayer_ptr = it->second;
+
+      // Clone basic layer and add new network layer
+      cloned_layers[id] = netlayer_ptr->basiclayer()->clone();
+   }
+   return cloned_layers;
+}
+
+void NetworkTopology::copy_layer_connections(std::vector<LayerConnRecord>& _to, const std::vector<LayerConnRecord>& _from)
+{
+   // Iterate through original layer connection records and create
+   // a new entry in the local copy that references the new copy of the base layer
+   //
+   for (auto i = 0; i<_from.size(); i++)
+   {
+      std::string conn_id = _from[i].layer().name();
+      LayerConnRecord::ConnectionType ctype = _from[i].get_connection_type();
+
+      _to.push_back(LayerConnRecord(network_layers.at(conn_id), ctype));
+   }
+}
 
 /**
- * Add a connection to the layer, _to, from the layer, _from.
+ * Add a connection to the basic_layer, _to, from the basic_layer, _from.
  *
- * @param _to - the name of the layer to recieve input
- * @param _from - the name of the layer to send its output
+ * @param _to - the name of the basic_layer to recieve input
+ * @param _from - the name of the basic_layer to send its output
  */
 void
-NetworkTopology::add_layer_connection(const string& _to, const string& _from, NetworkTopology::ConnectionType _type)
+NetworkTopology::add_layer_connection(const string& _to, const string& _from, LayerConnRecord::ConnectionType _type)
 {
    /*
     * Check that _to and _from layers exist in the list of network layers.
     * If not throw an exception.
     */
-   if (layers.find(_to) == layers.end())
+   if (network_layers.find(_to) == network_layers.end())
    {
       static std::stringstream sout;
       sout << "Error : NetworkTopology::add_external_input_field() - "
-           << "Target layer : \"" << _to.c_str() << "\" does not exist.\n";
+           << "Target basic_layer : \"" << _to.c_str() << "\" does not exist.\n";
       throw std::invalid_argument(sout.str());
    }
 
-   if (layers.find(_from) == layers.end())
+   if (network_layers.find(_from) == network_layers.end())
    {
       static std::stringstream sout;
       sout << "Error : NetworkTopology::add_layer_connection() - "
@@ -48,21 +163,18 @@ NetworkTopology::add_layer_connection(const string& _to, const string& _from, Ne
    // Get from_dependencies so we can validate connection type can be made
    std::set<std::string> from_dependencies;
    std::set<std::string> to_dependencies;
-   getInputDependencies(from_dependencies, _from);
-   getInputDependencies(to_dependencies, _to);
+   get_input_dependencies(from_dependencies, _from);
+   get_input_dependencies(to_dependencies, _to);
 
    switch (_type)
    {
-      case Forward:
-         add_forward_connection(_to, _from, _type, from_dependencies);
+      case LayerConnRecord::Forward:add_forward_connection(network_layers[_to], network_layers[_from], _type, from_dependencies);
          break;
 
-      case Recurrent:
-         add_recurrent_connection(_to, _from, _type, from_dependencies);
+      case LayerConnRecord::Recurrent:add_recurrent_connection(network_layers[_to], network_layers[_from], _type, from_dependencies);
          break;
 
-      case Lateral:
-         add_lateral_connection(_to, _from, _type, to_dependencies, from_dependencies);
+      case LayerConnRecord::Lateral:add_lateral_connection(network_layers[_to], network_layers[_from], _type, to_dependencies, from_dependencies);
          break;
    };
 
@@ -71,7 +183,7 @@ NetworkTopology::add_layer_connection(const string& _to, const string& _from, Ne
 }
 
 /**
- * Add a connection to the layer, _to, from an external input vector.
+ * Add a connection to the basic_layer, _to, from an external input vector.
  * @param _to
  * @param _vec
  */
@@ -79,15 +191,15 @@ void
 NetworkTopology::add_external_input_field(const string& _to, const string& _field)
 {
    /*
-    * Check that _to layer and external input field, _field, exist in the
+    * Check that _to basic_layer and external input field, _field, exist in the
     * list of network layers and in the external input sample, respectively.
     * If not throw an exception.
     */
-   if (layers.find(_to) == layers.end())
+   if (network_layers.find(_to) == network_layers.end())
    {
       static std::stringstream sout;
       sout << "Error : NetworkTopology::add_external_input_field() - "
-           << "Target layer : \"" << _to.c_str() << "\" does not exist.\n";
+           << "Target basic_layer : \"" << _to.c_str() << "\" does not exist.\n";
       throw std::invalid_argument(sout.str());
    }
 
@@ -100,210 +212,118 @@ NetworkTopology::add_external_input_field(const string& _to, const string& _fiel
       throw std::invalid_argument(sout.str());
    }
 
-   /*
-    * Check that there is an entry for the _to in the external input fields
-    * connection map. If not add one.
-    */
-   if (external_input_fields_conn_map.find(_to) != external_input_fields_conn_map.end())
-      external_input_fields_conn_map.insert({});
+   network_layers[_to]->add_external_input_field(_field, sample_extern_input.at(_field).size());
 
-   /*
-    * If a connection already exist to the _to layer from the field, _field,
-    * then throw an exception; otherwise add the new connection.
-    */
-   vector<string>& external_input_fields_list = external_input_fields_conn_map[_to];
-
-   std::vector<string>::iterator it;
-   it = std::find (external_input_fields_list.begin(), external_input_fields_list.end(), _field);
-   if (it != external_input_fields_list.end())
-   {
-      static std::stringstream sout;
-      sout << "Error : LayerInput::add_external_input_field() - connection from \""
-           << _field.c_str() << "\" to \"" << _to.c_str() << "\" already exists.\n";
-      throw std::invalid_argument(sout.str());
-   }
-   else
-   {
-      external_input_fields_list.push_back(_field);
-   }
+   // Always update the activation order after adding a new connection
+   update_activation_order();
 }
 
-void NetworkTopology::add_forward_connection(const string& _to, const string& _from, ConnectionType _type, std::set<std::string>& _from_dependencies)
+void
+NetworkTopology::add_forward_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<
+   std::string>& _from_dependencies)
 {
    /*
-    * In order to add a valid forward connection from layer _from to layer _to, the
-    * _from layer must not have a forward activation dependency on output from the
-    * _to layer as this would indicate a cycle. Likewise the _to and _from layers
+    * In order to add a valid forward connection from basic_layer _from to basic_layer _to, the
+    * _from basic_layer must not have a forward activation dependency on output from the
+    * _to basic_layer as this would indicate a cycle. Likewise the _to and _from layers
     * must not be the same as this would cause a cycle.
     */
-   if (_to == _from || _from_dependencies.find(_to) != _from_dependencies.end())
+   if (_to->name() == _from->name() || _from_dependencies.find(_to->name()) != _from_dependencies.end())
    {
       static std::stringstream sout;
       sout.clear();
       sout << "Error : NetworkTopology::add_layer_connection() - Can't add Forward connection from  \""
-           << _from.c_str() << "\" => \"" << _to.c_str() << "\" - "
+           << _from->name().c_str() << "\" => \"" << _to->name().c_str() << "\" - "
            << " would create cycle." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
    // If we got here it's OK to add forward connection
-   insert_activation_connection(_to, _from, _type);
-   insert_backprop_connection(_from, _to, _type);
+   _to->add_activation_connection(_from, _type);
+   _from->add_backprop_connection(_to, _type);
 }
 
-void NetworkTopology::add_recurrent_connection(const string& _to, const string& _from, ConnectionType _type, std::set<std::string>& _from_dependencies)
+void
+NetworkTopology::add_recurrent_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<
+   std::string>& _from_dependencies)
 {
    /*
-    * To add a valid recurrent connection from layer _from to layer _to, the
-    * _from layer must already have a forward activation dependency from the
-    * _to layer, or the _to and _from layer must be the same.
+    * To add a valid recurrent connection from basic_layer _from to basic_layer _to, the
+    * _from basic_layer must already have a forward activation dependency from the
+    * _to basic_layer, or the _to and _from basic_layer must be the same.
     */
-   if (_to != _from && _from_dependencies.find(_to) == _from_dependencies.end())
+   if (_to->name() != _from->name() && _from_dependencies.find(_to->name()) == _from_dependencies.end())
    {
       static std::stringstream sout;
       sout.clear();
       sout << "Error : NetworkTopology::add_layer_connection() - "
            << "Can't add Recurrent connection from  \""
-           << _from.c_str() << "\" => \"" << _to.c_str() << "\" - "
+           << _from->name().c_str() << "\" => \"" << _to->name().c_str() << "\" - "
            << " no forward depenencies." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
    // If we got here it's OK to add recurrent connection
-   insert_activation_connection(_to, _from, _type);
-   insert_backprop_connection(_from, _to, _type);
+   _to->add_activation_connection(_from, _type);
+   _from->add_backprop_connection(_to, _type);
 }
 
-void NetworkTopology::add_lateral_connection(const string& _to, const string& _from, ConnectionType _type, std::set<std::string>& _to_dependencies, std::set<std::string>& _from_dependencies)
+void
+NetworkTopology::add_lateral_connection(std::shared_ptr<NetworkLayer>& _to, std::shared_ptr<NetworkLayer>& _from, LayerConnRecord::ConnectionType _type, std::set<
+   std::string>& _to_dependencies, std::set<std::string>& _from_dependencies)
 {
    /*
-    * To add a valid lateral connection from layer _from to layer _to, the
-    * _to and _from layer must be distinct and there must not be any existing
+    * To add a valid lateral connection from basic_layer _from to basic_layer _to, the
+    * _to and _from basic_layer must be distinct and there must not be any existing
     * forward connection from either one to the other.
     */
-   if (_to == _from)
+   if (_to->name() == _from->name())
    {
       static std::stringstream sout;
       sout.clear();
       sout << "Error : NetworkTopology::add_layer_connection() - "
            << "Can't add Lateral connection from  \""
-           << _from.c_str() << "\" to itself." << std::endl;
+           << _from->name().c_str() << "\" to itself." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
-   if (_to_dependencies.find(_from) != _to_dependencies.end())
+   if (_to_dependencies.find(_from->name()) != _to_dependencies.end())
    {
       static std::stringstream sout;
       sout.clear();
       sout << "Error : NetworkTopology::add_layer_connection() - Can't add Lateral connection from  \""
-           << _from.c_str() << "\" => \"" << _to.c_str() << "\" - "
+           << _from->name().c_str() << "\" => \"" << _to->name().c_str() << "\" - "
            << " Forward connection already exist." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
-   if (_from_dependencies.find(_to) != _from_dependencies.end())
+   if (_from_dependencies.find(_to->name()) != _from_dependencies.end())
    {
       static std::stringstream sout;
       sout.clear();
       sout << "Error : NetworkTopology::add_layer_connection() - Can't add Lateral connection from  \""
-           << _to.c_str() << "\" => \"" << _from.c_str() << "\" - "
+           << _to->name().c_str() << "\" => \"" << _from->name().c_str() << "\" - "
            << " Forward connection already exist." << std::endl;
       throw std::invalid_argument(sout.str());
    }
 
    // If we got here it's OK to add lateral connections
-   insert_activation_connection(_to, _from, _type);
-   insert_backprop_connection(_from, _to, _type);
-   insert_activation_connection(_from, _to, _type);
-   insert_backprop_connection(_to, _from, _type);
-}
-
-void NetworkTopology::insert_activation_connection(const string& _to, const string& _from, ConnectionType _type)
-{
-   /*
-    * Check that there is an entry for the _to connection in the activation
-    * connection map. If not add one.
-    */
-   if (activation_conn_map.find(_to) == activation_conn_map.end())
-      activation_conn_map[_to] = {};
-
-   /*
-    * If a connection already exist to the _to layer from the _from layer
-    * throw an exception; otherwise add the new connection.
-    */
-   vector<LayerConnRecord>& activation_conn_list = activation_conn_map[_to];
-
-   bool found = false;
-   for (auto it = activation_conn_list.begin(); it != activation_conn_list.end(); it++)
-   {
-      if (it->layer->name() == _from)
-      {
-         found = true;
-         break;
-      }
-   }
-
-   if (found)
-   {
-      static std::stringstream sout;
-      sout << "Error : LayerInput::add_connection() - forward activation connection from \""
-           << _from.c_str() << "\" to \"" << _to.c_str() << "\" already exists.\n";
-      throw std::invalid_argument(sout.str());
-   }
-   else
-   {
-      activation_conn_list.push_back(LayerConnRecord(layers[_from], _type));
-   }
-}
-
-void NetworkTopology::insert_backprop_connection(const string& _to, const string& _from, ConnectionType _type)
-{
-   /*
-    * Check that there is an entry for the _to connection in the activation
-    * connection map. If not add one.
-    */
-   if (backprop_conn_map.find(_to) == backprop_conn_map.end())
-      backprop_conn_map[_to] = {};
-
-   /*
-    * If a connection already exist to the _to layer from the _from layer
-    * throw an exception; otherwise add the new connection.
-    */
-   vector<LayerConnRecord>& backprop_conn_list = backprop_conn_map[_to];
-
-   bool found = false;
-   for (auto it = backprop_conn_list.begin(); it != backprop_conn_list.end(); it++)
-   {
-      if (it->layer->name() == _from)
-      {
-         found = true;
-         break;
-      }
-   }
-
-   if (found)
-   {
-      static std::stringstream sout;
-      sout << "Error : LayerInput::insert_backprop_connection() - backprop connection from \""
-           << _from.c_str() << "\" back to \"" << _to.c_str() << "\" already exists.\n";
-      throw std::invalid_argument(sout.str());
-   }
-   else
-   {
-      backprop_conn_list.push_back(LayerConnRecord(layers[_from], _type));
-   }
+   _to->add_activation_connection(_from, _type);
+   _from->add_backprop_connection(_to, _type);
+   _to->add_backprop_connection(_from, _type);
+   _from->add_activation_connection(_to, _type);
 }
 
 /**
- * Return a set containing the names of layers connected to the layer, _to, through
+ * Return a set containing the names of layers connected to the basic_layer, _to, through
  * a chain of one or more forward connections.
  *
  * @param _dependencies
  * @param _name
  */
-void NetworkTopology::getInputDependencies(std::set<std::string>& _dependencies, const std::string& _from)
+void NetworkTopology::get_input_dependencies(std::set<std::string>& _dependencies, const std::string& _from)
 {
-   const vector<LayerConnRecord>& activation_conn_list = activation_conn_map[_from];
+   const vector<LayerConnRecord>& activation_conn_list = network_layers[_from]->activation_connections;
 
 // Add indirect dependencies by recursing on direct dependencies not already in dependency set_weights
    for (auto& record : activation_conn_list)
@@ -313,14 +333,14 @@ void NetworkTopology::getInputDependencies(std::set<std::string>& _dependencies,
          continue;
 
       /*
-       * If this layer is not already in our dependency list then
-       * add it and recurse; otherwise we've visited this layer already
+       * If this basic_layer is not already in our dependency list then
+       * add it and recurse; otherwise we've visited this basic_layer already
        * so do nothing.
        */
-      if (_dependencies.find(record.layer->name()) == _dependencies.end())
+      if (_dependencies.find(record.layer().name()) == _dependencies.end())
       {
-         _dependencies.insert(record.layer->name());
-         getInputDependencies(_dependencies, record.layer->name());
+         _dependencies.insert(record.layer().name());
+         get_input_dependencies(_dependencies, record.layer().name());
       }
    }
 }
@@ -328,7 +348,7 @@ void NetworkTopology::getInputDependencies(std::set<std::string>& _dependencies,
 void NetworkTopology::update_activation_order(void)
 {
    ordered_layers.clear();
-   for (auto& item : layers)
+   for (auto& item : network_layers)
    {
       std::string layer_name = item.first;
 
@@ -344,12 +364,12 @@ void NetworkTopology::update_activation_order(void)
 
          // Get dependencies for ordered_layer_name
          std::set<std::string> dependencies;
-         getInputDependencies(dependencies, ordered_layer_name);
+         get_input_dependencies(dependencies, ordered_layer_name);
 
          // If new layer_name is in the list then break now and insert.
          if (dependencies.find(layer_name) != dependencies.end())
          {
-            ordered_layers.insert(it, layers[layer_name]);
+            ordered_layers.insert(it, network_layers[layer_name]);
             inserted = true;
             break;
          }
@@ -357,6 +377,14 @@ void NetworkTopology::update_activation_order(void)
 
       // If it wasn't already inserted, add it to the end now
       if (!inserted)
-         ordered_layers.push_back(layers[layer_name]);
+         ordered_layers.push_back(network_layers[layer_name]);
    }
+}
+
+void NetworkTopology::config_virtual_network_output_layer(void)
+{
+   virtual_network_output_layer.clear();
+
+   for (auto it = network_output_layers.begin(); it != network_output_layers.end(); it++)
+      virtual_network_output_layer.add_activation_connection(*it);
 }

@@ -9,6 +9,8 @@
 #include "test_logsig_constructor.h"
 #include "test_radbas_constructor.h"
 #include "test_softmax_constructor.h"
+#include "Evaluator.h"
+#include "RMSError.h"
 
 int main(int argc, char** argv)
 {

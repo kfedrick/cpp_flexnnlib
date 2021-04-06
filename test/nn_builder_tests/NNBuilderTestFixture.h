@@ -8,9 +8,13 @@
 #include <CommonTestFixtureFunctions.h>
 
 #include "PureLin.h"
+#include "LayerConnRecord.h"
+#include "NetworkLayerImpl.h"
 #include "NetworkTopology.h"
 
 using flexnnet::PureLin;
+using flexnnet::LayerConnRecord;
+using flexnnet::NetworkLayerImpl;
 using flexnnet::NetworkTopology;
 
 class NNBuilderTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
@@ -27,8 +31,79 @@ public:
    virtual void TearDown()
    {}
 
-   std::map<std::string, std::vector<double>> sample_external_input;
+   flexnnet::ValarrMap sample_external_input;
 };
+
+TEST_F(NNBuilderTestFixture, NetworkLayerDefaultCon)
+{
+   try
+   {
+      NetworkLayerImpl nl;
+   }
+   catch (...)
+   {
+      FAIL() << "Declaration failed.";
+   }
+}
+
+TEST_F(NNBuilderTestFixture, NetworkLayerNetLayerSetLayerPtr)
+{
+   try
+   {
+      NetworkLayerImpl nl(std::shared_ptr<flexnnet::BasicLayer>(new PureLin(3, "purelin")));
+   }
+   catch (...)
+   {
+      FAIL() << "Declaration failed.";
+   }
+}
+
+TEST_F(NNBuilderTestFixture, NetworkLayerGetActConn)
+{
+   try
+   {
+      NetworkLayerImpl nl(std::shared_ptr<flexnnet::BasicLayer>(new PureLin(3, "purelin")));
+      const std::vector<LayerConnRecord>& conn = nl.get_activation_connections();
+
+      ASSERT_EQ(conn.size(), 0) << "Expected network connection size to be zero, got " << conn.size() << "\n";
+   }
+   catch (...)
+   {
+      FAIL() << "Declaration failed.";
+   }
+}
+
+TEST_F(NNBuilderTestFixture, NetworkLayerGetExt)
+{
+   try
+   {
+      NetworkLayerImpl nl(std::shared_ptr<flexnnet::BasicLayer>(new PureLin(3, "purelin")));
+      const std::vector<flexnnet::ExternalInputRecord>& xfields = nl.get_external_input_fields();
+
+      ASSERT_EQ(xfields.size(), 0) << "Expected external fields size to be zero, got " << xfields.size() << "\n";
+   }
+   catch (...)
+   {
+      FAIL() << "Declaration failed.";
+   }
+}
+
+TEST_F(NNBuilderTestFixture, NetworkLayerAddExt)
+{
+   try
+   {
+      NetworkLayerImpl nl(std::shared_ptr<flexnnet::BasicLayer>(new PureLin(3, "purelin")));
+      nl.add_external_input_field("input1");
+      const std::vector<std::string>& xfields = nl.get_external_input_fields();
+
+      ASSERT_EQ(xfields.size(), 1) << "Expected external fields size to be zero, got " << xfields.size() << "\n";
+      ASSERT_EQ(xfields[0], "input1") << "Expected external field[0]=\"input1\", got " << xfields[0].c_str() << "\n";
+   }
+   catch (...)
+   {
+      FAIL() << "Declaration failed.";
+   }
+}
 
 TEST_F(NNBuilderTestFixture, NNTopoEmptyDecl)
 {
@@ -49,14 +124,11 @@ TEST_F(NNBuilderTestFixture, NNTopoAddSingleLayer)
    try
    {
       topo.add_layer<PureLin>("output", 3);
-
-      const std::map<std::string, std::shared_ptr<flexnnet::BasicLayer>>& layers = topo.get_layers();
-      if (layers.find("output") == layers.end())
-         FAIL() << "Couldn't find layer we just added. " << layers.size();
+      const flexnnet::NetworkLayerImpl& layers = topo.get_layer("output");
    }
    catch (std::exception& err)
    {
-      FAIL() << "Add output layer failed on exception :\n" << err.what();
+      FAIL() << "Couldn't find layer \"output\" we just added.\n" << err.what();
    }
 }
 
@@ -71,7 +143,7 @@ TEST_F(NNBuilderTestFixture, NNTopoAddTwoLayers)
    }
    catch (...)
    {
-      FAIL() << "Add hidden layer failed.";
+      FAIL() << "Add hidden basic_layer failed.";
    }
 }
 
@@ -83,7 +155,7 @@ TEST_F(NNBuilderTestFixture, NNTopoAddDuplicateLayer)
    try
    {
       topo.add_layer<PureLin>("output", 3);
-      FAIL() << "Failed to detect addition of duplicate output layer.";
+      FAIL() << "Failed to detect addition of duplicate output basic_layer.";
    }
    catch (...)
    {
@@ -103,12 +175,13 @@ TEST_F(NNBuilderTestFixture, NNTopoAddExternInput)
    {
       FAIL() << "Failed to add external input.\n" << err.what();
    }
+   const std::vector<std::string>& input_fields = topo.get_external_input_fields("output");
 
-   std::vector<std::string> input_fields = topo.get_external_input_fields("output");
-   std::vector<std::string>::iterator it;
+   std::vector<std::string>::const_iterator it;
    it = std::find(input_fields.begin(), input_fields.end(), "a");
    if (it == input_fields.end())
       FAIL() << "Field \"a\" doesn't appear in input fields for \"output\".\n";
+
 }
 
 TEST_F(NNBuilderTestFixture, NNTopoAddMultipleExternInputs)
@@ -128,7 +201,7 @@ TEST_F(NNBuilderTestFixture, NNTopoAddMultipleExternInputs)
       FAIL() << "Failed to add external input.\n" << err.what();
    }
 
-   std::vector<std::string> ret_input_fields = topo.get_external_input_fields("output");
+   const std::vector<std::string>& ret_input_fields = topo.get_external_input_fields("output");
    std::set<std::string> ret_input_field_set;
 
    for (auto it = ret_input_fields.begin(); it != ret_input_fields.end(); it++)
@@ -146,20 +219,21 @@ TEST_F(NNBuilderTestFixture, NNTopoSingleForwardConn)
 
    try
    {
-      topo.add_layer_connection("output", "hidden", flexnnet::NetworkTopology::Forward);
+      topo.add_layer_connection("output", "hidden", flexnnet::LayerConnRecord::Forward);
 
       // Validate connection entry
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn = topo
          .get_activation_connections("output");
       ASSERT_EQ(layerconn.size(), 1) << "Expected output1 to have 1 input connection, got " << layerconn.size();
-      ASSERT_EQ(layerconn[0].layer->name(), "hidden") << "Expected layer input from \"hidden\"";
-      ASSERT_EQ(layerconn[0].connection_type, flexnnet::NetworkTopology::Forward)
-                     << "Expected layer connection type to be Forward, got : " << layerconn[0].connection_type;
-      ASSERT_FALSE(layerconn[0].is_recurrent()) << "Expected layer connection is_recurrent() to be false";
+      ASSERT_EQ(layerconn[0].layer().name(), "hidden") << "Expected basic_layer input from \"hidden\"";
+      ASSERT_EQ(layerconn[0].get_connection_type(), flexnnet::LayerConnRecord::Forward)
+                     << "Expected basic_layer connection type to be Forward, got : "
+                     << layerconn[0].get_connection_type();
+      ASSERT_FALSE(layerconn[0].is_recurrent()) << "Expected basic_layer connection is_recurrent() to be false";
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add forward layer connection.\n" << err.what();
+      FAIL() << "Failed to add forward basic_layer connection.\n" << err.what();
    }
 }
 
@@ -168,12 +242,12 @@ TEST_F(NNBuilderTestFixture, NNTopoDupForwardConn)
    NetworkTopology topo(sample_external_input);
    topo.add_layer<PureLin>("output", 3);
    topo.add_layer<PureLin>("hidden", 5);
-   topo.add_layer_connection("output", "hidden", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output", "hidden", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("output", "hidden", flexnnet::NetworkTopology::Forward);
-      FAIL() << "Failed to detect duplicate forward layer connection.\n";
+      topo.add_layer_connection("output", "hidden", flexnnet::LayerConnRecord::Forward);
+      FAIL() << "Failed to detect duplicate forward basic_layer connection.\n";
    }
    catch (std::exception const& err)
    {
@@ -192,23 +266,23 @@ TEST_F(NNBuilderTestFixture, NNTopoFaninForwardConn)
    {
       // Add all connections to output from conn_set
       for (auto it = conn_set.begin(); it != conn_set.end(); it++)
-         topo.add_layer_connection("output", *it, flexnnet::NetworkTopology::Forward);
+         topo.add_layer_connection("output", *it, flexnnet::LayerConnRecord::Forward);
 
       // Get the list of connections for output and verify it contains
       // all of the conn_set
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn = topo
          .get_activation_connections("output");
 
       std::set<std::string> ret_set;
       for (auto i = 0; i < layerconn.size(); i++)
-         ret_set.insert(layerconn[i].layer->name());
+         ret_set.insert(layerconn[i].layer().name());
 
       if (ret_set != conn_set)
          FAIL() << "Return connection set doesn't match expected.\n";
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add forward layer connection.\n" << err.what();
+      FAIL() << "Failed to add forward basic_layer connection.\n" << err.what();
    }
 }
 
@@ -225,24 +299,24 @@ TEST_F(NNBuilderTestFixture, NNTopoFanoutForwardConn)
    {
       // Add all connections to output from conn_set
       for (auto it = conn_set.begin(); it != conn_set.end(); it++)
-         topo.add_layer_connection(*it, "hidden", flexnnet::NetworkTopology::Forward);
+         topo.add_layer_connection(*it, "hidden", flexnnet::LayerConnRecord::Forward);
 
       // Validate activation connections
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn1 = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn1 = topo
          .get_activation_connections("output1");
       ASSERT_EQ(layerconn1.size(), 1) << "Expected 1 input for output1";
-      ASSERT_EQ(layerconn1[0].layer->name(), "hidden") << "Expected input from hidden for output1";
+      ASSERT_EQ(layerconn1[0].layer().name(), "hidden") << "Expected input from hidden for output1";
 
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn2 = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn2 = topo
          .get_activation_connections("output2");
       ASSERT_EQ(layerconn2.size(), 1) << "Expected 1 input for output2";
-      ASSERT_EQ(layerconn2[0].layer->name(), "hidden") << "Expected input from hidden for output2";
+      ASSERT_EQ(layerconn2[0].layer().name(), "hidden") << "Expected input from hidden for output2";
 
       // Validate backprop connections
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& bpconn1 = topo.get_backprop_connections("hidden");
+      const std::vector<flexnnet::LayerConnRecord>& bpconn1 = topo.get_backprop_connections("hidden");
       ASSERT_EQ(bpconn1.size(), 2) << "Expected 2 backprop connections for hidden";
-      ASSERT_EQ(bpconn1[0].layer->name(), "output1") << "Expected backprop conn[0] from output1 for hidden";
-      ASSERT_EQ(bpconn1[1].layer->name(), "output2") << "Expected backprop conn[1] from output2 for hidden";
+      ASSERT_EQ(bpconn1[0].layer().name(), "output1") << "Expected backprop conn[0] from output1 for hidden";
+      ASSERT_EQ(bpconn1[1].layer().name(), "output2") << "Expected backprop conn[1] from output2 for hidden";
    }
    catch (std::exception const& err)
    {
@@ -251,31 +325,32 @@ TEST_F(NNBuilderTestFixture, NNTopoFanoutForwardConn)
 }
 
 /**
- * Test a simple two layer network with a recurrent connection
+ * Test a simple two basic_layer network with a recurrent connection
  */
 TEST_F(NNBuilderTestFixture, NNTopoSimpleRecurConn)
 {
    NetworkTopology topo(sample_external_input);
    topo.add_layer<PureLin>("output", 3);
    topo.add_layer<PureLin>("hidden", 5);
-   topo.add_layer_connection("output", "hidden", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output", "hidden", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("hidden", "output", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("hidden", "output", flexnnet::LayerConnRecord::Recurrent);
 
       // Validate recurrent connection entry
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn = topo
          .get_activation_connections("hidden");
       ASSERT_EQ(layerconn.size(), 1) << "Expected output1 to have 1 input connection, got " << layerconn.size();
-      ASSERT_EQ(layerconn[0].layer->name(), "output") << "Expected layer input from \"output\"";
-      ASSERT_EQ(layerconn[0].connection_type, flexnnet::NetworkTopology::Recurrent)
-                     << "Expected layer connection type to be Recurrent, got : " << layerconn[0].connection_type;
-      ASSERT_TRUE(layerconn[0].is_recurrent()) << "Expected layer connection is_recurrent() to be true";
+      ASSERT_EQ(layerconn[0].layer().name(), "output") << "Expected basic_layer input from \"output\"";
+      ASSERT_EQ(layerconn[0].get_connection_type(), flexnnet::LayerConnRecord::Recurrent)
+                     << "Expected basic_layer connection type to be Recurrent, got : "
+                     << layerconn[0].get_connection_type();
+      ASSERT_TRUE(layerconn[0].is_recurrent()) << "Expected basic_layer connection is_recurrent() to be true";
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
@@ -290,8 +365,8 @@ TEST_F(NNBuilderTestFixture, NNTopoBadRecurConn)
 
    try
    {
-      topo.add_layer_connection("hidden", "output", flexnnet::NetworkTopology::Recurrent);
-      FAIL() << "Failed to detect bad recurrent layer connection.\n";
+      topo.add_layer_connection("hidden", "output", flexnnet::LayerConnRecord::Recurrent);
+      FAIL() << "Failed to detect bad recurrent basic_layer connection.\n";
    }
    catch (std::exception const& err)
    {
@@ -310,18 +385,18 @@ TEST_F(NNBuilderTestFixture, NNTopoDeepRecurConn)
    topo.add_layer<PureLin>("hidden4", 5);
    topo.add_layer<PureLin>("output", 3);
 
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden4", "hidden3", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden4", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden4", "hidden3", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden4", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("hidden2", "output", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("hidden2", "output", flexnnet::LayerConnRecord::Recurrent);
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
@@ -337,23 +412,23 @@ TEST_F(NNBuilderTestFixture, NNTopoMidRecurConn)
    topo.add_layer<PureLin>("hidden4", 5);
    topo.add_layer<PureLin>("output", 3);
 
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden4", "hidden3", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden4", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden4", "hidden3", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden4", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("hidden2", "hidden4", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("hidden2", "hidden4", flexnnet::LayerConnRecord::Recurrent);
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
 /**
- * Test a self recurrent layer
+ * Test a self recurrent basic_layer
  */
 TEST_F(NNBuilderTestFixture, NNTopoSelfRecurConn)
 {
@@ -362,11 +437,11 @@ TEST_F(NNBuilderTestFixture, NNTopoSelfRecurConn)
 
    try
    {
-      topo.add_layer_connection("output", "output", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("output", "output", flexnnet::LayerConnRecord::Recurrent);
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
@@ -379,15 +454,15 @@ TEST_F(NNBuilderTestFixture, NNTopoEndSelfRecurConn)
    topo.add_layer<PureLin>("output", 5);
    topo.add_layer<PureLin>("hidden", 3);
 
-   topo.add_layer_connection("output", "hidden", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output", "hidden", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("output", "output", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("output", "output", flexnnet::LayerConnRecord::Recurrent);
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
@@ -402,17 +477,17 @@ TEST_F(NNBuilderTestFixture, NNTopoMidSelfRecurConn)
    topo.add_layer<PureLin>("hidden3", 3);
    topo.add_layer<PureLin>("output", 5);
 
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden3", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden3", flexnnet::LayerConnRecord::Forward);
 
    try
    {
-      topo.add_layer_connection("hidden2", "hidden2", flexnnet::NetworkTopology::Recurrent);
+      topo.add_layer_connection("hidden2", "hidden2", flexnnet::LayerConnRecord::Recurrent);
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add recurrent layer connection.\n" << err.what();
+      FAIL() << "Failed to add recurrent basic_layer connection.\n" << err.what();
    }
 }
 
@@ -424,20 +499,21 @@ TEST_F(NNBuilderTestFixture, NNTopoSimpleLateralConn)
 
    try
    {
-      topo.add_layer_connection("output1", "output2", flexnnet::NetworkTopology::Lateral);
+      topo.add_layer_connection("output1", "output2", flexnnet::LayerConnRecord::Lateral);
 
       // Validate connection entry
-      const std::vector<flexnnet::NetworkTopology::LayerConnRecord>& layerconn = topo
+      const std::vector<flexnnet::LayerConnRecord>& layerconn = topo
          .get_activation_connections("output1");
       ASSERT_EQ(layerconn.size(), 1) << "Expected output1 to have 1 input connection, got " << layerconn.size();
-      ASSERT_EQ(layerconn[0].layer->name(), "output2") << "Expected layer input from \"output2\"";
-      ASSERT_EQ(layerconn[0].connection_type, flexnnet::NetworkTopology::Lateral)
-                     << "Expected layer connection type to be Lateral, got : " << layerconn[0].connection_type;
-      ASSERT_TRUE(layerconn[0].is_recurrent()) << "Expected layer connection is_recurrent() to be true";
+      ASSERT_EQ(layerconn[0].layer().name(), "output2") << "Expected basic_layer input from \"output2\"";
+      ASSERT_EQ(layerconn[0].get_connection_type(), flexnnet::LayerConnRecord::Lateral)
+                     << "Expected basic_layer connection type to be Lateral, got : "
+                     << layerconn[0].get_connection_type();
+      ASSERT_TRUE(layerconn[0].is_recurrent()) << "Expected basic_layer connection is_recurrent() to be true";
    }
    catch (std::exception const& err)
    {
-      FAIL() << "Failed to add lateral layer connection.\n" << err.what();
+      FAIL() << "Failed to add lateral basic_layer connection.\n" << err.what();
    }
 }
 
@@ -449,11 +525,11 @@ TEST_F(NNBuilderTestFixture, NNTopoSimpleActivationOrder)
    topo.add_layer<PureLin>("hidden3", 3);
    topo.add_layer<PureLin>("output", 5);
 
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden3", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden3", flexnnet::LayerConnRecord::Forward);
 
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& ordered_layers = topo.get_ordered_layers();
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& ordered_layers = topo.get_ordered_layers();
 
    // Check activation order
    ASSERT_EQ(ordered_layers[0]->name(), "hidden1") << "hidden1 out of order.";
@@ -470,11 +546,11 @@ TEST_F(NNBuilderTestFixture, NNTopoFaninActivationOrder)
    topo.add_layer<PureLin>("hidden3", 3);
    topo.add_layer<PureLin>("output", 5);
 
-   topo.add_layer_connection("hidden3", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden3", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("hidden3", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden3", flexnnet::LayerConnRecord::Forward);
 
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& ordered_layers = topo.get_ordered_layers();
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& ordered_layers = topo.get_ordered_layers();
    std::map<std::string, int> ordered_names;
 
    for (int i = 0; i < ordered_layers.size(); i++)
@@ -496,12 +572,12 @@ TEST_F(NNBuilderTestFixture, NNTopoActOrderWRecur)
    topo.add_layer<PureLin>("hidden3", 3);
    topo.add_layer<PureLin>("output", 5);
 
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden3", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "output", flexnnet::NetworkTopology::Recurrent);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden3", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "output", flexnnet::LayerConnRecord::Recurrent);
 
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& ordered_layers = topo.get_ordered_layers();
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& ordered_layers = topo.get_ordered_layers();
 
    // Check activation order
    ASSERT_EQ(ordered_layers[0]->name(), "hidden1") << "hidden1 out of order.";
@@ -518,11 +594,11 @@ TEST_F(NNBuilderTestFixture, NNTopoFaninActOrderRandConnOrder)
    topo.add_layer<PureLin>("hidden3", 3);
    topo.add_layer<PureLin>("output", 5);
 
-   topo.add_layer_connection("output", "hidden3", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden2", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("hidden3", "hidden2", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output", "hidden3", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden2", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("hidden3", "hidden2", flexnnet::LayerConnRecord::Forward);
 
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& ordered_layers = topo.get_ordered_layers();
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& ordered_layers = topo.get_ordered_layers();
 
    // Check activation order
    ASSERT_EQ(ordered_layers[0]->name(), "hidden1") << "hidden1 out of order.";
@@ -538,12 +614,12 @@ TEST_F(NNBuilderTestFixture, NNTopoNNOutputLayers)
    topo.add_layer<PureLin>("hidden1", 5);
    topo.add_layer<PureLin>("hidden2", 2);
 
-   topo.add_layer_connection("output", "hidden1", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output", "hidden2", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output", "hidden1", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output", "hidden2", flexnnet::LayerConnRecord::Forward);
 
    // Validate activation connections
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& olayers = topo.get_output_layers();
-   ASSERT_EQ(olayers.size(), 1) << "Expected 1 output layer";
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& olayers = topo.get_output_layers();
+   ASSERT_EQ(olayers.size(), 1) << "Expected 1 output basic_layer";
    ASSERT_EQ(olayers[0]->name(), "output") << "Expected input from hidden for output1";
 }
 
@@ -554,12 +630,12 @@ TEST_F(NNBuilderTestFixture, NNTopoFanoutOutputLayers)
    topo.add_layer<PureLin>("output2", 5, true);
    topo.add_layer<PureLin>("hidden", 2);
 
-   topo.add_layer_connection("output1", "hidden", flexnnet::NetworkTopology::Forward);
-   topo.add_layer_connection("output2", "hidden", flexnnet::NetworkTopology::Forward);
+   topo.add_layer_connection("output1", "hidden", flexnnet::LayerConnRecord::Forward);
+   topo.add_layer_connection("output2", "hidden", flexnnet::LayerConnRecord::Forward);
 
    // Validate activation connections
-   const std::vector<std::shared_ptr<flexnnet::BasicLayer>>& olayers = topo.get_output_layers();
-   ASSERT_EQ(olayers.size(), 2) << "Expected 2 output layer";
+   const std::vector<std::shared_ptr<NetworkLayerImpl>>& olayers = topo.get_output_layers();
+   ASSERT_EQ(olayers.size(), 2) << "Expected 2 output basic_layer";
    ASSERT_EQ(olayers[0]->name(), "output1") << "Expected output_layer[0] to be \"output1\"";
    ASSERT_EQ(olayers[1]->name(), "output2") << "Expected output_layer[1] to be \"output2\"";
 }

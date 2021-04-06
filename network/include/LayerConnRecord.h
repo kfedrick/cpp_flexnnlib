@@ -1,15 +1,17 @@
 //
-// Created by kfedrick on 6/5/19.
+// Created by kfedrick on 2/21/21.
 //
 
-#ifndef FLEX_NEURALNET_LAYERCONNRECORDD_H_
-#define FLEX_NEURALNET_LAYERCONNRECORDD_H_
+#ifndef FLEX_NEURALNET_LAYERCONNRECORD_H_
+#define FLEX_NEURALNET_LAYERCONNRECORD_H_
 
 #include <stddef.h>
-#include "BasicLayer.h"
+#include <memory>
 
 namespace flexnnet
 {
+   class NetworkLayer;
+
    class LayerConnRecord
    {
    public:
@@ -19,30 +21,30 @@ namespace flexnnet
       };
 
    public:
-      LayerConnRecord() : connection_type(Forward), input_layer_size(0), input_layer(0)
-      {}
-      LayerConnRecord(flexnnet::BasicLayer* _from, ConnectionType _type);
-      LayerConnRecord(size_t _sz, ConnectionType _type);
-      LayerConnRecord(std::string _id, size_t _sz, ConnectionType _type);
+      LayerConnRecord();
+      LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type);
+      ~LayerConnRecord();
 
+      NetworkLayer& layer();
+      const NetworkLayer& layer() const;
+      bool is_recurrent() const;
       ConnectionType get_connection_type() const;
 
-      bool is_recurrent() const;
-
-      size_t size() const;
-      BasicLayer& get_input_layer() const;
-      const std::string& get_input_layer_id() const;
-
    private:
-      std::string input_layer_id;
-      BasicLayer* input_layer;
+      std::shared_ptr<NetworkLayer> from_layer;
       ConnectionType connection_type;
-      size_t input_layer_size;
    };
 
-   inline LayerConnRecord::ConnectionType LayerConnRecord::get_connection_type() const
+   inline
+   NetworkLayer& LayerConnRecord::layer()
    {
-      return connection_type;
+      return *from_layer;
+   }
+
+   inline
+   const NetworkLayer& LayerConnRecord::layer() const
+   {
+      return *from_layer;
    }
 
    inline bool LayerConnRecord::is_recurrent() const
@@ -50,19 +52,9 @@ namespace flexnnet
       return !(connection_type == Forward);
    }
 
-   inline size_t LayerConnRecord::size() const
+   inline LayerConnRecord::ConnectionType LayerConnRecord::get_connection_type() const
    {
-      return input_layer_size;
-   }
-
-   inline BasicLayer& LayerConnRecord::get_input_layer() const
-   {
-      return *input_layer;
-   }
-
-   inline const std::string& LayerConnRecord::get_input_layer_id() const
-   {
-      return input_layer_id;
+      return connection_type;
    }
 }
 

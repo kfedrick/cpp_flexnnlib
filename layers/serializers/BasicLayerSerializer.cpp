@@ -38,7 +38,7 @@ rapidjson::Value& flexnnet::BasicLayerSerializer::encodeBasic(rapidjson::Value& 
 rapidjson::Value& flexnnet::BasicLayerSerializer::encodeID(rapidjson::Value& _obj, const BasicLayer& _layer)
 {
    /*
-    * Add layer identity information
+    * Add basic_layer identity information
     */
    _obj.SetObject();
 
@@ -51,7 +51,7 @@ rapidjson::Value& flexnnet::BasicLayerSerializer::encodeID(rapidjson::Value& _ob
 rapidjson::Value& flexnnet::BasicLayerSerializer::encodeDimensions(rapidjson::Value& _obj, const BasicLayer& _layer)
 {
    /*
-    * Add layer dimensions
+    * Add basic_layer dimensions
     */
    _obj.SetObject();
 
@@ -99,17 +99,17 @@ flexnnet::BasicLayerSerializer::BasicLayerInfo flexnnet::BasicLayerSerializer::p
 {
    BasicLayerInfo network_layer_info;
 
-   // Save layer identifier information
+   // Save basic_layer identifier information
    network_layer_info.id = _obj["id"].GetString();
 
-   // Save flag indicating this is an output layer
+   // Save flag indicating this is an output basic_layer
    network_layer_info.is_output_layer = _obj["is_output_layer"].GetBool();
 
-   // Save layer dimension information
+   // Save basic_layer dimension information
    network_layer_info.size = _obj["dimensions"]["layer_size"].GetUint();
    network_layer_info.input_size = _obj["dimensions"]["layer_input_size"].GetUint();
 
-   // Save layer weights information - resize weights as required
+   // Save basic_layer weights information - resize weights as required
    network_layer_info.weights.resize(network_layer_info.size, network_layer_info.input_size + 1);
 
    const rapidjson::Value& weights_obj = _obj["learned_parameters"]["weights"];

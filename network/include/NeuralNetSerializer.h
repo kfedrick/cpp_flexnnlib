@@ -6,7 +6,7 @@
 #define FLEX_NEURALNET_NEURALNETSERIALIZER_H_
 
 #include "NeuralNet.h"
-#include "BasicNeuralNetSerializer.h"
+#include "deprecated/BasicNeuralNetSerializer.h"
 
 namespace flexnnet
 {
@@ -24,12 +24,12 @@ namespace flexnnet
       rapidjson::Document netdoc;
       netdoc.Parse(_json.c_str());
 
-      Datum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
+      OldDatum network_input = BasicNeuralNetSerializer::parseNetworkInput(netdoc["network_input"].GetArray());
 
-      std::map<std::string, std::shared_ptr<NetworkLayer>> layers;
+      std::map<std::string, std::shared_ptr<OldNetworkLayer>> layers;
       layers = BasicNeuralNetSerializer::parseNetworkLayers(netdoc["network_layers"].GetArray());
 
-      std::vector<std::shared_ptr<NetworkLayer>> network_layers;
+      std::vector<std::shared_ptr<OldNetworkLayer>> network_layers;
       network_layers = BasicNeuralNetSerializer::parseNetworkTopology(netdoc["layer_topology"]
                                                                          .GetArray(), layers, network_input);
 

@@ -7,7 +7,6 @@
 
 #include "Array2D.h"
 #include "EuclideanDistLayer.h"
-#include "LayerSerializer.h"
 
 namespace flexnnet
 {
@@ -23,8 +22,12 @@ namespace flexnnet
       static const Parameters DEFAULT_PARAMS;
 
    public:
-      RadBas(size_t _sz, const std::string& _name, NetworkLayerType _type = Output, const Parameters& _params = DEFAULT_PARAMS);
+      RadBas(size_t _sz, const std::string& _name, const Parameters& _params = DEFAULT_PARAMS);
+      RadBas(const RadBas& _radbas);
       ~RadBas();
+
+      RadBas& operator=(const RadBas& _radbas);
+      std::shared_ptr<BasicLayer> clone(void) const override;
 
       void set_rescaled(bool _val);
       bool is_rescaled(void) const;
@@ -34,7 +37,11 @@ namespace flexnnet
 
    protected:
       const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
-      const Array2D<double>& calc_dAdN(const std::valarray<double>& _out);
+      const Array2D<double>& calc_dy_dnet(const std::valarray<double>& _out);
+
+
+   private:
+      void copy(const RadBas& _radbas);
 
    private:
       double lower_bound;
@@ -70,7 +77,7 @@ namespace flexnnet
 
    inline std::string RadBas::toJson(void) const
    {
-      return LayerSerializer<RadBas>::toJson(*this);
+      return "";
    }
 }
 

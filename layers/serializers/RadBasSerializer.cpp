@@ -39,18 +39,18 @@ namespace flexnnet
 
    template<> std::shared_ptr<RadBas> flexnnet::LayerSerializer<RadBas>::parse(const rapidjson::Value& _obj)
    {
-      // First get common network layer information
+      // First get common network basic_layer information
       BasicLayerInfo network_layer_info = BasicLayerSerializer::parseBasic(_obj);
 
       std::string type = _obj["transfer_function"]["type"].GetString();
       bool rescaled = _obj["transfer_function"]["parameters"]["rescaled"].GetBool();
 
-      NetworkLayer::NetworkLayerType network_layer_type = NetworkLayer::Output;
+      OldNetworkLayer::NetworkLayerType network_layer_type = OldNetworkLayer::Output;
       if (!network_layer_info.is_output_layer)
-         network_layer_type = NetworkLayer::Hidden;
+         network_layer_type = OldNetworkLayer::Hidden;
 
       std::shared_ptr<RadBas> layer_ptr = std::shared_ptr<RadBas>(new RadBas(network_layer_info.size, network_layer_info
-         .id, network_layer_type));
+         .id));
       layer_ptr->resize_input(network_layer_info.input_size);
 
       layer_ptr->set_rescaled(rescaled);
