@@ -9,7 +9,7 @@
 #include <NeuralNet.h>
 
 template<class _InType, class _OutType>
-class MockNN : public flexnnet::NeuralNet<_InType,_OutType>
+class MockNN : public flexnnet::NeuralNet<_InType, _OutType>
 {
 public:
    MockNN(const flexnnet::BaseNeuralNet& _nnet);
@@ -24,7 +24,7 @@ private:
 };
 
 template<class _InType, class _OutType>
-MockNN<_InType, _OutType>::MockNN(const flexnnet::BaseNeuralNet& _nnet) : flexnnet::NeuralNet<_InType,_OutType>(_nnet)
+MockNN<_InType, _OutType>::MockNN(const flexnnet::BaseNeuralNet& _nnet) : flexnnet::NeuralNet<_InType, _OutType>(_nnet)
 {
 
 }

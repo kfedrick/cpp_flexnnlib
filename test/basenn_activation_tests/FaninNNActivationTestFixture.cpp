@@ -7,12 +7,10 @@
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>
 
-#include "NetworkTopology.h"
-#include "BaseNeuralNet.h"
 
-using flexnnet::NetworkTopology;
-using flexnnet::BaseNeuralNet;
 using flexnnet::PureLin;
+using flexnnet::BaseNeuralNet;
+using flexnnet::NetworkLayerImpl;
 using flexnnet::LayerConnRecord;
 
 template<typename T> std::vector<typename FaninNNActivationTestFixture<T>::TestCase>
@@ -80,50 +78,53 @@ FaninNNActivationTestFixture<T>::read_samples(std::string _filepath)
    return test_samples;
 }
 
-template<typename T> void FaninNNActivationTestFixture<T>::create_nnet(const TestCase& _testcase)
+template<typename T> void FaninNNActivationTestFixture<T>::create_newnnet(const TestCase& _testcase)
 {
-   // Set network basic_layer names
-/*   std::string type_id = FaninNNActivationTestFixture<T>::get_typeid();
-   std::string layer_id = type_id;
-   std::transform(layer_id.begin(), layer_id.end(), layer_id.begin(), ::tolower);
-   std::set<std::string> layerid_set = {layer_id};*/
-
    // Create network topology
-   NetworkTopology nettopo(_testcase.input);
+   flexnnet::NeuralNetTopology topo;
 
-   nettopo.add_layer<T>("hidden1", _testcase.hlayer1_sz, false);
-   nettopo.add_external_input_field("hidden1", "input1");
+   std::shared_ptr<NetworkLayerImpl<T>> hl1_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.hlayer1_sz, "hidden1", T::DEFAULT_PARAMS, false));
 
-   nettopo.add_layer<T>("hidden2", _testcase.hlayer2_sz, false);
-   nettopo.add_external_input_field("hidden2", "input2");
+   std::shared_ptr<NetworkLayerImpl<T>> hl2_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.hlayer2_sz, "hidden2", T::DEFAULT_PARAMS, false));
 
    size_t total_sz = _testcase.hlayer1_sz + _testcase.hlayer2_sz;
-   nettopo.add_layer<PureLin>("output", total_sz, true);
+   std::shared_ptr<NetworkLayerImpl<PureLin>> ol_ptr = std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(total_sz, "output", PureLin::DEFAULT_PARAMS, true));
 
-   // Add input from both hidden basic_layer
-   nettopo.add_layer_connection("output", "hidden1", LayerConnRecord::Forward);
-   nettopo.add_layer_connection("output", "hidden2", LayerConnRecord::Forward);
+   hl1_ptr->add_external_input_field("input1", _testcase.hlayer1_input_sz);
+   hl2_ptr->add_external_input_field("input2", _testcase.hlayer2_input_sz);
+   ol_ptr->add_connection("activation", hl1_ptr, LayerConnRecord::Forward);
+   ol_ptr->add_connection("activation", hl2_ptr, LayerConnRecord::Forward);
+   hl1_ptr->add_connection("backprop", ol_ptr, LayerConnRecord::Forward);
+   hl2_ptr->add_connection("backprop", ol_ptr, LayerConnRecord::Forward);
 
-   // Create neural net
-   BaseNeuralNet nn(nettopo);
-   nnet = std::shared_ptr<BaseNeuralNet>(new BaseNeuralNet(nettopo));
+   topo.network_layers[ol_ptr->name()] = ol_ptr;
+   topo.network_layers[hl1_ptr->name()] = hl1_ptr;
+   topo.network_layers[hl2_ptr->name()] = hl2_ptr;
+
+   topo.network_output_layers.push_back(ol_ptr);
+
+   topo.ordered_layers.push_back(hl1_ptr);
+   topo.ordered_layers.push_back(hl2_ptr);
+   topo.ordered_layers.push_back(ol_ptr);
+
+   newnnet = std::make_shared<BaseNeuralNet>(BaseNeuralNet(topo));
 
    // Set network weights
-   nnet->set_weights(
-      {
-         {"hidden1", _testcase.hlayer1_weights},
-         {"hidden2", _testcase.hlayer2_weights},
-         {"output", _testcase.output_weights}
-      });
+   newnnet->set_weights("output", _testcase.output_weights);
+   newnnet->set_weights("hidden1", _testcase.hlayer1_weights);
+   newnnet->set_weights("hidden2", _testcase.hlayer2_weights);
 }
 
-TYPED_TEST_P (FaninNNActivationTestFixture, ReadTestCase)
+
+
+
+TYPED_TEST_P (FaninNNActivationTestFixture, NNActivationTest)
 {
    std::vector<typename FaninNNActivationTestFixture<TypeParam>::TestCase> test_samples;
 
    // Get parameterized type string
    std::string layer_type_id = FaninNNActivationTestFixture<TypeParam>::get_typeid();
-   std::cout << "\nTest Fan-in Hidden Units Network<" << layer_type_id << ">\n";
+   std::cout << "\nTest New Fan-in Hidden Units Network<" << layer_type_id << ">\n";
 
    // Get lower case parameterized type string
    std::string _id = layer_type_id;
@@ -132,32 +133,33 @@ TYPED_TEST_P (FaninNNActivationTestFixture, ReadTestCase)
    // Set file name containing test cases
    std::string sample_fname = "fanin_" + _id + "_nnet_test_cases.json";
 
-   std::vector<typename FaninNNActivationTestFixture<TypeParam>::TestCase> test_cases = FaninNNActivationTestFixture<
+   std::vector<typename FaninNNActivationTestFixture<TypeParam>::TestCase>
+      test_cases = FaninNNActivationTestFixture<
       TypeParam>::read_samples(sample_fname);
    for (auto test_case : test_cases)
    {
       // Create the neural network
-      this->create_nnet(test_case);
+      this->create_newnnet(test_case);
 
       // Print out the input vector
       std::cout << this->prettyPrintVector("input1", test_case.input.at("input1")).c_str() << "\n" << std::flush;
       std::cout << this->prettyPrintVector("input2", test_case.input.at("input2")).c_str() << "\n" << std::flush;
 
       // Activate the network
-      const std::valarray<double>& netout = this->nnet->activate(test_case.input);
+      const flexnnet::ValarrMap& netout = this->newnnet->activate(test_case.input);
 
       // Print out the network output
-      std::cout << this->prettyPrintVector("netout", netout).c_str() << "\n";
+      std::cout << this->prettyPrintVector("netout", netout.at("output")).c_str() << "\n" << std::flush;
 
       // Check layer output
-      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output"), netout, 0.000000001) << "ruh roh";
+      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output"), netout.at("output"), 0.000000001) << "ruh roh";
 
       std::cout << "----- Done with test " << _id.c_str() << " ----\n";
       std::flush(std::cout);
    }
 }
 
-/*REGISTER_TYPED_TEST_CASE_P
-(FaninNNActivationTestFixture, ReadTestCase);
+REGISTER_TYPED_TEST_CASE_P
+(FaninNNActivationTestFixture, NNActivationTest);
 INSTANTIATE_TYPED_TEST_CASE_P
-(My, FaninNNActivationTestFixture, MyTypes);*/
+(My, FaninNNActivationTestFixture, MyTypes);

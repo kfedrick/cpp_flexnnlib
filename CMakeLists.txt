@@ -44,12 +44,10 @@ add_executable(sandbox sandbox/doit.cpp)
 
 add_library(flexneuralnet
         include/flexnnet.h
-        network/include/SumSquaredError.h network/SumSquaredError.cpp
         util/include/Array.h
         util/include/NamedObject.h
         layers/include/BasicLayer.h layers/BasicLayer.cpp
         util/include/LayerWeights.h util/LayerWeights.cpp
-        util/include/LayerDerivatives.h util/LayerDerivatives.cpp
         util/include/LayerState.h
         layers/transfer_functions/include/PureLin.h layers/transfer_functions/PureLin.cpp
         layers/transfer_functions/include/LogSig.h layers/transfer_functions/LogSig.cpp
@@ -58,21 +56,12 @@ add_library(flexneuralnet
         layers/transfer_functions/include/SoftMax.h layers/transfer_functions/SoftMax.cpp
         util/include/Array2D.h
         util/include/Array3D.h
-        network/include/NetworkLayer.h network/NetworkLayer.cpp
-        network/include/NetworkOutput.h network/NetworkOutput.cpp
         network/include/ExternalInputRecord.h network/ExternalInputRecord.cpp
         layers/transfer_functions/include/NetSumLayer.h layers/transfer_functions/NetSumLayer.cpp
         layers/transfer_functions/include/EuclideanDistLayer.h layers/transfer_functions/EuclideanDistLayer.cpp
         trainers/include/TrainerConfig.h
         datasets/include/DataSet.h
-        network/include/NeuralNet.h
-        evaluators/include/BasicEvaluator.h
         trainers/include/TrainingRecord.h
-        trainers/include/BasicTrainer.h
-        network/include/BaseNeuralNet.h network/BaseNeuralNet.cpp
-        network/include/NetworkTopology.h network/NetworkTopology.cpp
-        network/include/LayerConnRecord.h network/LayerConnRecord.cpp
-        trainers/include/SuperviseTrainingAlgo.h trainers/SuperviseTrainingAlgo.cpp
         evaluators/include/Evaluator.h
         evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
@@ -84,14 +73,28 @@ add_library(flexneuralnet
         datasets/include/ValarrayMap.h datasets/ValarrayMap.cpp
         evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
         datasets/stream/ValarrayMapStream.cpp
-        trainers/include/BaseTraining.h trainers/BaseTraining.cpp
-        trainers/include/LearningRatePolicy.h
-        trainers/include/ConstantLearningRate.h
         trainers/include/DeltaBarDeltaLearningRate.h
-        trainers/include/TrainingReport.cpp
         trainers/include/TrainingReport.h
         util/include/URandArray2DInitializer.h
         util/include/NRandArray2DInitializer.h
+        util/LayerState.cpp
+        network/NetworkLayer.cpp
+        network/include/NetworkLayer.h
+        network/include/LayerConnRecord.h
+        network/include/NetworkLayerImpl.h
+        network/NeuralNetBuilder.cpp
+        network/include/NeuralNetBuilder.h
+        network/NeuralNetTopology.cpp
+        network/include/NeuralNetTopology.h
+        network/BaseNetworkLayer.cpp
+        network/include/BaseNetworkLayer.h
+        network/BaseNeuralNet.cpp
+        network/include/BaseNeuralNet.h
+        network/include/NeuralNet.h
+        trainers/include/BaseTrainer.h
+        trainers/include/SuperviseTrainingAlgo.h
+        trainers/include/LearningRatePolicy.h
+        trainers/include/ConstantLearningRate.h
         )
 
 target_include_directories(flexneuralnet PUBLIC

@@ -9,6 +9,7 @@
 #include <NeuralNet.h>
 #include <DataSet.h>
 #include <CommonTestFixtureFunctions.h>
+#include <ValarrayMap.h>
 
 using flexnnet::NeuralNet;
 

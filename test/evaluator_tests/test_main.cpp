@@ -6,6 +6,7 @@
 
 #include "flexnnet.h"
 #include "Evaluator.h"
+#include "NeuralNetTopology.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
 #include "CartesianCoord.h"
@@ -18,7 +19,7 @@
 #include "MockNN.h"
 
 using flexnnet::DataSet;
-using flexnnet::NetworkTopology;
+using flexnnet::NeuralNetTopology;
 using flexnnet::BaseNeuralNet;
 using flexnnet::NeuralNet;
 using flexnnet::Evaluator;
@@ -39,7 +40,7 @@ TEST(TestEvaluator, Constructor)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
 
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 }
@@ -61,7 +62,7 @@ TEST(TestEvaluator, OrderedSingleSampling)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
 
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
@@ -87,7 +88,7 @@ TEST(TestEvaluator, RandomizedSingleSampling)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
 
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
@@ -114,7 +115,7 @@ TEST(TestEvaluator, Randomized2Sampling)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
 
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
@@ -141,7 +142,7 @@ TEST(TestEvaluator, Randomized3SubSampling)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
 
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
@@ -156,7 +157,7 @@ TEST(TestEvaluator, CartesianCoord)
    std::cout << "***** Test Derived Evaluator CartesianCoord\n" << std::flush;
 
    DataSet<CartesianCoord, ValarrayMap> dataset;
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    NeuralNet<CartesianCoord, ValarrayMap> nnet(basenet);
    Evaluator<CartesianCoord, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
@@ -206,19 +207,21 @@ TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
 
    tst = {{"output",{-1, 0, 0.5}}};
    tgt = {{"output",{-1.03, 0.1, 0.59}}};
-   tgt_egradient = {{"output",{0.0003, 0.00333333333, 0.0027}}};
+   tgt_egradient = {{"output",{0.03, -0.1, -0.09}}};
 
    rmse_fit.clear();
    egradient = rmse_fit.calc_error_gradient(tgt,tst);
 
    std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient.at("output"), 9).c_str() << "\n";
+   std::cout << CommonTestFixtureFunctions::prettyPrintVector("tgt egradient", tgt_egradient.at("output"), 9).c_str() << "\n";
 
    // Check basic_layer output
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient["output"], egradient["output"], 0.000000001) << "ruh roh";
 
    double fitval = rmse_fit.calc_fitness();
    std::cout << "RMSE = " << std::setprecision(9) << fitval << "\n" << std::flush;
-   EXPECT_NEAR(fitval, 0.0795822426, 0.000000001);
+   //EXPECT_NEAR(fitval, 0.0795822426, 0.000000001);
+   EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSFitMultiField)
@@ -234,7 +237,7 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
 
    tst = {{"output1",{-1}}, {"output2",{0}}, {"output3",{0.5}}};
    tgt = {{"output1",{-1.03}}, {"output2",{0.1}}, {"output3",{0.59}}};
-   tgt_egradient = {{"output1",{0.0003}}, {"output2",{0.00333333333}}, {"output3",{0.0027}}};
+   tgt_egradient = {{"output1",{0.03}}, {"output2",{-0.1}}, {"output3",{-0.09}}};
 
    rmse_fit.clear();
    egradient = rmse_fit.calc_error_gradient(tgt,tst);
@@ -249,7 +252,7 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient["output3"], egradient["output3"], 0.000000001) << "ruh roh";
 
    double fitval = rmse_fit.calc_fitness();
-   EXPECT_NEAR(fitval, 0.0795822426, 0.000000001);
+   EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSFitMultiSample)
@@ -265,36 +268,30 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
 
    tst1 = {{"output",{-1, 0, 0.5}}};
    tgt1 = {{"output",{-1.03, 0.1, 0.59}}};
-   tgt_egradient1 = {{"output",{0.0003, 0.00333333333, 0.0027}}};
+   tgt_egradient1 = {{"output",{0.03, -0.1, -0.09}}};
    tst2 = {{"output",{-0.3, -1.3, 0.875}}};
    tgt2 = {{"output",{-0.63, -0.1, 0.59}}};
-   tgt_egradient2 = {{"output",{0.0363, 0.48, 0.027075}}};
+   tgt_egradient2 = {{"output",{0.33, -1.2, 0.285}}};
 
    rmse_fit.clear();
    egradient1 = rmse_fit.calc_error_gradient(tgt1,tst1);
-   std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient1.at("output"), 9).c_str() << "\n";
+   std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient1", egradient1.at("output"), 9).c_str() << "\n";
 
    // Check basic_layer output
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient1["output"], egradient1["output"], 0.000000001) << "ruh roh";
 
    double fitval1 = rmse_fit.calc_fitness();
    std::cout << "RMSE1 = " << std::setprecision(9) << fitval1 << "\n" << std::flush;
-   EXPECT_NEAR(fitval1, 0.0795822426, 0.000000001);
+   EXPECT_NEAR(fitval1, 0.097467943448, 0.000000001);
 
    egradient2 = rmse_fit.calc_error_gradient(tgt2,tst2);
-   std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient2.at("output"), 9).c_str() << "\n";
+   std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient2", egradient2.at("output"), 9).c_str() << "\n";
+
+   EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient2["output"], egradient2["output"], 0.000000001) << "ruh roh";
 
    double fitval2 = rmse_fit.calc_fitness();
    std::cout << "RMSE2 = " << std::setprecision(9) << fitval2 << "\n" << std::flush;
-   EXPECT_NEAR(fitval2, 0.524265359, 0.000000001);
-
-   rmse_fit.clear();
-   egradient2 = rmse_fit.calc_error_gradient(tgt2,tst2);
-   std::cout << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient2.at("output"), 9).c_str() << "\n";
-
-   double fitval3 = rmse_fit.calc_fitness();
-   std::cout << "RMSE3 = " << std::setprecision(10) << fitval3 << "\n" << std::flush;
-   EXPECT_NEAR(fitval3, 0.7371397425, 0.000000001);
+   EXPECT_NEAR(fitval2, 0.6420913097, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSEEvaluatorTest)
@@ -313,18 +310,18 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst2, tgt2));
 
    RMSEFitnessFunc<ValarrayMap> rmse_fit;
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    MockNN<ValarrayMap,ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, MockNN, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
-   eval.set_subsample_fraction(0.5);
+   eval.set_subsample_fraction(1.0);
 
    double rmse, errstd;
    std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<ValarrayMap,ValarrayMap>&>(nnet), dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
-   EXPECT_NEAR(rmse, 0.07958224258, 0.000000001) << "Bad mean fitness score.\n";
+   EXPECT_NEAR(rmse, 0.64209131, 0.000000001) << "Bad mean fitness score.\n";
    EXPECT_NEAR(errstd, 0, 0.000000001) << "Bad fitness score standard dev.\n";
 }
 
@@ -350,11 +347,11 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst3, tgt3));
 
    RMSEFitnessFunc<ValarrayMap> rmse_fit;
-   BaseNeuralNet basenet(NetworkTopology({}));
+   BaseNeuralNet basenet;
    MockNN<ValarrayMap,ValarrayMap> nnet(basenet);
    Evaluator<ValarrayMap, ValarrayMap, MockNN, DataSet, RMSEFitnessFunc> eval;
 
-   eval.set_sampling_count(17);
+   eval.set_sampling_count(1000);
    eval.randomize_order(true);
    eval.set_subsample_fraction(0.67);
 
@@ -362,6 +359,8 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<ValarrayMap,ValarrayMap>&>(nnet), dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
+   EXPECT_NEAR(rmse, 0.573, 0.01) << "Bad mean fitness score.\n";
+   EXPECT_NEAR(errstd, 0.16, 0.01) << "Bad fitness score standard dev.\n";
 }
 
 int main(int argc, char** argv)

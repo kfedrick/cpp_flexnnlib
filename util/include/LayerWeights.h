@@ -175,7 +175,7 @@ namespace flexnnet
 
    inline void LayerWeights::set(const Array2D<double>& _weights)
    {
-      weights.set(_weights);
+      weights.assign(_weights);
    }
 
    inline void LayerWeights::set(const std::vector<std::vector<double>>& _lweights)

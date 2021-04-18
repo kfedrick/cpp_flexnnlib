@@ -36,8 +36,9 @@ namespace flexnnet
       std::string toJson(void) const;
 
    protected:
-      const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
-      const Array2D<double>& calc_dy_dnet(const std::valarray<double>& _out);
+      void calc_layer_output(const std::valarray<double>& _netin, std::valarray<double>& _layerval) override;
+      void calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet) override;
+      const TanSig::Parameters& get_params(void) const;
 
    private:
       void copy(const TanSig& _tansig);
@@ -49,6 +50,12 @@ namespace flexnnet
    inline void TanSig::set_params(const Parameters& _val)
    {
       params = _val;
+   }
+
+   inline
+   const TanSig::Parameters& TanSig::get_params(void) const
+   {
+      return params;
    }
 
    inline void TanSig::set_gain(double _val)

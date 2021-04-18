@@ -26,19 +26,19 @@ namespace flexnnet
        * Calculate the net input value based on the raw input vector and weights specified in the
        * argument list and writes it into the _netin argument.
        */
-      const std::valarray<double>& calc_netin(const std::valarray<double>& _rawin);
+      void calc_netin(const std::valarray<double>& _rawinv, std::valarray<double>& _netin);
 
       /**
        * Calculate the derivative of the net input with respect to the weights based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dnet_dw(const std::valarray<double>& _rawin);
+      void calc_dnet_dw(const LayerState& _lstate, Array2D<double>& _dnetdw);
 
       /**
        * Calculate the derivative of the net input with respect to the raw input based on the raw
        * input vector and weights specified in the argument list and writes it into the _dNdW argument.
        */
-      const Array2D<double>& calc_dnet_dx(const std::valarray<double>& _rawin);
+      void calc_dnet_dx(const LayerState& _lstate, Array2D<double>& _dnetdx);
 
    private:
       std::valarray<double> squared_euclidean_dist;

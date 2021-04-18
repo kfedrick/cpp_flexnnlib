@@ -246,14 +246,14 @@ namespace flexnnet
        * Accumulate the error gradients so we can use them later to calculate
        * the learning rate adjustments.
        */
-      const std::map<std::string, std::shared_ptr<NetworkLayer>> network_layers = nnet.get_layers();
+      const std::map<std::string, std::shared_ptr<NetworkLayer>> network_layers = basennet.get_layers();
       for (auto it = cumulative_dE_dw.begin(); it != cumulative_dE_dw.end(); it++)
       {
          std::string id = it->first;
          const NetworkLayer& layer = *network_layers.at(id);
 
          // TODO - fix this, I need dE_dw
-         const Array2D<double>& dE_dw = layer.dE_dw();
+         const Array2D<double>& dE_dw = layer.dEdw();
 
          cumulative_dE_dw[id] += dE_dw;
       }

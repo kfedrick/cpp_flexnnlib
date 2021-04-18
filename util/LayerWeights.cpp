@@ -23,6 +23,8 @@ LayerWeights::LayerWeights(const std::vector<std::vector<double>>& _lweights)
 
 LayerWeights::LayerWeights(const Array2D<double>& _lweights)
 {
+   Array2D<double>::Dimensions dim = _lweights.size();
+   resize(dim.rows, dim.cols-1);
    set(_lweights);
 }
 

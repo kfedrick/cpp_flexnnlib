@@ -10,6 +10,7 @@
 #include "CommonTestFixtureFunctions.h"
 #include "BaseNNActivationTestFixture.h"
 
+
 #include "flexnnet.h"
 #include "PureLin.h"
 #include "TanSig.h"
@@ -18,6 +19,7 @@
 #include "LogSig.h"
 
 #include "BaseNeuralNet.h"
+#include "NetworkLayerImpl.h"
 
 template<typename T>
 class FaninNNActivationTestFixture : public CommonTestFixtureFunctions, public BaseNNActivationTestFixture<T>, public ::testing::Test
@@ -47,8 +49,10 @@ public:
 
    std::vector<TestCase> read_samples(std::string _fpath);
    void create_nnet(const TestCase& _testcase);
+   void create_newnnet(const TestCase& _testcase);
 
    std::shared_ptr<flexnnet::BaseNeuralNet> nnet;
+   std::shared_ptr<flexnnet::BaseNeuralNet> newnnet;
 };
 TYPED_TEST_CASE_P (FaninNNActivationTestFixture);
 

@@ -11,11 +11,9 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include "TestLayer.h"
-#include "OldNetworkLayer.h"
 
 using flexnnet::Array2D;
 using flexnnet::OldDatum;
-using flexnnet::OldNetworkLayer;
 using flexnnet::BasicNeuralNet;
 using flexnnet::NNetIO_Typ;
 
