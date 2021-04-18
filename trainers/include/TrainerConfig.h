@@ -21,7 +21,7 @@ namespace flexnnet
       static constexpr double DEFAULT_ERROR_GOAL = 0.0;
       static constexpr size_t DEFAULT_MAX_EPOCHS = 10;
       static constexpr double DEFAULT_FAILBACK_PERF_DELTA = 0.05;
-      static constexpr size_t DEFAULT_MAX_VALIDATION_FAIL = 10;
+      static constexpr size_t DEFAULT_MAX_FAILBACK_COUNT = 5;
       static constexpr size_t DEFAULT_BATCH_MODE = 0;
       static constexpr size_t DEFAULT_REPORT_FREQ = 1;
       static constexpr size_t DEFAULT_DISPLAY_FREQ = 1;
@@ -63,7 +63,7 @@ namespace flexnnet
        *
        * @param _count
        */
-      void set_max_validation_failures(size_t _count);
+      void set_max_failbacks(size_t _count);
 
       /**
        * Set limit for training error increase from one epoch to the next.
@@ -126,6 +126,12 @@ namespace flexnnet
        */
       void set_saved_nnet_limit(size_t _limit);
 
+      /**
+       * Set flag to randomize presentation order of training set.
+       * @param _flag
+       */
+      void set_randomize_training_order(bool _flag);
+
       /* ****************************************************
        *    Public getter methods
        */
@@ -136,10 +142,11 @@ namespace flexnnet
       double error_increase_limit(void) const;
       bool train_biases(const std::string& _id) const;
       size_t batch_mode(void) const;
-      size_t max_validation_failures(void) const;
+      size_t max_failbacks(void) const;
       size_t report_frequency(void) const;
       size_t display_frequency(void) const;
       size_t saved_nnet_limit(void) const;
+      bool randomize_training_order(void) const;
 
    private:
 
@@ -148,10 +155,15 @@ namespace flexnnet
       double min_performance_error{DEFAULT_ERROR_GOAL};
       double failback_performance_delta{DEFAULT_FAILBACK_PERF_DELTA};
       size_t training_batch_mode{DEFAULT_BATCH_MODE};
-      size_t max_allowed_validation_failures{DEFAULT_MAX_VALIDATION_FAIL};
+
+      // Maximum consecutive training epoch fail-backs allowed
+      size_t max_failback_count{DEFAULT_MAX_FAILBACK_COUNT};
+
       size_t training_report_frequency{DEFAULT_REPORT_FREQ};
       size_t training_display_frequency{DEFAULT_DISPLAY_FREQ};
       size_t max_saved_nnet{DEFAULT_SAVED_NNET_LIMIT};
+
+      bool random_training_order{true};
 
       std::map<std::string, bool> train_biases_flags;
    };
@@ -212,18 +224,18 @@ namespace flexnnet
       failback_performance_delta = _limit;
    }
 
-   inline void TrainerConfig::set_max_validation_failures(size_t _count)
+   inline void TrainerConfig::set_max_failbacks(size_t _count)
    {
       static std::ostringstream err_str;
 
       if (_count < 1)
       {
          err_str.clear();
-         err_str << "Error : set_max_validation_failures - min count must be > 0\n";
+         err_str << "Error : set_max_failbacks - min count must be > 0\n";
          throw std::invalid_argument(err_str.str());
       }
 
-      max_allowed_validation_failures = _count;
+      max_failback_count = _count;
    }
 
    inline
@@ -254,7 +266,7 @@ namespace flexnnet
       if (_limit < 1)
       {
          err_str.clear();
-         err_str << "Error : set_max_validation_failures - min count must be > 0\n";
+         err_str << "Error : set_max_failbacks - min count must be > 0\n";
          throw std::invalid_argument(err_str.str());
       }
 
@@ -291,9 +303,9 @@ namespace flexnnet
       return training_batch_mode;
    }
 
-   inline size_t TrainerConfig::max_validation_failures(void) const
+   inline size_t TrainerConfig::max_failbacks(void) const
    {
-      return max_allowed_validation_failures;
+      return max_failback_count;
    }
 
    inline size_t TrainerConfig::report_frequency(void) const
@@ -310,6 +322,12 @@ namespace flexnnet
    {
       return max_saved_nnet;
    }
+
+   inline bool TrainerConfig::randomize_training_order(void) const
+   {
+      return random_training_order;
+   }
+
 }
 
 #endif //FLEX_NEURALNET_TRAINERCONFIG_H_

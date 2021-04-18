@@ -1,5 +1,5 @@
 //
-// Created by kfedrick on 2/21/21.
+// Created by kfedrick on 4/9/21.
 //
 
 #ifndef FLEX_NEURALNET_LAYERCONNRECORD_H_
@@ -14,6 +14,7 @@ namespace flexnnet
 
    class LayerConnRecord
    {
+
    public:
       enum ConnectionType
       {
@@ -25,10 +26,17 @@ namespace flexnnet
       LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type);
       ~LayerConnRecord();
 
-      NetworkLayer& layer();
-      const NetworkLayer& layer() const;
-      bool is_recurrent() const;
-      ConnectionType get_connection_type() const;
+      NetworkLayer&
+      layer();
+
+      const NetworkLayer&
+      layer() const;
+
+      bool
+      is_recurrent() const;
+
+      ConnectionType
+      get_connection_type() const;
 
    private:
       std::shared_ptr<NetworkLayer> from_layer;
@@ -36,23 +44,41 @@ namespace flexnnet
    };
 
    inline
-   NetworkLayer& LayerConnRecord::layer()
+   LayerConnRecord::LayerConnRecord()
+   {}
+
+   inline
+   LayerConnRecord::LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type)
+      : from_layer(_from_layer), connection_type(_type)
+   {
+   }
+
+   inline
+   LayerConnRecord::~LayerConnRecord()
+   {}
+
+   inline
+   NetworkLayer&
+   LayerConnRecord::layer()
    {
       return *from_layer;
    }
 
    inline
-   const NetworkLayer& LayerConnRecord::layer() const
+   const NetworkLayer&
+   LayerConnRecord::layer() const
    {
       return *from_layer;
    }
 
-   inline bool LayerConnRecord::is_recurrent() const
+   inline bool
+   LayerConnRecord::is_recurrent() const
    {
       return !(connection_type == Forward);
    }
 
-   inline LayerConnRecord::ConnectionType LayerConnRecord::get_connection_type() const
+   inline LayerConnRecord::ConnectionType
+   LayerConnRecord::get_connection_type() const
    {
       return connection_type;
    }

@@ -5,11 +5,10 @@
  *      Author: kfedrick
  */
 
-#ifndef FLEX_NEURALNET_LRATE_POLICY_H_
-#define FLEX_NEURALNET_LRATE_POLICY_H_
+#ifndef FLEX_NEURALNET_NEWLRATE_POLICY_H_
+#define FLEX_NEURALNET_NEWLRATE_POLICY_H_
 
 #include "Array2D.h"
-#include "BaseNeuralNet.h"
 
 #include <cstddef>
 #include <iostream>
@@ -73,25 +72,25 @@ namespace flexnnet
       alloc_storage(const BaseNeuralNet& _nnet);
 
    protected:
-      const BaseNeuralNet& nnet;
+      const BaseNeuralNet& basennet;
       std::map<std::string, Array2D<double>> layer_weight_learning_rates_map;
 
 
    };
 
-   inline LearningRatePolicy::LearningRatePolicy() : nnet(BaseNeuralNet({}))
+   inline LearningRatePolicy::LearningRatePolicy() : basennet(BaseNeuralNet())
    {
    }
 
    inline LearningRatePolicy::LearningRatePolicy(const
-                                                 BaseNeuralNet& _nnet) : nnet(_nnet)
+                                                 BaseNeuralNet& _nnet) : basennet(_nnet)
    {
       alloc_storage(_nnet);
    }
 
    inline
    LearningRatePolicy::LearningRatePolicy(
-      const LearningRatePolicy& _nnLRPolicy) : nnet(_nnLRPolicy.nnet)
+      const LearningRatePolicy& _nnLRPolicy) : basennet(_nnLRPolicy.basennet)
    {
       copy(_nnLRPolicy);
    }

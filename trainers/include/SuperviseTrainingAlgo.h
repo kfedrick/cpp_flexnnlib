@@ -2,8 +2,8 @@
 // Created by kfedrick on 3/2/21.
 //
 
-#ifndef FLEX_NEURALNET_SUPERVISEDTRAININGALGO_H_
-#define FLEX_NEURALNET_SUPERVISEDTRAININGALGO_H_
+#ifndef FLEX_NEURALNET_NEWSUPERVISEDTRAININGALGO_H_
+#define FLEX_NEURALNET_NEWSUPERVISEDTRAININGALGO_H_
 
 #include <memory>
 #include <iostream>
@@ -12,34 +12,32 @@
 #include "DataSet.h"
 #include "TrainingRecord.h"
 #include "TrainingReport.h"
-#include "BaseTraining.h"
+#include "BaseTrainer.h"
 
 namespace flexnnet
 {
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-         template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-
-   class SuperviseTrainingAlgo : public BaseTraining, public _LRPolicy
+         template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   class SuperviseTrainingAlgo : public BaseTrainer<InTyp, OutTyp, NN>, public LRPolicy
    {
-      using _NNTyp = _NN<_InTyp,_OutTyp>;
-      using _DatasetTyp = _DataSet<_InTyp,_OutTyp>;
-      using _Exemplar = std::pair<_InTyp,_OutTyp>;
+      using DatasetTyp = Dataset<InTyp, OutTyp>;
+      using ExemplarTyp = std::pair<InTyp, OutTyp>;
 
    public:
-      SuperviseTrainingAlgo(_NNTyp& _nnet) : _LRPolicy(_nnet), nnet(_nnet)
+      SuperviseTrainingAlgo(NN<InTyp, OutTyp>& _nnet) : BaseTrainer<InTyp, OutTyp, NN>(_nnet), LRPolicy(_nnet)
       {
-         std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = nnet.get_layers();
+         const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
          for (auto it : layers)
          {
             std::string id = it.first;
 
             // Set to train layer biases by default.
-            set_train_biases(id, true);
+            TrainerConfig::set_train_biases(id, true);
          }
       }
 
@@ -49,53 +47,51 @@ namespace flexnnet
        * the best set of trained networks. Calculate the training
        * statistics across all training runs.
        *
-       * @param _nnet
        * @param _trnset
        */
-      void train(const _DatasetTyp& _trnset);
+      void train(const DatasetTyp& _trnset);
 
    protected:
       /**
        * Train the network once starting with weights initialized as
        * specified by the current policy.
        *
-       * @param _nnet
        * @param _trnset
        */
-      TrainingRecord train_run(const _DatasetTyp& _trnset);
+      TrainingRecord train_run(const DatasetTyp& _trnset);
 
       /**
        * Train the network using all samples in the specified training
        * set.
        *
        * @param _epoch
-       * @param _nnet
        * @param _trnset
        */
-      void train_epoch(size_t _epoch, const _DatasetTyp& _trnset);
+      void train_epoch(size_t _epoch, const DatasetTyp& _trnset);
 
       /**
        * Present a single sample from the training set to the network and
        * calculate the network weight updates.
        *
        * @param _epoch
-       * @param _nnet
        * @param _sample
        */
-      void train_sample(const _Exemplar& _sample);
+      void train_sample(const ExemplarTyp& _sample);
       
-      virtual void calc_weight_updates(const ValarrMap _egradient, BaseNeuralNet& _nnet) override;
+      virtual void calc_weight_updates(const ValarrMap _egradient) override;
+
+      double update_performance_traces(unsigned int _epoch, double _trnperf, TrainingRecord& _trec);
+
+      void failback();
 
    private:
-      void initialize();
+      void alloc();
 
    private:
-      _NNTyp& nnet;
+      Eval<InTyp, OutTyp, NN, Dataset, FitFunc> evaluator;
 
-      _Eval<_InTyp, _OutTyp, _NN, _DataSet, _FitnessFunc> evaluator;
-
-      _DatasetTyp validation_dataset;
-      _DatasetTyp test_dataset;
+      DatasetTyp validation_dataset;
+      DatasetTyp test_dataset;
 
       std::map<std::string, Array2D<double>> weight_updates;
 
@@ -103,110 +99,98 @@ namespace flexnnet
    };
 
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   void SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc, _LRPolicy>::train(const _DatasetTyp& _trnset)
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train(const DatasetTyp& _trnset)
    {
-      double trn_perf, vld_perf, tst_perf;
-      double trn_stdev, vld_stdev, tst_stdev;
+      double trn_perf, trn_stdev;
+      double perf;
 
-      initialize();
+      alloc();
 
-      size_t no_runs = training_runs();
+      size_t no_runs = TrainerConfig::training_runs();
 
-      save_nnet_weights("initial_weights", nnet);
+      // If no randomization of training order is set then
+      // make certain training set order is normalized now.
+      if (!this->randomize_training_order())
+         _trnset.normalize_order();
 
       for (size_t runndx = 0; runndx < no_runs; runndx++)
       {
          training_record.clear();
 
          if (runndx > 0)
-            nnet.initialize_weights();
+            this->nnet.initialize_weights();
+
+         this->save_network_weights("initial_weights");
 
          /*
-          * Evaluate the initial performance
+          * Evaluate and save the performance for the initial network
           */
-         double& perf = (validation_dataset.size() > 0) ? vld_perf : trn_perf;
-
-         std::tie(trn_perf,trn_stdev) = evaluator.evaluate(nnet, _trnset);
-         training_record.training_set_trace.push_back({.epoch=0, .performance=trn_perf});
-         // Record the performance on the validation set for this epoch
-
-         if (validation_dataset.size() > 0)
-         {
-            std::tie(vld_perf,vld_stdev) = evaluator.evaluate(nnet, validation_dataset);
-            training_record.validation_set_trace.push_back({.epoch=0, .performance=vld_perf});
-         }
-
-         // Record the performance on the test set for this epoch
-         if (test_dataset.size() > 0)
-         {
-            std::tie(tst_perf,tst_stdev) = evaluator.evaluate(nnet, test_dataset);
-            training_record.test_set_trace.push_back({.epoch=0, .performance=tst_perf});
-         }
+         std::tie(trn_perf,trn_stdev) = evaluator.evaluate(this->nnet, _trnset);
+         perf = update_performance_traces(0, trn_perf, training_record);
 
          training_record.best_epoch = 0;
-         training_record.best_performance = trn_perf;
-         save_nnet_weights("best_epoch", nnet);
+         training_record.best_performance = perf;
+         this->save_network_weights("best_epoch");
 
+         // *** train the network
          train_run(_trnset);
 
-         // Save if one of best networks
-         training_record.network_weights = nnet.get_weights();
-         save_best_weights(training_record, nnet);
+         const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
+         for (auto& it : layers)
+            training_record.network_weights[it.first] = it.second->weights();
+
+         this->save_training_record(training_record);
 
          // TODO - update aggregate training statistics
       }
    }
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   TrainingRecord SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc, _LRPolicy>::train_run(const _DatasetTyp& _trnset)
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   TrainingRecord SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_run(const DatasetTyp& _trnset)
    {
-      double trn_perf, vld_perf, tst_perf;
-      double trn_stdev, vld_stdev, tst_stdev;
+      double trn_perf, trn_stdev;
       double trn_perf_improvement;
+      double perf;
 
-      _LRPolicy::reset();
+      unsigned int failback_count = 0;
 
-      // Set reference to the performance value to use for best performance as:
-      //    validation set performance if one is available; training set
-      //    performance otherwise.
-      //
-      double& perf = (validation_dataset.size() > 0) ? vld_perf : trn_perf;
+      LRPolicy::reset();
 
       // Previous performance value - used for failback testing
       double prev_trn_perf = std::numeric_limits<double>::max();
-      double failback_limit = error_increase_limit();
+      double failback_limit = TrainerConfig::error_increase_limit();
 
       // Init best performance assuming we are trying to minimize error
       //training_record.best_performance = std::numeric_limits<double>::max();
       training_record.stop_signal = TrainingStopSignal::UNKNOWN;
 
       // Iterate through training epochs
-      size_t n_epochs = max_epochs();
+      size_t n_epochs = TrainerConfig::max_epochs();
       size_t epoch = 0;
       for (epoch = 0; epoch < n_epochs; epoch++)
       {
          // Save the network weights in case we need to fail back
-         save_nnet_weights("failback", nnet);
+         this->save_network_weights("failback");
 
          // Call function to iterate over training samples and update
          // the network weights.
          train_epoch(epoch, _trnset);
 
          // Evaluate the performance of the updated network
-         std::tie(trn_perf,trn_stdev) = evaluator.evaluate(nnet, _trnset);
+         std::tie(trn_perf,trn_stdev) = evaluator.evaluate(this->nnet, _trnset);
 
          /*
           * If the performance on the training set worsens by an
@@ -217,73 +201,68 @@ namespace flexnnet
          trn_perf_improvement = (prev_trn_perf > 0) ? (trn_perf - prev_trn_perf) / prev_trn_perf : (trn_perf - 1e-9) / 1e-9;
          if (trn_perf_improvement > failback_limit)
          {
-            restore_nnet_weights("failback", nnet);
-            _LRPolicy::reduce_learning_rate();
+            failback();
             epoch--;
+
+            failback_count++;
+            if (failback_count > this->max_failbacks())
+            {
+               training_record.stop_signal = TrainingStopSignal::MAX_FAILBACK_REACHED;
+               return training_record;
+            }
             continue;
          }
-
-         // Record the performance on the training set for this epoch
-         if (epoch < 10 || epoch % report_frequency() == 0 || epoch == n_epochs-1)
-            training_record.training_set_trace.push_back({.epoch=epoch+1, .performance=trn_perf});
-
-         // Record the performance on the validation set for this epoch
-         if (validation_dataset.size() > 0)
+         else
          {
-            std::tie(vld_perf,vld_stdev) = evaluator.evaluate(nnet, validation_dataset);
-            if (epoch < 10 || epoch % report_frequency() == 0 || epoch == n_epochs-1)
-               training_record.validation_set_trace.push_back({.epoch=epoch+1, .performance=vld_perf});
+            failback_count = 0;
+            LRPolicy::apply_learning_rate_adjustments();
          }
 
-         // Record the performance on the test set for this epoch
-         if (test_dataset.size() > 0)
-         {
-            std::tie(tst_perf,tst_stdev) = evaluator.evaluate(nnet, test_dataset);
-            if (epoch < 10 || epoch % report_frequency() == 0 || epoch == n_epochs-1)
-               training_record.test_set_trace.push_back({.epoch=epoch+1, .performance=tst_perf});
-         }
+         // Update performance history in training record
+         if (epoch < 10 || epoch % TrainerConfig::report_frequency() == 0 || epoch == n_epochs-1)
+            perf = update_performance_traces(epoch+1, trn_perf, training_record);
 
          // Call function to save network weights for the best epoch.
          if (perf < training_record.best_performance)
          {
             training_record.best_epoch = epoch+1;
             training_record.best_performance = perf;
-            if (perf < error_goal())
+            if (perf < TrainerConfig::error_goal())
                training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
 
-            save_nnet_weights("best_epoch", nnet);
+            this->save_network_weights("best_epoch");
          }
 
          // If we've reached the target error goal then exit.
-         if (perf < error_goal())
+         if (perf < TrainerConfig::error_goal())
          {
             training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
             break;
          }
-
-         // Apply adjustments to the learning rates
-         _LRPolicy::apply_learning_rate_adjustments();
       }
 
       if (training_record.stop_signal == TrainingStopSignal::UNKNOWN)
          training_record.stop_signal = TrainingStopSignal::MAX_EPOCHS_REACHED;
 
       // Restore the best network weights.
-      restore_nnet_weights("best_epoch", nnet);
+      this->restore_network_weights("best_epoch");
 
       return training_record;
    }
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   void SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc, _LRPolicy>::train_epoch(size_t _epoch, const _DatasetTyp& _trnset)
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_epoch(size_t _epoch, const DatasetTyp& _trnset)
    {
       bool pending_updates = false;
+
+      if (this->randomize_training_order())
+         _trnset.randomize_order();
 
       // Iterate through all samples in the training set_weights
       size_t sample_ndx = 0;
@@ -293,9 +272,9 @@ namespace flexnnet
          pending_updates = true;
 
          // If training in online or mini-batch mode, update now.
-         if (batch_mode() > 0 && sample_ndx % batch_mode() == 0)
+         if (TrainerConfig::batch_mode() > 0 && sample_ndx % TrainerConfig::batch_mode() == 0)
          {
-            adjust_network_weights(nnet);
+            this->adjust_network_weights();
             pending_updates = false;
          }
 
@@ -304,84 +283,81 @@ namespace flexnnet
 
       // If training in batch mode or we there are updates pending from
       // an undersized mini-batch then update weights now
-      if (batch_mode() == 0 || pending_updates)
-         adjust_network_weights(nnet);
+      if (TrainerConfig::batch_mode() == 0 || pending_updates)
+         this->adjust_network_weights();
    }
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   void SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc, _LRPolicy>::train_sample(const _Exemplar& _exemplar)
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_sample(const ExemplarTyp& _exemplar)
    {
-      const _OutTyp& nn_out = nnet.activate(_exemplar.first);
+      const OutTyp& nn_out = this->nnet.activate(_exemplar.first);
 
       const std::map<std::string, std::valarray<double>>& nnoutv_map = nn_out.value_map();
       const std::map<std::string, std::valarray<double>>& targetv_map = _exemplar.second.value_map();
 
       ValarrMap gradient = evaluator.calc_error_gradient(targetv_map, nnoutv_map);
-
-      calc_weight_updates(gradient, nnet);
-      _LRPolicy::calc_learning_rate_adjustment(0);
+      this->calc_weight_updates(gradient);
+      LRPolicy::calc_learning_rate_adjustment(0);
    }
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   void SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc, _LRPolicy>::
-   calc_weight_updates(const ValarrMap _egradient, BaseNeuralNet& _nnet)
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::
+   calc_weight_updates(const ValarrMap _egradient)
    {
-      _nnet.backprop(_egradient);
+      this->nnet.backprop(_egradient);
 
-      std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
       for (auto it : layers)
       {
          std::string id = it.first;
-         Array2D<double> lr = _LRPolicy::get_learning_rates(id);
+         Array2D<double> lr = LRPolicy::get_learning_rates(id);
 
-         const LayerState& state = it.second->layer_state();
-         const std::valarray<double>& netin_errorv = state.netin_errorv;
-         const Array2D<double> dE_dw = it.second->dE_dw();
+         const Array2D<double> dE_dw = it.second->dEdw();
 
          const Array2D<double>::Dimensions dims = weight_updates[id].size();
 
          // If this layer doesn't train biases, stop before the last column
-         unsigned int last_col = (train_biases(id)) ? dims.cols : dims.cols-1;
+         unsigned int last_col = (TrainerConfig::train_biases(id)) ? dims.cols : dims.cols-1;
 
          weight_updates[id] = 0;
          for (unsigned int row = 0; row < dims.rows; row++)
             for (unsigned int col = 0; col < last_col; col++)
-               weight_updates[id].at(row, col) = -lr.at(row,col) * dE_dw.at(row,col);
-      }
-      accumulate_weight_updates(weight_updates);
+               weight_updates[id].at(row, col) = -lr.at(row, col) * dE_dw.at(row, col);
 
+         this->accumulate_weight_updates(id, weight_updates[id]);
+      }
    }
 
-   template<class _InTyp, class _OutTyp,
-      template<class, class> class _NN,
-      template<class, class> class _DataSet,
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class _Eval,
-      template<class> class _FitnessFunc,
-      class _LRPolicy>
-   void SuperviseTrainingAlgo<_InTyp, _OutTyp, _NN, _DataSet, _Eval, _FitnessFunc,_LRPolicy>::initialize()
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::alloc()
    {
-      BaseTraining::initialize(nnet);
+      BaseTrainer<InTyp, OutTyp, NN>::alloc();
 
       weight_updates.clear();
 
-      std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = nnet.get_layers();
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
       for (auto it : layers)
       {
          std::string id = it.first;
-         LayerWeights& w = it.second->weights();
+         const LayerWeights& w = it.second->weights();
 
          Array2D<double>::Dimensions dim = w.const_weights_ref.size();
 
@@ -389,5 +365,61 @@ namespace flexnnet
          weight_updates[id].resize(dim.rows, dim.cols);
       }
    }
-}
+
+
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
+      template<class, class, template<class,class> class,
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   double SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::update_performance_traces(unsigned int _epoch, double _trnperf, TrainingRecord& _trec)
+   {
+      double vld_perf, tst_perf;
+      double vld_stdev, tst_stdev;
+
+      double perf = _trnperf;
+
+      // Save the training set performance for this epoch
+      _trec.training_set_trace.push_back({.epoch=_epoch, .performance=_trnperf});
+
+      // Record the performance on the validation set for this epoch
+      if (validation_dataset.size() > 0)
+      {
+         std::tie(vld_perf,vld_stdev) = evaluator.evaluate(this->nnet, validation_dataset);
+
+         // If validation set exist use it as the overall performance measure
+         // in order to determine best weights using early stopping.
+         perf = vld_perf;
+
+         _trec.validation_set_trace.push_back({.epoch=_epoch, .performance=vld_perf});
+      }
+
+      // Record the performance on the test set for this epoch
+      if (test_dataset.size() > 0)
+      {
+         std::tie(tst_perf,tst_stdev) = evaluator.evaluate(this->nnet, test_dataset);
+         _trec.test_set_trace.push_back({.epoch=_epoch, .performance=tst_perf});
+      }
+
+      return perf;
+   }
+
+   template<class InTyp, class OutTyp,
+      template<class, class> class NN,
+      template<class, class> class Dataset,
+      template<class, class, template<class,class> class,
+      template<class,class> class, template<class> class> class Eval,
+      template<class> class FitFunc,
+      class LRPolicy>
+   void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::failback()
+   {
+      std::cout << "fail-back!!!!\n";
+      this->restore_network_weights("failback");
+      LRPolicy::reduce_learning_rate();
+   }
+} // end namespace flexnnet
+
+
 #endif //FLEX_NEURALNET_SUPERVISEDTRAININGALGO_H_

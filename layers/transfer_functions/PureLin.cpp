@@ -14,7 +14,6 @@ const PureLin::Parameters PureLin::DEFAULT_PARAMS = {.gain=1.0};
 PureLin::PureLin(size_t _sz, const std::string& _id, const Parameters& _params)
    : NetSumLayer(_sz, _id)
 {
-   layer_derivatives.dy_dnet.resize(_sz, _sz);
    set_params(_params);
 }
 
@@ -41,26 +40,20 @@ void PureLin::copy(const PureLin& _purelin)
 std::shared_ptr<BasicLayer> PureLin::clone(void) const
 {
    std::shared_ptr<PureLin> clone = std::make_shared<PureLin>(PureLin(*this));
+   std::cout << "clone size = " << clone->size() << "x" << clone->input_size() << "\n";
    return clone;
 }
 
-const std::valarray<double>&
-PureLin::calc_layer_output(const std::valarray<double>& _rawin)
+void
+PureLin::calc_layer_output(const std::valarray<double>& _netin, std::valarray<double>& _layerval)
 {
-   layer_state.netinv = calc_netin(_rawin);
-   layer_state.outputv = layer_state.netinv;
-
-   return layer_state.outputv;
+   _layerval = _netin;
 }
 
-const Array2D<double>& PureLin::calc_dy_dnet(const std::valarray<double>& _out)
+void PureLin::calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet)
 {
-   Array2D<double>& dy_dnet = layer_derivatives.dy_dnet;
-
-   dy_dnet = 0.0;
+   _dydnet = 0.0;
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      dy_dnet.at(i, i) = 1.0;
-
-   return dy_dnet;
+      _dydnet.at(i, i) = 1.0;
 }
 

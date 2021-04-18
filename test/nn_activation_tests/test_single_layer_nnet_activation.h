@@ -126,7 +126,7 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_single_layer_nn
    network_layers[0]->layer_weights.set(_testcase.weights);
 
    // Create neural net
-   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
+   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "basennet"));
 }
 
 template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnnet(const TestCase& _testcase)
@@ -163,7 +163,7 @@ template<typename T> void TestSingleLayerNNActivation<T>::create_two_layer_ffnne
    network_layers[1]->layer_weights.set(diag);
 
    // Create neural net
-   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
+   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "basennet"));
 }
 
 #endif //_TEST_SINGLE_LAYER_NNET_ACTIVATION_H_

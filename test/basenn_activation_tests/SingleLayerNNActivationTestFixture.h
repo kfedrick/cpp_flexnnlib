@@ -19,6 +19,7 @@
 #include "LogSig.h"
 
 #include "BaseNeuralNet.h"
+#include "NetworkLayerImpl.h"
 
 #define TESTCASE_PATH "test/basenn_activation_tests/samples/"
 
@@ -71,6 +72,10 @@ public:
    std::shared_ptr<flexnnet::BaseNeuralNet> create_deriv_nnet(const DerivativesTestCase& _testcase);
 
    std::shared_ptr<flexnnet::BaseNeuralNet> nnet;
+
+   void create_newnnet(const ActivationTestCase& _testcase);
+   std::shared_ptr<flexnnet::BaseNeuralNet> newnnet;
+
 };
 TYPED_TEST_CASE_P (SingleLayerNNActivationTestFixture);
 

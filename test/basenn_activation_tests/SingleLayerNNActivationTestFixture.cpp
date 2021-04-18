@@ -6,11 +6,9 @@
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>
 
-#include "NetworkTopology.h"
-#include "BaseNeuralNet.h"
-
-using flexnnet::NetworkTopology;
 using flexnnet::BaseNeuralNet;
+using flexnnet::NetworkLayerImpl;
+
 
 template<typename T> std::vector<typename SingleLayerNNActivationTestFixture<T>::ActivationTestCase>
 SingleLayerNNActivationTestFixture<T>::read_activation_samples(std::string _filepath)
@@ -122,8 +120,8 @@ SingleLayerNNActivationTestFixture<T>::read_derivatives_samples(std::string _fil
 
       // Read basic_layer target dnet_dx
       const rapidjson::Value& dNdI_obj = a_tuple_obj["dnet_dx"];
-      test_case.target.dNdI.resize(layer_sz, input_sz + 1);
-      test_case.target.dNdI = parse_weights(dNdI_obj, layer_sz, input_sz + 1);
+      test_case.target.dNdI.resize(layer_sz, input_sz);
+      test_case.target.dNdI = parse_weights(dNdI_obj, layer_sz, input_sz);
 
       test_samples.push_back(test_case);
    }
@@ -131,45 +129,33 @@ SingleLayerNNActivationTestFixture<T>::read_derivatives_samples(std::string _fil
    return test_samples;
 }
 
-template<typename T> void SingleLayerNNActivationTestFixture<T>::create_nnet(const ActivationTestCase& _testcase)
+template<typename T> void SingleLayerNNActivationTestFixture<T>::create_newnnet(const ActivationTestCase& _testcase)
 {
    // Create network topology
-   NetworkTopology nettopo(_testcase.input);
+   flexnnet::NeuralNetTopology topo;
 
-   nettopo.add_layer<T>("output", _testcase.layer_sz, true);
-   nettopo.add_external_input_field("output", "input");
+   std::shared_ptr<NetworkLayerImpl<T>> ol_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.layer_sz, "output", T::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("input", _testcase.input_sz);
 
-   nnet = std::shared_ptr<BaseNeuralNet>(new BaseNeuralNet(nettopo));
+   topo.network_layers[ol_ptr->name()] = ol_ptr;
+   topo.network_output_layers.push_back(ol_ptr);
+   topo.ordered_layers.push_back(ol_ptr);
 
-   // Set network weights
-   nnet->set_weights({{"output", _testcase.weights}});
-}
-
-template<typename T> std::shared_ptr<flexnnet::BaseNeuralNet>
-SingleLayerNNActivationTestFixture<T>::create_deriv_nnet(const DerivativesTestCase& _testcase)
-{
-   // Create network topology
-   NetworkTopology nettopo(_testcase.input);
-
-   nettopo.add_layer<T>("output", _testcase.layer_sz, true);
-   nettopo.add_external_input_field("output", "input");
-
-   std::shared_ptr<flexnnet::BaseNeuralNet> nnet = std::shared_ptr<BaseNeuralNet>(new BaseNeuralNet(nettopo));
+   newnnet = std::make_shared<BaseNeuralNet>(BaseNeuralNet(topo));
 
    // Set network weights
-   nnet->set_weights({{"output", _testcase.weights}});
-
-   return nnet;
+   newnnet->set_weights("output", _testcase.weights);
 }
 
-TYPED_TEST_P (SingleLayerNNActivationTestFixture, ActivationTest)
-{
 
+
+TYPED_TEST_P (SingleLayerNNActivationTestFixture, NNActivationTest)
+{
    std::vector<typename SingleLayerNNActivationTestFixture<TypeParam>::ActivationTestCase> test_samples;
 
    // Get parameterized type string
    std::string layer_type_id = SingleLayerNNActivationTestFixture<TypeParam>::get_typeid();
-   std::cout << "\nTest Single Layer Network Activation : " << layer_type_id << ">\n";
+   std::cout << "\nTest New Single Layer Network Construction : " << layer_type_id << ">\n";
 
    // Get lower case parameterized type string
    std::string _id = layer_type_id;
@@ -183,17 +169,17 @@ TYPED_TEST_P (SingleLayerNNActivationTestFixture, ActivationTest)
    for (auto test_case : test_cases)
    {
       // Create the neural network
-      this->create_nnet(test_case);
+      this->create_newnnet(test_case);
 
       // Print out the input vector
       std::cout << this->prettyPrintVector("input", test_case.input.at("input")).c_str() << "\n";
       std::flush(std::cout);
 
       // Activate the network
-      const flexnnet::ValarrMap& netout = this->nnet->activate(test_case.input);
+      const flexnnet::ValarrMap& netout = this->newnnet->activate(test_case.input);
 
       // Print out the network output
-      std::cout << this->prettyPrintVector("netout", netout.at("output")).c_str() << "\n";
+      std::cout << this->prettyPrintVector("netout", netout.at("output")).c_str() << "\n" << std::flush;
 
       // Check layer output
       EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output
@@ -204,56 +190,8 @@ TYPED_TEST_P (SingleLayerNNActivationTestFixture, ActivationTest)
    }
 }
 
-/*TYPED_TEST_P (SingleLayerNNActivationTestFixture, DerivativesTest)
-{
-
-   std::vector<typename SingleLayerNNActivationTestFixture<TypeParam>::ActivationTestCase> test_samples;
-
-   // Get parameterized type string
-   std::string layer_type_id = SingleLayerNNActivationTestFixture<TypeParam>::get_typeid();
-   std::cout << "\nTest Single Layer Network Derivatives : " << layer_type_id << ">\n";
-
-   // Get lower case parameterized type string
-   std::string _id = layer_type_id;
-   std::transform(_id.begin(), _id.end(), _id.begin(), ::tolower);
-
-   // Set file name containing test cases
-   std::string sample_fname = "single_" + _id + "_nnderiv_test_cases.json";
-
-   std::vector<typename SingleLayerNNActivationTestFixture<TypeParam>::DerivativesTestCase> test_cases = SingleLayerNNActivationTestFixture<
-      TypeParam>::read_derivatives_samples(sample_fname);
-   for (auto test_case : test_cases)
-   {
-      // Create the neural network
-      std::shared_ptr<flexnnet::BaseNeuralNet> nnet = this->create_deriv_nnet(test_case);
-
-      // Print out the input vector
-      std::cout << this->prettyPrintVector("input", test_case.input.at("input")).c_str() << "\n";
-      std::flush(std::cout);
-
-      // Activate the network
-      const flexnnet::NNetIO_Map& netout = nnet->activate(test_case.input);
-
-      // Print out the network output
-      std::cout << this->prettyPrintVector("netout", netout.at("output")).c_str() << "\n";
-
-      std::map<std::string, std::shared_ptr<flexnnet::NetworkLayer>> layers = nnet->get_layers();
-      for (auto it = layers.begin(); it != layers.end(); it++)
-      {
-         const std::string id = it->first;
-         const flexnnet::Array2D<double>& dy_dnet = it->second->dy_dnet();
-         const flexnnet::Array2D<double>& dnet_dw = it->second->dnet_dw();
-         const flexnnet::Array2D<double>& dnet_dx = it->second->dnet_dx();
-
-         std::cout << "------ " << id << " Derivatives " << " ------\n";
-         std::cout << this->prettyPrintArray("dy_dnet", dy_dnet).c_str() << "\n";
-         std::cout << this->prettyPrintArray("dnet_dw", dnet_dw).c_str() << "\n";
-         std::cout << this->prettyPrintArray("dnet_dx", dnet_dx).c_str() << "\n";
-      }
-   }
-}*/
 
 REGISTER_TYPED_TEST_CASE_P
-(SingleLayerNNActivationTestFixture, ActivationTest);
+(SingleLayerNNActivationTestFixture, NNActivationTest);
 INSTANTIATE_TYPED_TEST_CASE_P
 (My, SingleLayerNNActivationTestFixture, MyTypes);

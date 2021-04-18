@@ -49,41 +49,31 @@ std::shared_ptr<BasicLayer> SoftMax::clone(void) const
    return clone;
 }
 
-const std::valarray<double>& flexnnet::SoftMax::calc_layer_output(const std::valarray<double>& _rawin)
+void flexnnet::SoftMax::calc_layer_output(const std::valarray<double>& _netin, std::valarray<double>& _layerval)
 {
    double sum_exp = 0;
-
-   std::valarray<double>& netinv = layer_state.netinv;
-   std::valarray<double>& outputv = layer_state.outputv;
-
-   netinv = calc_netin(_rawin);
 
    // Calculate the initial exp of the input values and accumulate the summation
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
    {
-      exp_netin[i] = exp(params.gain * netinv[i]);
+      exp_netin[i] = exp(params.gain * _netin[i]);
       sum_exp += exp_netin[i];
    }
 
    // Normalize the transfer vector by dividing by the sum of activity
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      outputv[i] = output_range * exp_netin[i] / sum_exp + lower_bound;
+      _layerval[i] = output_range * exp_netin[i] / sum_exp + lower_bound;
 }
 
-const Array2D<double>& SoftMax::calc_dy_dnet(const std::valarray<double>& _out)
+void SoftMax::calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet)
 {
-   Array2D<double>& dAdN = layer_derivatives.dy_dnet;
-
-   dAdN = 0;
-
+   _dydnet = 0;
    for (size_t netin_ndx = 0; netin_ndx < const_layer_output_size_ref; netin_ndx++)
    {
-      for (size_t trans_ndx = 0; trans_ndx < const_layer_output_size_ref; trans_ndx++)
-         dAdN.at(trans_ndx, netin_ndx) =
-            (trans_ndx == netin_ndx) ?
-            output_range * params.gain * _out[trans_ndx] * (1 - _out[trans_ndx]) :
-            output_range * params.gain * -_out[trans_ndx] * _out[netin_ndx];
+      for (size_t out_ndx = 0; out_ndx < const_layer_output_size_ref; out_ndx++)
+         _dydnet.at(out_ndx, netin_ndx) =
+            (out_ndx == netin_ndx) ?
+            output_range * params.gain * _outv[out_ndx] * (1 - _outv[out_ndx]) :
+            output_range * params.gain * -_outv[out_ndx] * _outv[netin_ndx];
    }
-
-   return dAdN;
 }

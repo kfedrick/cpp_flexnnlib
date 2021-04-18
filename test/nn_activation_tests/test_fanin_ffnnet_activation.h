@@ -140,7 +140,7 @@ template<typename T> void TestFaninFFNNActivation<T>::create_fanin_ffnnet(const 
    network_layers[2]->layer_weights.set(diag);
 
    // Create neural net
-   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "nnet"));
+   nnet = std::shared_ptr<flexnnet::BasicNeuralNet>(new flexnnet::BasicNeuralNet(network_layers, false, "basennet"));
 }
 
 #endif //_TEST_FANIN_FFNNET_ACTIVATION_H_

@@ -47,24 +47,15 @@ std::shared_ptr<BasicLayer> RadBas::clone(void) const
    return clone;
 }
 
-const std::valarray<double>& RadBas::calc_layer_output(const std::valarray<double>& _rawin)
+void RadBas::calc_layer_output(const std::valarray<double>& _netinv, std::valarray<double>& _layerval)
 {
-   std::valarray<double>& netinv = layer_state.netinv;
-   std::valarray<double>& outputv = layer_state.outputv;
-
-   netinv = calc_netin(_rawin);
-
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      outputv[i] = output_range * exp(-netinv[i]) + lower_bound;
+      _layerval[i] = output_range * exp(-_netinv[i]) + lower_bound;
 }
 
-const Array2D<double>& RadBas::calc_dy_dnet(const std::valarray<double>& _out)
+void RadBas::calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet)
 {
-   Array2D<double>& dy_dnet = layer_derivatives.dy_dnet;
-
-   dy_dnet = 0;
-   for (size_t i = 0; i < _out.size(); i++)
-      dy_dnet.at(i, i) = -output_range * _out[i];
-
-   return dy_dnet;
+   _dydnet = 0;
+   for (size_t i = 0; i < const_layer_output_size_ref; i++)
+      _dydnet.at(i, i) = -output_range * _outv[i];
 }

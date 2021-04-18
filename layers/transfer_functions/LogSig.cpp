@@ -46,26 +46,17 @@ LogSig::copy(const LogSig& _logsig)
    params = _logsig.params;
 }
 
-const std::valarray<double>&
-LogSig::calc_layer_output(const std::valarray<double>& _rawin)
+void
+LogSig::calc_layer_output(const std::valarray<double>& _netinv, std::valarray<double>& _layerval)
 {
-   std::valarray<double>& netinv = layer_state.netinv;
-   std::valarray<double>& outputv = layer_state.outputv;
-
-   netinv = calc_netin(_rawin);
-
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      outputv[i] = 1.0 / (1.0 + exp(-params.gain * netinv[i]));
+      _layerval[i] = 1.0 / (1.0 + exp(-params.gain * _netinv[i]));
 }
 
-const Array2D<double>&
-LogSig::calc_dy_dnet(const std::valarray<double>& _out)
+void
+LogSig::calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet)
 {
-   Array2D<double>& dy_dnet = layer_derivatives.dy_dnet;
-
-   dy_dnet = 0;
+   _dydnet = 0;
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      dy_dnet.at(i, i) = params.gain * _out[i] * (1 - _out[i]);
-
-   return dy_dnet;
+      _dydnet.at(i, i) = params.gain * _outv[i] * (1 - _outv[i]);
 }
