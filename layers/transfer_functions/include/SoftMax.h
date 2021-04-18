@@ -41,8 +41,9 @@ namespace flexnnet
       std::string toJson(void) const;
 
    protected:
-      const std::valarray<double>& calc_layer_output(const std::valarray<double>& _netin);
-      const Array2D<double>& calc_dy_dnet(const std::valarray<double>& _out);
+      void calc_layer_output(const std::valarray<double>& _netin, std::valarray<double>& _layerval) override;
+      void calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet) override;
+      const SoftMax::Parameters& get_params(void) const;
 
    private:
       void copy(const SoftMax& _purelin);
@@ -64,6 +65,12 @@ namespace flexnnet
    {
       set_gain(_val.gain);
       set_rescaled(_val.rescaled_flag);
+   }
+
+   inline
+   const SoftMax::Parameters& SoftMax::get_params(void) const
+   {
+      return params;
    }
 
    inline void SoftMax::set_gain(double _val)

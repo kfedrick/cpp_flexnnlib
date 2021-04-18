@@ -2,17 +2,23 @@ include_directories(".." "include")
 
 enable_testing()
 
-add_executable(layer_constructor_tests layer_constructor_tests/test_layer_constructor.cpp ../layers/include/BasicLayer.h layer_activation_tests/LayerActivationTestCase.h layer_constructor_tests/test_purelin_constructor.h layer_constructor_tests/test_tansig_constructor.h layer_constructor_tests/test_layer_constructor.h layer_constructor_tests/test_radbas_constructor.h layer_constructor_tests/test_logsig_constructor.h layer_constructor_tests/test_softmax_constructor.h)
-target_link_libraries(layer_constructor_tests gtest flexneuralnet)
-add_test(NAME layer_constructor_tests COMMAND layer_constructor_tests)
+add_executable(baselayer_activation_tests baselayer_activation_tests/test_main.cpp
+        baselayer_activation_tests/LayerActivationTestCase.h
+        CommonTestFixtureFunctions.cpp include/CommonTestFixtureFunctions.h
+        baselayer_activation_tests/test_purelin_activation.cpp
+        baselayer_activation_tests/test_tansig_activation.cpp
+        baselayer_activation_tests/test_logsig_activation.cpp
+        baselayer_activation_tests/test_radbas_activation.cpp
+        baselayer_activation_tests/test_softmax_activation.cpp)
+target_link_libraries(baselayer_activation_tests gtest flexneuralnet)
+add_test(NAME baselayer_activation_tests COMMAND test_main)
 
-add_executable(layer_activation_tests layer_activation_tests/test_layer_activation.cpp ../layers/include/BasicLayer.h layer_activation_tests/LayerActivationTestCase.h CommonTestFixtureFunctions.cpp include/CommonTestFixtureFunctions.h layer_activation_tests/test_purelin_activation.cpp layer_activation_tests/test_tansig_activation.cpp layer_activation_tests/test_logsig_activation.cpp layer_activation_tests/test_radbas_activation.cpp layer_activation_tests/test_softmax_activation.cpp)
-target_link_libraries(layer_activation_tests gtest flexneuralnet)
-add_test(NAME layer_activation_tests COMMAND layer_activation_tests)
-
-add_executable(test_nn_builder nn_builder_tests/NNBuilderTestFixture.h nn_builder_tests/test_main.cpp)
-target_link_libraries(test_nn_builder gtest flexneuralnet)
-add_test(NAME nn_builder_tests COMMAND test_main)
+add_executable(networklayer_tests networklayer_tests/NNBuilderTestFixture.h
+        CommonTestFixtureFunctions.cpp include/CommonTestFixtureFunctions.h
+        networklayer_tests/test_main.cpp
+        )
+target_link_libraries(networklayer_tests gtest flexneuralnet)
+add_test(NAME networklayer_tests COMMAND test_main)
 
 add_executable(test_nn_activation nn_activation_tests/test_nn_activation.cpp
         nn_activation_tests/test_single_layer_nnet_activation.cpp nn_activation_tests/test_single_layer_nnet_activation.h
@@ -30,7 +36,6 @@ add_executable(test_basenn_activation
         basenn_activation_tests/test_main.cpp)
 target_link_libraries(test_basenn_activation gtest flexneuralnet)
 add_test(NAME test_basenn_activation COMMAND test_main)
-
 
 add_executable(dataset_tests dataset_tests/test_main.cpp
         include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp

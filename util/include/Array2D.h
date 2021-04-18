@@ -67,6 +67,7 @@ namespace flexnnet
       void set(T _val = T());
       void set(const std::vector<std::vector<T> >& _arr);
       void set(const Array2D<T>& arr);
+      void assign(const Array2D<T>& arr);
 
       type_ref operator=(const_value_ref val);
       type_ref operator=(const_type_ref arr);
@@ -202,6 +203,13 @@ namespace flexnnet
    }
 
    template<class T> inline
+   void Array2D<T>::assign(const Array2D<T>& _arr)
+   {
+      validate_dimensions(*this, _arr);
+      data = _arr.data;
+   }
+
+   template<class T> inline
    void Array2D<T>::set(const std::vector<std::vector<T> >& _arr)
    {
       // Get dimensionality of source array
@@ -238,10 +246,7 @@ namespace flexnnet
 
    template<class T> inline Array2D<T>& Array2D<T>::operator=(const_type_ref _arr)
    {
-      validate_dimensions(*this, _arr);
-
-      dimensions = _arr.dimensions;
-      data = _arr.data;
+      assign(_arr);
       return *this;
    }
 

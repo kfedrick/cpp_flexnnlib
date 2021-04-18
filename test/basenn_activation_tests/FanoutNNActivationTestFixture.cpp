@@ -7,13 +7,10 @@
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>
 
-#include "NetworkTopology.h"
-#include "NetworkLayerImpl.h"
-#include "BaseNeuralNet.h"
 
-using flexnnet::NetworkTopology;
-using flexnnet::BaseNeuralNet;
 using flexnnet::PureLin;
+using flexnnet::BaseNeuralNet;
+using flexnnet::NetworkLayerImpl;
 using flexnnet::LayerConnRecord;
 
 template<typename T> std::vector<typename FanoutNNActivationTestFixture<T>::TestCase> FanoutNNActivationTestFixture<T>::read_samples(std::string _filepath)
@@ -84,40 +81,50 @@ template<typename T> std::vector<typename FanoutNNActivationTestFixture<T>::Test
    return test_samples;
 }
 
-template<typename T> void FanoutNNActivationTestFixture<T>::create_nnet(const TestCase& _testcase)
+
+template<typename T> void FanoutNNActivationTestFixture<T>::create_newnnet(const TestCase& _testcase)
 {
-   // Create network topology
-   NetworkTopology nettopo(_testcase.input);
+   flexnnet::NeuralNetTopology topo;
 
-   nettopo.add_layer<T>("hidden", _testcase.hlayer_sz, false);
-   nettopo.add_external_input_field("hidden", "input1");
+   std::shared_ptr<NetworkLayerImpl<T>> ol1_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.olayer1_sz, "output1", T::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<T>> ol2_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.olayer2_sz, "output2", T::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<T>> hl_ptr = std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_testcase.hlayer_sz, "hidden", T::DEFAULT_PARAMS, false));
 
-   nettopo.add_layer<T>("output1", _testcase.olayer1_sz, true);
-   nettopo.add_layer_connection("output1", "hidden", LayerConnRecord::Forward);
+   hl_ptr->add_external_input_field("input1", _testcase.input1_sz);
 
-   nettopo.add_layer<T>("output2", _testcase.olayer2_sz, true);
-   nettopo.add_layer_connection("output2", "hidden", LayerConnRecord::Forward);
+   ol1_ptr->add_connection("activation", hl_ptr, LayerConnRecord::Forward);
+   hl_ptr->add_connection("backprop", ol1_ptr, LayerConnRecord::Forward);
 
-   // Create neural net
-   BaseNeuralNet nn(nettopo);
-   nnet = std::shared_ptr<BaseNeuralNet>(new BaseNeuralNet(nettopo));
+   ol2_ptr->add_connection("activation", hl_ptr, LayerConnRecord::Forward);
+   hl_ptr->add_connection("backprop", ol2_ptr, LayerConnRecord::Forward);
+
+   topo.network_layers[ol1_ptr->name()] = ol1_ptr;
+   topo.network_layers[ol2_ptr->name()] = ol2_ptr;
+   topo.network_layers[hl_ptr->name()] = hl_ptr;
+
+   topo.network_output_layers.push_back(ol1_ptr);
+   topo.network_output_layers.push_back(ol2_ptr);
+
+   topo.ordered_layers.push_back(hl_ptr);
+   topo.ordered_layers.push_back(ol1_ptr);
+   topo.ordered_layers.push_back(ol2_ptr);
+
+   newnnet = std::make_shared<BaseNeuralNet>(BaseNeuralNet(topo));
 
    // Set network weights
-   nnet->set_weights(
-      {
-         {"hidden", _testcase.hlayer_weights},
-         {"output1", _testcase.olayer1_weights},
-         {"output2", _testcase.olayer2_weights}
-      });
+   newnnet->set_weights("output1", _testcase.olayer1_weights);
+   newnnet->set_weights("output2", _testcase.olayer2_weights);
+   newnnet->set_weights("hidden", _testcase.hlayer_weights);
 }
 
-TYPED_TEST_P (FanoutNNActivationTestFixture, ReadTestCase)
+
+TYPED_TEST_P (FanoutNNActivationTestFixture, NNActivationTest)
 {
    std::vector<typename FanoutNNActivationTestFixture<TypeParam>::TestCase> test_samples;
 
    // Get parameterized type string
    std::string layer_type_id = FanoutNNActivationTestFixture<TypeParam>::get_typeid();
-   std::cout << "\nTest Fan-out Hidden Units Network<" << layer_type_id << ">\n";
+   std::cout << "\nTest NEW Fan-out Hidden Units Network<" << layer_type_id << ">\n";
 
    // Get lower case parameterized type string
    std::string _id = layer_type_id;
@@ -125,36 +132,35 @@ TYPED_TEST_P (FanoutNNActivationTestFixture, ReadTestCase)
 
    // Set file name containing test cases
    std::string sample_fname = "fanout_" + _id + "_nnet_test_cases.json";
-   std::vector<typename FanoutNNActivationTestFixture<TypeParam>::TestCase> test_cases = FanoutNNActivationTestFixture<
+   std::vector<typename FanoutNNActivationTestFixture<TypeParam>::TestCase>
+      test_cases = FanoutNNActivationTestFixture<
       TypeParam>::read_samples(sample_fname);
    for (auto test_case : test_cases)
    {
       // Create the neural network
-      this->create_nnet(test_case);
+      this->create_newnnet(test_case);
 
       // Print out the input vector
       std::cout << this->prettyPrintVector("input1", test_case.input.at("input1")).c_str() << "\n" << std::flush;
 
       // Activate the network
-      const std::valarray<double>& netout = this->nnet->activate(test_case.input);
+      const flexnnet::ValarrMap& netout = this->newnnet->activate(test_case.input);
 
       // Print out the network output
-      const std::map<std::string, std::shared_ptr<flexnnet::NetworkLayer>> layers = this->nnet->get_layers();
-      flexnnet::ValarrMap outmap({{"output1", layers.at("output1")->value()}, {"output2", layers.at("output2")->value()}});
-      std::cout << this->prettyPrintVector("output1", outmap.at("output1")).c_str() << "\n";
-      std::cout << this->prettyPrintVector("output2", outmap.at("output2")).c_str() << "\n";
+      std::cout << this->prettyPrintVector("output1", netout.at("output1")).c_str() << "\n";
+      std::cout << this->prettyPrintVector("output2", netout.at("output2")).c_str() << "\n";
 
       // Check layer output
-      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output1"), outmap.at("output1"), 0.000000001) << "ruh roh";
-      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output2"), outmap.at("output2"), 0.000000001) << "ruh roh";
+      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output1"), netout.at("output1"), 0.000000001) << "ruh roh";
+      EXPECT_PRED3(CommonTestFixtureFunctions::valarray_double_near, test_case.target_output.at("output2"), netout.at("output2"), 0.000000001) << "ruh roh";
 
       std::cout << "----- Done with test " << _id.c_str() << " ----\n";
       std::flush(std::cout);
    }
 }
 
-/*
+
 REGISTER_TYPED_TEST_CASE_P
-(FanoutNNActivationTestFixture, ReadTestCase);
+(FanoutNNActivationTestFixture, NNActivationTest);
 INSTANTIATE_TYPED_TEST_CASE_P
-(My, FanoutNNActivationTestFixture, MyTypes);*/
+(My, FanoutNNActivationTestFixture, MyTypes);

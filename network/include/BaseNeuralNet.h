@@ -1,21 +1,20 @@
 //
-// Created by kfedrick on 2/20/21.
+// Created by kfedrick on 4/11/21.
 //
 
 #ifndef FLEX_NEURALNET_BASENEURALNET_H_
 #define FLEX_NEURALNET_BASENEURALNET_H_
 
-#include "flexnnet.h"
-#include "NetworkTopology.h"
-#include "NetworkOutput.h"
-#include <ValarrayMap.h>
+#include <flexnnet.h>
+#include <NeuralNetTopology.h>
 
 namespace flexnnet
 {
-   class BaseNeuralNet
+   class BaseNeuralNet : protected NeuralNetTopology
    {
    public:
-      BaseNeuralNet(const NetworkTopology& _topology = NetworkTopology({}));
+      BaseNeuralNet();
+      BaseNeuralNet(const NeuralNetTopology& _topology);
       BaseNeuralNet(const BaseNeuralNet& _nnet);
 
       virtual ~BaseNeuralNet();
@@ -31,12 +30,6 @@ namespace flexnnet
       size_t size(void);
 
       virtual const ValarrMap& value_map() const;
-
-      /**
-       * Initialize network weights and other network state information
-       * prior to training.
-       */
-      virtual void initialize_weights(void);
 
       /**
        * Reset network state activation prior to presentation of next
@@ -66,20 +59,19 @@ namespace flexnnet
 
       const LayerWeights& get_weights(const std::string _layerid) const;
 
+      /**
+       * Initialize network weights and other network state information
+       * prior to training.
+       */
+      virtual void initialize_weights(void);
+
       void set_weights(const std::string _layerid, const LayerWeights& _weight);
 
       void adjust_weights(const std::string _layerid, const Array2D<double>& _deltaw);
 
-      NetworkWeights get_weights(void) const;
-
-      void set_weights(const NetworkWeights& _weight);
-
       const std::set<std::string>& get_layer_names(void);
 
-      std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void);
       const std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void) const;
-
-      std::string toJSON(void) const;
 
    protected:
       std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void);
@@ -87,50 +79,43 @@ namespace flexnnet
    private:
       size_t network_output_size;
 
-      // Network topology
-      NetworkTopology network_topology;
-
       // Set containing basic_layer names
       std::set<std::string> layer_name_set;
 
       // recurrent_network_flag - Set if this network has recurrent connections.
       bool recurrent_network_flag;
 
-      // virtual_network_output_layer_ref - Used to gather network output from the output layers.
-      NetworkOutput& virtual_network_output_layer_ref;
+      mutable ValarrMap output_val_map;
    };
+
+   inline
+   const std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void) const
+   {
+      return network_layers;
+   }
 
    inline const std::set<std::string>& BaseNeuralNet::get_layer_names(void)
    {
       return layer_name_set;
    }
 
-   inline
-   std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void)
-   {
-      return network_topology.get_layers();
-   }
-
-   inline
-   const std::map<std::string, std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_layers(void) const
-   {
-      return network_topology.get_layers();
-   }
-
-   inline
-   std::vector<std::shared_ptr<NetworkLayer>>& BaseNeuralNet::get_ordered_layers(void)
-   {
-      return network_topology.get_ordered_layers();
-   }
-
    inline size_t BaseNeuralNet::size(void)
    {
-      return virtual_network_output_layer_ref.size();
+      // TODO - fix ineffecient implementation
+      size_t sz = 0;
+      for (auto& it : network_output_layers)
+         sz += it->value().size();
+
+      return sz;
    }
 
    inline const ValarrMap& BaseNeuralNet::value_map() const
    {
-      return virtual_network_output_layer_ref.input_value_map();
+      // TODO - fix ineffecient implementation
+      for (auto& it : network_output_layers)
+         output_val_map[it->name()] = it->value();
+
+      return output_val_map;
    }
 }
 

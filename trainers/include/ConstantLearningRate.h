@@ -36,24 +36,24 @@ public:
          const ConstantLearningRate& _nnLRPolicy);
 
 private:
-   double DEFAULT_LEARNING_RATE{0.01};
+   double DEFAULT_LEARNING_RATE{0.001};
 };
 
 inline ConstantLearningRate::ConstantLearningRate() :
-      LearningRatePolicy()
+   LearningRatePolicy()
 {
 }
 
 inline ConstantLearningRate::ConstantLearningRate(
-      BaseNeuralNet& _nnet) :
-      LearningRatePolicy(_nnet)
+   BaseNeuralNet& _nnet) :
+   LearningRatePolicy(_nnet)
 {
    set_learning_rate(DEFAULT_LEARNING_RATE);
 }
 
 inline ConstantLearningRate::ConstantLearningRate(
       const ConstantLearningRate& _nnLRPolicy) :
-      LearningRatePolicy(_nnLRPolicy)
+   LearningRatePolicy(_nnLRPolicy)
 {
 }
 

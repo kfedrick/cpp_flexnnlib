@@ -11,7 +11,7 @@
 
 #include "flexnnet.h"
 #include "Evaluator.h"
-#include "NetworkTopology.h"
+#include "NeuralNetTopology.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
 #include "RMSEFitnessFunc.h"
@@ -29,7 +29,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 
    flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
    flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
-   flexnnet::BaseNeuralNet basenet(flexnnet::NetworkTopology({}));
+   flexnnet::BaseNeuralNet basenet;
    MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
    flexnnet::Evaluator<flexnnet::ValarrayMap,
                        flexnnet::ValarrayMap,
@@ -54,7 +54,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
 
    flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
    flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
-   flexnnet::BaseNeuralNet basenet(flexnnet::NetworkTopology({}));
+   flexnnet::BaseNeuralNet basenet;
    MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
    flexnnet::Evaluator<flexnnet::ValarrayMap,
                        flexnnet::ValarrayMap,

@@ -43,23 +43,15 @@ std::shared_ptr<BasicLayer> TanSig::clone(void) const
    return clone;
 }
 
-const std::valarray<double>& TanSig::calc_layer_output(const std::valarray<double>& _rawin)
+void TanSig::calc_layer_output(const std::valarray<double>& _netinv, std::valarray<double>& _layerval)
 {
-   std::valarray<double>& netinv = layer_state.netinv;
-   std::valarray<double>& outputv = layer_state.outputv;
-
-   netinv = calc_netin(_rawin);
    for (size_t i = 0; i < const_layer_output_size_ref; i++)
-      outputv[i] = 2.0 / (1.0 + exp(-2.0 * params.gain * (netinv[i]))) - 1.0;
+      _layerval[i] = 2.0 / (1.0 + exp(-2.0 * params.gain * (_netinv[i]))) - 1.0;
 }
 
-const Array2D<double>& TanSig::calc_dy_dnet(const std::valarray<double>& _out)
+void TanSig::calc_dy_dnet(const std::valarray<double>& _outv, Array2D<double>& _dydnet)
 {
-   Array2D<double>& dAdN = layer_derivatives.dy_dnet;
-
-   dAdN = 0;
+   _dydnet = 0;
    for (unsigned int i = 0; i < const_layer_output_size_ref; i++)
-      dAdN.at(i, i) = params.gain * (1 - _out[i] * _out[i]);
-
-   return dAdN;
+      _dydnet.at(i, i) = params.gain * (1 - _outv[i] * _outv[i]);
 }
