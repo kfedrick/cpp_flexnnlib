@@ -95,7 +95,7 @@ add_library(flexneuralnet
         trainers/include/SuperviseTrainingAlgo.h
         trainers/include/LearningRatePolicy.h
         trainers/include/ConstantLearningRate.h
-        )
+        datasets/include/Exemplar.h datasets/include/ExemplarSeries.cpp datasets/include/ExemplarSeries.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

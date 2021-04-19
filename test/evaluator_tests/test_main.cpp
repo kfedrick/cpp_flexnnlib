@@ -26,6 +26,7 @@ using flexnnet::Evaluator;
 using flexnnet::RMSEFitnessFunc;
 using flexnnet::CartesianCoord;
 using flexnnet::ValarrayMap;
+using flexnnet::Exemplar;
 
 TEST(TestEvaluator, Constructor)
 {
@@ -35,10 +36,10 @@ TEST(TestEvaluator, Constructor)
    ValarrayMap b({{"b",{-1, 0, 0.5}}});
    ValarrayMap c({{"c",{-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
 
    BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
@@ -55,12 +56,12 @@ TEST(TestEvaluator, OrderedSingleSampling)
    ValarrayMap d({{"d",{-1, 0, 0.5}}});
    ValarrayMap e({{"e",{-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
 
    BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
@@ -81,12 +82,12 @@ TEST(TestEvaluator, RandomizedSingleSampling)
    ValarrayMap d({{"d",{-1, 0, 0.5}}});
    ValarrayMap e({{"e",{-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
 
    BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
@@ -108,12 +109,12 @@ TEST(TestEvaluator, Randomized2Sampling)
    ValarrayMap d({{"d",{-1, 0, 0.5}}});
    ValarrayMap e({{"e",{-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
 
    BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
@@ -135,12 +136,12 @@ TEST(TestEvaluator, Randomized3SubSampling)
    ValarrayMap d({{"d",{-1, 0, 0.5}}});
    ValarrayMap e({{"e",{-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
 
    BaseNeuralNet basenet;
    NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
@@ -156,7 +157,7 @@ TEST(TestEvaluator, CartesianCoord)
 {
    std::cout << "***** Test Derived Evaluator CartesianCoord\n" << std::flush;
 
-   DataSet<CartesianCoord, ValarrayMap> dataset;
+   DataSet<CartesianCoord, ValarrayMap, Exemplar> dataset;
    BaseNeuralNet basenet;
    NeuralNet<CartesianCoord, ValarrayMap> nnet(basenet);
    Evaluator<CartesianCoord, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
@@ -305,9 +306,9 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
    ValarrayMap tgt2({{"output",{-0.63, -0.1, 0.59}}});
    ValarrayMap tgt_egradient2({{"output",{0.0363, 0.48, 0.027075}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst1, tgt1));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst2, tgt2));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst1, tgt1));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst2, tgt2));
 
    RMSEFitnessFunc<ValarrayMap> rmse_fit;
    BaseNeuralNet basenet;
@@ -341,10 +342,10 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    ValarrayMap tgt3({{"output",{0.59, -0.1, 0.59}}});
    ValarrayMap tgt_egradient3({{"output",{0.0363, 0.48, 0.027075}}});
 
-   DataSet<ValarrayMap, ValarrayMap> dataset;
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst1, tgt1));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst2, tgt2));
-   dataset.push_back(std::pair<ValarrayMap, ValarrayMap>(tst3, tgt3));
+   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst1, tgt1));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst2, tgt2));
+   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst3, tgt3));
 
    RMSEFitnessFunc<ValarrayMap> rmse_fit;
    BaseNeuralNet basenet;

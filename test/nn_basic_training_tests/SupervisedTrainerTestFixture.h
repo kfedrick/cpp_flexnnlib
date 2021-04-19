@@ -10,8 +10,10 @@
 #include <DataSet.h>
 #include <CommonTestFixtureFunctions.h>
 #include <ValarrayMap.h>
+#include <Exemplar.h>
 
 using flexnnet::NeuralNet;
+using flexnnet::Exemplar;
 
 
 class SupervisedTrainerTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
@@ -24,7 +26,7 @@ public:
 protected:
    std::unique_ptr<NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap>> nnet;
 
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> trnset;
+   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> trnset;
 };
 
 void SupervisedTrainerTestFixture::SetUp()

@@ -18,14 +18,14 @@ namespace flexnnet
 {
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-         template<class,class> class, template<class> class> class Eval,
+         template<class,class, template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    class SuperviseTrainingAlgo : public BaseTrainer<InTyp, OutTyp, NN>, public LRPolicy
    {
-      using DatasetTyp = Dataset<InTyp, OutTyp>;
+      using DatasetTyp = Dataset<InTyp, OutTyp, Exemplar>;
       using ExemplarTyp = std::pair<InTyp, OutTyp>;
 
    public:
@@ -101,9 +101,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class, template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train(const DatasetTyp& _trnset)
@@ -154,9 +154,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    TrainingRecord SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_run(const DatasetTyp& _trnset)
@@ -252,9 +252,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_epoch(size_t _epoch, const DatasetTyp& _trnset)
@@ -289,9 +289,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::train_sample(const ExemplarTyp& _exemplar)
@@ -308,9 +308,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::
@@ -342,9 +342,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::alloc()
@@ -369,9 +369,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    double SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::update_performance_traces(unsigned int _epoch, double _trnperf, TrainingRecord& _trec)
@@ -408,9 +408,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp,
       template<class, class> class NN,
-      template<class, class> class Dataset,
+      template<class, class, template<class,class> class> class Dataset,
       template<class, class, template<class,class> class,
-      template<class,class> class, template<class> class> class Eval,
+      template<class,class,template<class,class> class> class, template<class> class> class Eval,
       template<class> class FitFunc,
       class LRPolicy>
    void SuperviseTrainingAlgo<InTyp, OutTyp, NN, Dataset, Eval, FitFunc, LRPolicy>::failback()

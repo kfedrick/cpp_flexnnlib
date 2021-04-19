@@ -12,9 +12,13 @@
 #include "CartesianCoord.h"
 #include "DataSet.h"
 #include "DataSetStream.h"
+#include "Exemplar.h"
+#include "ExemplarSeries.h"
 
 using flexnnet::CartesianCoord;
 using flexnnet::DataSet;
+using flexnnet::Exemplar;
+using flexnnet::ExemplarSeries;
 
 class DataSetTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
 {
@@ -49,7 +53,7 @@ TEST_F(DataSetTestFixture, DatasetConstructor)
 {
    std::cout << "Test Empty Dataset Constructor\n" << std::flush;
 
-   DataSet<CartesianCoord, std::valarray<double>> dataset;
+   DataSet<CartesianCoord, CartesianCoord, Exemplar> dataset;
 
    ASSERT_EQ(dataset.size(), 0);
 }
@@ -58,9 +62,9 @@ TEST_F(DataSetTestFixture, DatasetPushback)
 {
    std::cout << "Test Empty Dataset Pushback\n" << std::flush;
 
-   DataSet<CartesianCoord, std::valarray<double>> dataset;
+   DataSet<CartesianCoord, std::valarray<double>, Exemplar> dataset;
 
-   dataset.push_back(std::pair<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
+   dataset.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
    ASSERT_EQ(dataset.size(), 1);
 }
 
@@ -178,11 +182,11 @@ TEST_F(DataSetTestFixture, OStream)
 {
    std::cout << "Test Dataset Console Stream\n" << std::flush;
 
-   DataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord, Exemplar> dataset;
 
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(-1,0.3), CartesianCoord(0,0)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(-1,0.3), CartesianCoord(0,0)));
 
    std::cout << dataset;
 }
@@ -193,11 +197,11 @@ TEST_F(DataSetTestFixture, Write)
 
    std::string fname = "test_write.txt";
 
-   DataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord, Exemplar> dataset;
 
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
-   dataset.push_back(std::pair<CartesianCoord, CartesianCoord>(CartesianCoord(-1,0.3), CartesianCoord(0,13)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(0,0), CartesianCoord(0,0)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(1,3), CartesianCoord(0,0)));
+   dataset.push_back(Exemplar<CartesianCoord, CartesianCoord>(CartesianCoord(-1,0.3), CartesianCoord(0,13)));
 
    std::ofstream of_strm(fname);
    of_strm << dataset;
@@ -210,7 +214,7 @@ TEST_F(DataSetTestFixture, IStream)
 
    std::string fname = "test_write.txt";
 
-   DataSet<CartesianCoord, CartesianCoord> dataset;
+   DataSet<CartesianCoord, CartesianCoord, Exemplar> dataset;
 
    // Open file for writing
    std::ifstream if_strm(fname);
@@ -230,7 +234,51 @@ TEST_F(DataSetTestFixture, IStream)
    if_strm.close();
 }
 
+TEST_F(DataSetTestFixture, EmptyESeriesDataSet)
+{
+   std::cout << "Test Empty ExemplarSeries DataSet\n" << std::flush;
 
+   DataSet<CartesianCoord, std::valarray<double>, ExemplarSeries> dataset;
+
+   //dataset.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
+   ASSERT_EQ(dataset.size(), 0);
+}
+
+TEST_F(DataSetTestFixture, ESeriesDataSet)
+{
+   std::cout << "Test ExemplarSeries DataSet\n" << std::flush;
+
+   DataSet<CartesianCoord, std::valarray<double>, ExemplarSeries> dataset;
+
+   ExemplarSeries<CartesianCoord, std::valarray<double>> eseries;
+
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(1,1), {1.1}));
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(-1,2), {1.11}));
+
+   dataset.push_back(eseries);
+   ASSERT_EQ(dataset.size(), 1);
+}
+
+TEST_F(DataSetTestFixture, ESeriesDataSetCopy)
+{
+   std::cout << "Test ExemplarSeries DataSet\n" << std::flush;
+
+   DataSet<CartesianCoord, std::valarray<double>, ExemplarSeries> dataset;
+
+   ExemplarSeries<CartesianCoord, std::valarray<double>> eseries;
+
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(0,0), {1}));
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(1,1), {1.1}));
+   eseries.push_back(Exemplar<CartesianCoord, std::valarray<double>>(CartesianCoord(-1,2), {1.11}));
+
+   ExemplarSeries<CartesianCoord, std::valarray<double>> eseries_copy(eseries);
+   eseries_copy = eseries;
+   std::cout << eseries_copy[2].second[0] << "\n";
+
+   dataset.push_back(eseries);
+   ASSERT_EQ(dataset.size(), 1);
+}
 
 int main(int argc, char** argv)
 {
