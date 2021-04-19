@@ -23,9 +23,13 @@ namespace flexnnet
 
    typedef std::tuple<double, double> EvalResults;
 
-   // Alias declaration for Exemplar (e.g. Exemplar<ValarrayMap,ValarrayMap>)
-   template <typename _InTyp, typename _OutTyp>
-   using Exemplar = std::pair<_InTyp, _OutTyp>;
+   // Alias declaration for Exemplar and ExemplarSeries
+   //template <typename _InTyp, typename _OutTyp>
+   //using Exemplar = std::pair<_InTyp, _OutTyp>;
+
+   //template <typename _InTyp, typename _OutTyp>
+   //using ExemplarSeries = std::vector<std::pair<_InTyp, _OutTyp>>;
+
 }
 
 #include <flexnnet_utils.h>

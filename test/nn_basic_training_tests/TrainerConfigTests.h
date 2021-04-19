@@ -27,7 +27,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 {
    std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
+   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> dataset;
    flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
    MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
@@ -52,7 +52,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
 {
    std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> dataset;
+   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> dataset;
    flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
    MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);

@@ -6,19 +6,20 @@
 #define FLEX_NEURALNET_EVALUATOR_H_
 
 #include <flexnnet.h>
-#include "BasicEvalConfig.h"
+#include <Exemplar.h>
+#include <BasicEvalConfig.h>
 
 namespace flexnnet
 {
    template<class _InTyp, class _OutTyp,
       template<class, class> class _NN,
-      template<class, class> class _DataSet,
+      template<class, class, template<class,class> class> class _DataSet,
       template<class> class _FitnessFunc>
    class Evaluator : public BasicEvalConfig, public _FitnessFunc<_OutTyp>
    {
       using _NNTyp = _NN<_InTyp, _OutTyp>;
-      using _DatasetTyp = _DataSet<_InTyp, _OutTyp>;
       using _ExemplarTyp = Exemplar<_InTyp, _OutTyp>;
+      using _DatasetTyp = _DataSet<_InTyp, _OutTyp, Exemplar>;
 
    public:
       Evaluator();
@@ -35,7 +36,7 @@ namespace flexnnet
    };
 
    template<class _In, class _Out, template<class, class> class _NN,
-      template<class, class> class _Dataset,
+      template<class, class, template<class,class> class> class _Dataset,
       template<class> class _FitnessFunc>
    Evaluator<_In,
              _Out,
@@ -46,7 +47,7 @@ namespace flexnnet
    }
 
    template<class _In, class _Out, template<class, class> class _NN,
-      template<class, class> class _Dataset,
+      template<class, class, template<class,class> class> class _Dataset,
       template<class> class _FitnessFunc>
    std::tuple<double, double>
    Evaluator<_In,
@@ -82,7 +83,7 @@ namespace flexnnet
    }
 
    template<class _In, class _Out, template<class, class> class _NN,
-      template<class, class> class _Dataset,
+      template<class, class, template<class,class> class> class _Dataset,
       template<class> class _FitnessFunc>
    double
    Evaluator<_In,
@@ -110,7 +111,7 @@ namespace flexnnet
    }
 
    template<class _In, class _Out, template<class, class> class _NN,
-      template<class, class> class _Dataset,
+      template<class, class, template<class,class> class> class _Dataset,
       template<class> class _FitnessFunc>
    void
    Evaluator<_In,

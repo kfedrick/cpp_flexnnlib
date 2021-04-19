@@ -10,36 +10,38 @@
 #include <iostream>
 #include <random>
 
+#include <Exemplar.h>
+
 // Forward declaration for CartesianCoord
 namespace flexnnet
 {
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    class DataSet;
 }
 
 // Forward declarations for stream operators
-template<class _InTyp, class _OutTyp>
+template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
 std::ostream&
-operator<<(std::ostream& _ostrm, const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+operator<<(std::ostream& _ostrm, const ItemTyp<InTyp, OutTyp>& _item);
 
-template<class _InTyp, class _OutTyp>
+template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
 std::istream&
-operator>>(std::istream& _istrm, flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar);
+operator>>(std::istream& _istrm, ItemTyp<InTyp, OutTyp>& _item);
 
-template<class _InTyp, class _OutTyp>
+template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
 std::ostream&
-operator<<(std::ostream& _ostrm, const flexnnet::DataSet<_InTyp, _OutTyp>& _dataset);
+operator<<(std::ostream& _ostrm, const flexnnet::DataSet<InTyp, OutTyp, ItemTyp>& _dataset);
 
-template<class _InTyp, class _OutTyp>
+template<class InTyp, class TgtTyp, template<class,class> class ItemTyp>
 std::istream&
-operator>>(std::istream& _istrm, flexnnet::DataSet<_InTyp, _OutTyp>& _dataset);
+operator>>(std::istream& _istrm, flexnnet::DataSet<InTyp, TgtTyp, ItemTyp>& _dataset);
 
 namespace flexnnet
 {
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    class DataSet
    {
-      using _DataTyp = Exemplar<_InTyp, _OutTyp>;
+      using ExemplarTyp = Exemplar<InTyp, OutTyp>;
       using order_iterator = std::vector<int>::iterator;
       using order_const_iterator = std::vector<int>::const_iterator;
 
@@ -67,7 +69,7 @@ namespace flexnnet
        * @param _data
        */
       void
-      push_back(const _DataTyp& _data);
+      push_back(const ItemTyp<InTyp,OutTyp>& _data);
 
       /**
        * Create a new permutation for the order in which the iterator
@@ -84,24 +86,24 @@ namespace flexnnet
       normalize_order(void) const;
 
       friend std::ostream&::operator
-      <<<_InTyp,_OutTyp>(
+      <<<InTyp,OutTyp,ItemTyp>(
       std::ostream& _ostrm,
-      const flexnnet::Exemplar<_InTyp, _OutTyp>& _exemplar
+      const ItemTyp<InTyp, OutTyp>& _exemplar
       );
 
       friend std::istream&
-      ::operator>><_InTyp, _OutTyp>(std::istream& _istrm, flexnnet::Exemplar<_InTyp,
-                                                                             _OutTyp>& _exemplar);
+      ::operator>><InTyp, OutTyp>(std::istream& _istrm, flexnnet::Exemplar<InTyp,
+                                                                           OutTyp>& _exemplar);
 
-      friend std::ostream&::operator
-      <<<_InTyp,_OutTyp>(
+      friend std::ostream&
+         ::operator
+      <<<InTyp,OutTyp,ItemTyp>(
       std::ostream& _ostrm,
-      const DataSet<_InTyp, _OutTyp>& _dataset
+      const DataSet<InTyp, OutTyp, ItemTyp>& _dataset
       );
 
-      template<typename _InTyp1, typename _OutTyp1>
       friend std::istream&
-      ::operator>>(std::istream& _istrm, DataSet<_InTyp1, _OutTyp1>& _dataset);
+      ::operator>><InTyp,OutTyp,ItemTyp>(std::istream& _istrm, DataSet<InTyp, OutTyp, ItemTyp>& _dataset);
 
       /*
        * Public iterators
@@ -109,16 +111,17 @@ namespace flexnnet
    public:
 
       class iterator : public std::iterator<std::forward_iterator_tag,
-                                            _DataTyp, int, _DataTyp*, _DataTyp*>
+                                            ItemTyp<InTyp,OutTyp>, int, ItemTyp<InTyp,OutTyp>*, ItemTyp<InTyp,OutTyp>*>
       {
       public:
          typedef iterator self_type;
-         typedef _DataTyp value_type;
-         typedef _DataTyp& reference;
-         typedef _DataTyp* pointer;
+         typedef ItemTyp<InTyp,OutTyp> value_type;
+         typedef ItemTyp<InTyp,OutTyp>& reference;
+         typedef ItemTyp<InTyp,OutTyp>* pointer;
          typedef std::forward_iterator_tag iterator_category;
          typedef int difference_type;
-         iterator(std::vector<_DataTyp>& _data, order_iterator ptr) : data(_data), it(ptr)
+         iterator(std::vector<ItemTyp<InTyp,OutTyp>>& _data, order_iterator ptr)
+            : data(_data), it(ptr)
          {
          }
 
@@ -151,23 +154,23 @@ namespace flexnnet
          { return it != rhs.it; }
       private:
          order_iterator it;
-         std::vector<_DataTyp>& data;
+         std::vector<ItemTyp<InTyp,OutTyp>>& data;
       };
 
       class const_iterator : public std::iterator<std::forward_iterator_tag,
-                                                  _DataTyp,
+                                                  ItemTyp<InTyp,OutTyp>,
                                                   int,
-                                                  const _DataTyp*,
-                                                  const _DataTyp*>
+                                                  const ItemTyp<InTyp,OutTyp>*,
+                                                  const ItemTyp<InTyp,OutTyp>*>
       {
       public:
          typedef const_iterator self_type;
-         typedef _DataTyp value_type;
-         typedef const _DataTyp& reference;
-         typedef const _DataTyp* pointer;
+         typedef ItemTyp<InTyp,OutTyp> value_type;
+         typedef const ItemTyp<InTyp,OutTyp>& reference;
+         typedef const ItemTyp<InTyp,OutTyp>* pointer;
          typedef int difference_type;
          typedef std::forward_iterator_tag iterator_category;
-         const_iterator(const std::vector<_DataTyp>& _data, order_const_iterator ptr)
+         const_iterator(const std::vector<ItemTyp<InTyp,OutTyp>>& _data, order_const_iterator ptr)
             : data(_data), it(ptr)
          {
          }
@@ -201,7 +204,7 @@ namespace flexnnet
          { return it != rhs.it; }
       private:
          order_const_iterator it;
-         const std::vector<_DataTyp>& data;
+         const std::vector<ItemTyp<InTyp,OutTyp>>& data;
       };
 
       iterator
@@ -229,11 +232,11 @@ namespace flexnnet
       }
 
    private:
-      void
-      write_exemplar(std::ostream& _ostrm, const _DataTyp& _exemplar) const;
+      //void
+      //write_exemplar(std::ostream& _ostrm, const ExemplarTyp& _exemplar) const;
 
    private:
-      std::vector<_DataTyp> data;
+      std::vector<ItemTyp<InTyp, OutTyp>> data;
       mutable std::vector<int> presentation_order;
 
       //mutable std::default_random_engine rand_engine;
@@ -241,46 +244,46 @@ namespace flexnnet
 
    };
 
-   template<class _InTyp, class _OutTyp>
-   DataSet<_InTyp, _OutTyp>::DataSet(void)
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
+   inline
+   DataSet<InTyp, OutTyp, ItemTyp>::DataSet(void)
    {
       std::random_device r;
       std::seed_seq seed2{r(), r(), r(), r(), r(), r(), r(), r()};
       rand_engine.seed(seed2);
    }
 
-
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    inline size_t
-   DataSet<_InTyp, _OutTyp>::size(void) const
+   DataSet<InTyp, OutTyp, ItemTyp>::size(void) const
    {
       return data.size();
    }
 
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    inline void
-   DataSet<_InTyp, _OutTyp>::clear(void)
+   DataSet<InTyp, OutTyp, ItemTyp>::clear(void)
    {
       data.clear();
       presentation_order.clear();
    }
 
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    inline void
-   DataSet<_InTyp, _OutTyp>::push_back(const _DataTyp& _data)
+   DataSet<InTyp, OutTyp, ItemTyp>::push_back(const ItemTyp<InTyp,OutTyp>& _data)
    {
       data.push_back(_data);
       presentation_order.push_back(data.size() - 1);
    }
 
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    inline void
-   DataSet<_InTyp, _OutTyp>::randomize_order(void) const
+   DataSet<InTyp, OutTyp, ItemTyp>::randomize_order(void) const
    {
       unsigned int new_ndx, temp;
       unsigned int sz = presentation_order.size();
 
-      std::uniform_int_distribution<int> uniform_dist(1, sz-1);
+      std::uniform_int_distribution<int> uniform_dist(1, sz - 1);
       for (unsigned int ndx = 0; ndx < sz; ndx++)
       {
          new_ndx = uniform_dist(rand_engine);
@@ -297,9 +300,9 @@ namespace flexnnet
       }
    };
 
-   template<class _InTyp, class _OutTyp>
+   template<class InTyp, class OutTyp, template<class,class> class ItemTyp>
    inline void
-   DataSet<_InTyp, _OutTyp>::normalize_order(void) const
+   DataSet<InTyp, OutTyp, ItemTyp>::normalize_order(void) const
    {
       presentation_order.resize(data.size());
       for (size_t i = 0; i < presentation_order.size(); i++)
