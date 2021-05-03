@@ -53,9 +53,11 @@ add_executable(test_nn_basic_training
         include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
         nn_basic_training_tests/MockNN.h
         nn_basic_training_tests/SimpleBinaryClassifierDataSet.h
+        nn_basic_training_tests/BoundedRandomWalkDataSet.h
         nn_basic_training_tests/SupervisedTrainerTestFixture.h
         nn_basic_training_tests/TrainerConfigTests.h
         nn_basic_training_tests/test_main.cpp
-        nn_basic_training_tests/ClassifierTrainingTests.h)
+        nn_basic_training_tests/ClassifierTrainingTests.h
+        )
 target_link_libraries(test_nn_basic_training gtest flexneuralnet)
 add_test(NAME test_nn_basic_training COMMAND test_main)

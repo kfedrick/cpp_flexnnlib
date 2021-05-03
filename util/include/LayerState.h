@@ -15,13 +15,13 @@ namespace flexnnet
       LayerState();
       LayerState(size_t _out_sz, size_t _rawin_sz);
       LayerState(const LayerState& _state);
-      LayerState(LayerState&& _state);
+      //LayerState(LayerState&& _state);
       ~LayerState();
 
       void resize(size_t _out_sz, size_t _rawin_sz);
       
       LayerState& operator=(const LayerState& _state);
-      LayerState& operator=(LayerState&& _state);
+      //LayerState& operator=(LayerState&& _state);
       
    public:
       // The cached value of the most recent raw input value.
@@ -58,7 +58,7 @@ namespace flexnnet
 
    private:
       void copy(const LayerState& _state);
-      void copy(LayerState&& _state);
+      //void copy(LayerState&& _state);
    };
 
    inline
@@ -85,12 +85,12 @@ namespace flexnnet
       return *this;
    }
 
-   inline
+/*   inline
    LayerState& LayerState::operator=(LayerState&& _state)
    {
       copy(_state);
       return *this;
-   }
+   }*/
 
    inline
    void LayerState::copy(const LayerState& _state)
@@ -109,7 +109,7 @@ namespace flexnnet
       dE_dx = _state.dE_dx;
    }
 
-   inline
+/*   inline
    void LayerState::copy(LayerState&& _state)
    {
       outputv = std::forward<const std::valarray<double>>(_state.outputv);
@@ -124,7 +124,7 @@ namespace flexnnet
       dE_dy = std::forward<const std::valarray<double>>(_state.dE_dy);
       dE_dnet = std::forward<const std::valarray<double>>(_state.dE_dnet);
       dE_dx = std::forward<const std::valarray<double>>(_state.dE_dx);
-   }
+   }*/
 }
 
 #endif //FLEX_NEURALNET_LAYERSTATE_H_

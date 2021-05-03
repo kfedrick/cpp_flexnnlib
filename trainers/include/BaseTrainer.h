@@ -64,10 +64,11 @@ namespace flexnnet
       void accumulate_weight_updates(const std::string& _id, const Array2D<double>& _deltaw);
 
    protected:
+      TrainingRecord training_record;
       NNTyp& nnet;
 
    private:
-      // Cached basic_layer weights (e.g. used to back out weight changes)
+      // Cached layer weights (e.g. used to back out weight changes)
       std::map<std::string, NetworkWeights> cached_layer_weights;
 
       // Cumulative NN weight updates prior to application

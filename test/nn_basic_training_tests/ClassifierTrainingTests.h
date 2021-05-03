@@ -27,8 +27,11 @@
 #include <NetworkLayerImpl.h>
 #include <BaseNeuralNet.h>
 #include <NeuralNet.h>
-#include <SuperviseTrainingAlgo.h>
+#include <SupervisedTrainingAlgo.h>
 #include <ConstantLearningRate.h>
+#include <ExemplarSeries.h>
+#include <DeepRLAlgo.h>
+#include <CartesianCoord.h>
 
 #include "SimpleBinaryClassifierDataSet.h"
 
@@ -40,6 +43,9 @@ using flexnnet::NeuralNetTopology;
 using flexnnet::BaseNeuralNet;
 using flexnnet::NetworkLayerImpl;
 using flexnnet::NeuralNet;
+using flexnnet::CartesianCoord;
+using flexnnet::ExemplarSeries;
+using flexnnet::Exemplar;
 
 
 TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
@@ -106,13 +112,14 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   NeuralNet,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(newnnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    NeuralNet,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(newnnet);
 
    trainer.set_saved_nnet_limit(20);
    trainer.set_batch_mode(0);
@@ -254,13 +261,14 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   NeuralNet,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(newnnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    NeuralNet,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(newnnet);
 
    trainer.set_saved_nnet_limit(20);
    trainer.set_batch_mode(0);
@@ -433,13 +441,14 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   NeuralNet,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(newnnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    NeuralNet,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(newnnet);
 
    trainer.set_saved_nnet_limit(20);
    trainer.set_batch_mode(0);
@@ -621,13 +630,14 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   NeuralNet,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(newnnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    NeuralNet,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(newnnet);
 
    trainer.set_saved_nnet_limit(20);
    trainer.set_batch_mode(0);
@@ -734,6 +744,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    // Performance on the test set should meet expected goal.
    EXPECT_LE(tst_perf, ERROR_GOAL) << "test set performance should match expected goal.";
 }
+
 
 
 #endif //_CLASSIFIERTRAININGTESTS_H_

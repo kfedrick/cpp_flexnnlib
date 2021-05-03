@@ -9,69 +9,108 @@
 
 namespace flexnnet
 {
-   /**
-    * The temporal-difference training mode.
-    *    FINAL_COST       - predict final reinforcement signal if episode
-    *    CUMULATIVE_COST  - predict cumulative reinforcement signal over episode
-    */
-   enum TDForecastMode
-   {
-      FINAL_COST, CUMULATIVE_COST
-   };
 
-   template<TDForecastMode _MODE>
-   class TDTrainerConfig : TrainerConfig
+   class TDTrainerConfig
    {
    public:
-      static constexpr double DEFAULT_TD_DISCOUNT = 0.2;
-      static const TDForecastMode td_forecast_mode{_MODE};
+      enum TD_TRAINING_MODE { FINAL_COST, COST_TO_GO };
+      static constexpr double DEFAULT_GAMMA = 0.2;
+      static constexpr double DEFAULT_LAMBDA = 0.4;
 
    public:
       /**
-       * Set the value of the cumulative temporal-difference error discount
-       * discount parameter, gamma : (0 <= gamma <= 1.0)
        *
-       * @param _gamma
+       * @param _mode
        */
-      void set_td_discount(double _gamma);
+      void set_td_mode(TD_TRAINING_MODE _mode);
 
       /**
-       * Get the value of the cumulative temporal-difference error discount
-       * paramater, gamma.
+       * Set the value of the cumulative temporal-difference reinforcement
+       * discount parameter, gamma : (0 <= get_gamma <= 1.0)
        *
-       * @return
+       * @param _val
        */
-      constexpr double td_discount(void);
+      void set_gamma(double _val);
+
+      /**
+       * Set the value of the eligibility trace discount parameter
+       * lambda : (0 <= get_lambda <= 1.0)
+       *
+       * @param _val
+       */
+      void set_lambda(double _val);
+
+      constexpr TD_TRAINING_MODE get_td_mode();
+
+      constexpr double get_gamma();
+
+      constexpr double get_lambda();
 
    private:
+
+      TD_TRAINING_MODE td_mode{COST_TO_GO};
 
       // td_discount is the discount parameter for cumulative temporal-difference
       // learning error and their variants. It controls how fast older reinforcement
       // signals are discounted, with: 0 <= td_discount <= 1.0
       //
-      double gamma{DEFAULT_TD_DISCOUNT};
+      double gamma{DEFAULT_GAMMA};
+
+      double lambda{DEFAULT_LAMBDA};
+
    };
 
-   template<TDForecastMode _MODE>
-   inline void TDTrainerConfig<_MODE>::set_td_discount(double _gamma)
+   inline
+   constexpr TDTrainerConfig::TD_TRAINING_MODE TDTrainerConfig::get_td_mode()
    {
-      if (_gamma < 0 || _gamma > 1.0)
-      {
-         std::ostringstream err_str;
-         err_str
-            << "Error : TDTrainerConfig.set_td_discount() - illegal value " << _gamma << "\n";
-         throw std::invalid_argument(err_str.str());
-      }
-
-      gamma = _gamma;
+      return td_mode;
    }
 
-   template<TDForecastMode _MODE>
-   inline constexpr double TDTrainerConfig<_MODE>::td_discount(void)
+   inline
+   constexpr double TDTrainerConfig::get_gamma()
    {
       return gamma;
    }
 
+   inline
+   constexpr double TDTrainerConfig::get_lambda()
+   {
+      return lambda;
+   }
+
+   inline
+   void TDTrainerConfig::set_td_mode(TD_TRAINING_MODE _mode)
+   {
+      td_mode = _mode;
+   }
+
+   inline
+   void TDTrainerConfig::set_gamma(double _val)
+   {
+      if (_val < 0 || _val > 1.0)
+      {
+         std::ostringstream err_str;
+         err_str
+            << "Error : TDTrainerConfig.set_gamma() - illegal value " << _val << "\n";
+         throw std::invalid_argument(err_str.str());
+      }
+
+      gamma = _val;
+   }
+
+   inline
+   void TDTrainerConfig::set_lambda(double _val)
+   {
+      if (_val < 0 || _val > 1.0)
+      {
+         std::ostringstream err_str;
+         err_str
+            << "Error : TDTrainerConfig.set_lambda() - illegal value " << _val << "\n";
+         throw std::invalid_argument(err_str.str());
+      }
+
+      lambda = _val;
+   }
 }
 
 #endif //FLEX_NEURALNET_TDTRAINERCONFIG_H_

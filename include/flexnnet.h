@@ -11,6 +11,7 @@
 #include <map>
 #include <valarray>
 #include <LayerWeights.h>
+#include <LayerState.h>
 
 namespace flexnnet
 {
@@ -20,12 +21,9 @@ namespace flexnnet
    typedef std::map<std::string, std::valarray<double>> ValarrMap;
    typedef unsigned int _index_typ;
    typedef std::map<std::string, flexnnet::LayerWeights> NetworkWeights;
+   typedef std::map<std::string, flexnnet::LayerState> NetworkState;
 
    typedef std::tuple<double, double> EvalResults;
-
-   // Alias declaration for Exemplar (e.g. Exemplar<ValarrayMap,ValarrayMap>)
-   template <typename _InTyp, typename _OutTyp>
-   using Exemplar = std::pair<_InTyp, _OutTyp>;
 }
 
 #include <flexnnet_utils.h>

@@ -83,6 +83,7 @@ namespace flexnnet
    size_t
    ValarrayMap::size() const
    {
+      init_virtual_vector();
       return virtual_vector.size();
    }
 
@@ -90,6 +91,7 @@ namespace flexnnet
    std::valarray<double>&
    ValarrayMap::operator[](const std::string& _key)
    {
+      stale = true;
       return data[_key];
    }
 
@@ -97,6 +99,7 @@ namespace flexnnet
    std::valarray<double>&
    ValarrayMap::at(const std::string& _key)
    {
+      stale = true;
       return data.at(_key);
    }
 

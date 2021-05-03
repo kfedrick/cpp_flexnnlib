@@ -70,11 +70,13 @@ ValarrayMap::init_virtual_vector(void) const
 
 void ValarrayMap::concat_virtual_vector(void) const
 {
-   if (!stale)
-      return;
+   //if (!stale)
+   //   return;
+
+   init_virtual_vector();
 
    size_t vndx = 0;
-   for (auto entry : data)
+   for (auto& entry : data)
       for (auto i = 0; i < entry.second.size(); i++)
          virtual_vector[vndx++] = entry.second[i];
 

@@ -11,7 +11,7 @@
 using flexnnet::DataSet;
 using flexnnet::ValarrayMap;
 
-class SimpleBinaryClassifierDataSet : public DataSet<ValarrayMap, ValarrayMap>
+class SimpleBinaryClassifierDataSet : public DataSet<ValarrayMap, ValarrayMap, Exemplar>
 {
 public:
    SimpleBinaryClassifierDataSet();

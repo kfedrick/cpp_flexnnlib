@@ -36,6 +36,15 @@ namespace flexnnet
       using size_ref = Dimensions&;
       using const_size_ref = const Dimensions&;
 
+      template<class T1>
+      friend Array2D<T1> operator+(const Array2D<T1>& _larr,
+                                  const Array2D<T1>& _rarr);
+      template<class T1>
+      friend Array2D<T1> operator*(T1 _val, const Array2D<T1>& _rarr);
+
+      template<class T1>
+      friend Array2D<T1> operator*(const Array2D<T1>& _larr, T1 _val);
+
    public:
 
       /* *****************************************
@@ -46,6 +55,7 @@ namespace flexnnet
       Array2D(size_t _rows, size_t _cols);
       Array2D(const std::vector<std::vector<T> >& _arr);
       Array2D(const Array2D<T>& _arr);
+      ~Array2D();
 
       void resize(size_t _rows, size_t _cols, T _val = T());
 
@@ -105,6 +115,10 @@ namespace flexnnet
    {
       dimensions = {.rows=0, .cols=0};
       set(_arr);
+   }
+
+   template<class T> inline Array2D<T>::~Array2D()
+   {
    }
 
    template<class T> inline
@@ -297,6 +311,22 @@ namespace flexnnet
 
       Array2D<T> ret_arr(_larr);
       ret_arr += _rarr;
+
+      return ret_arr;
+   }
+
+   template<class T> inline Array2D<T> operator*(T _val, const Array2D<T>& _rarr)
+   {
+      Array2D<T> ret_arr(_rarr);
+      ret_arr *= _val;
+
+      return ret_arr;
+   }
+
+   template<class T> inline Array2D<T> operator*(const Array2D<T>& _larr, T _val)
+   {
+      Array2D<T> ret_arr(_larr);
+      ret_arr *= _val;
 
       return ret_arr;
    }

@@ -1,6 +1,7 @@
 {
   "input_type":"flexnnet::CartesianCoord",
   "output_type":"flexnnet::CartesianCoord",
+  "item_type":"flexnnet::Exemplar<flexnnet::CartesianCoord, flexnnet::CartesianCoord>",
   "exemplars":
   [
     {

@@ -15,6 +15,7 @@ namespace flexnnet
    {
    public:
       void clear(void);
+      void new_series(void);
       double calc_fitness(void);
       const ValarrMap& calc_error_gradient(const _OutTyp& _target, const _OutTyp& _nnout);
 
