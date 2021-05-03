@@ -19,7 +19,7 @@
 #include <ValarrayMap.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
-#include <SuperviseTrainingAlgo.h>
+#include <SupervisedTrainingAlgo.h>
 #include <ConstantLearningRate.h>
 #include "MockNN.h"
 
@@ -37,13 +37,14 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   MockNN,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(nnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    MockNN,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(nnet);
 
    EXPECT_NO_THROW("Unexpected exception thrown.");
 }
@@ -62,13 +63,14 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SuperviseTrainingAlgo<flexnnet::ValarrayMap,
-                                   flexnnet::ValarrayMap,
-                                   MockNN,
-                                   flexnnet::DataSet,
-                                   flexnnet::Evaluator,
-                                   flexnnet::RMSEFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(nnet);
+   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
+                                    flexnnet::ValarrayMap,
+                                    Exemplar,
+                                    MockNN,
+                                    flexnnet::DataSet,
+                                    flexnnet::Evaluator,
+                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::ConstantLearningRate> trainer(nnet);
 
    size_t BATCH = 5;
    trainer.set_batch_mode(BATCH);

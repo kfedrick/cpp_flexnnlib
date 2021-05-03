@@ -40,8 +40,9 @@ namespace flexnnet
       // The number of runs reaching the minimum error criteria
       unsigned int successful_runs{0};
 
+      // Working cache to hold performance for added records
+      std::vector<double> temp_performance;
       double sum_performance{0};
-      double sum_sqr_performance{0};
 
       bool stale{false};
       mutable double mean_performance{0};
@@ -51,11 +52,11 @@ namespace flexnnet
    inline
    void TrainingReport::clear(void)
    {
+      temp_performance.clear();
       records.clear();
       training_runs = 0;
       successful_runs = 0;
       sum_performance = 0;
-      sum_sqr_performance = 0;
       stale = false;
    }
 
@@ -114,8 +115,8 @@ namespace flexnnet
          successful_runs++;
 
       // Accumulate statistics
+      temp_performance.push_back(_rec.best_performance);
       sum_performance += _rec.best_performance;
-      sum_sqr_performance += _rec.best_performance * _rec.best_performance;
 
       // Insert the new record and truncate the last record
       // to reduce the set of records to max size. This will
@@ -146,7 +147,10 @@ namespace flexnnet
       {
          mean_performance = sum_performance / training_runs;
 
-         double variance = sum_sqr_performance / training_runs - mean_performance * mean_performance;
+         double variance = 0;
+         for (auto& perf : temp_performance)
+            variance = (mean_performance - perf) * (mean_performance - perf);
+         variance /= training_runs;
          stdev_performance = sqrt(variance);
       }
    }

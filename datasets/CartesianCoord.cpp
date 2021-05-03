@@ -12,6 +12,8 @@ CartesianCoord::CartesianCoord()
 
    kernel_coord["x"] = std::valarray<double>(N);
    kernel_coord["y"] = std::valarray<double>(N);
+
+   virtual_vector.resize(1);
 }
 
 CartesianCoord::CartesianCoord(double _x, double _y)
@@ -21,6 +23,9 @@ CartesianCoord::CartesianCoord(double _x, double _y)
 
    kernel_coord["x"] = std::valarray<double>(N);
    kernel_coord["y"] = std::valarray<double>(N);
+
+   virtual_vector.resize(1);
+   virtual_vector[0] = _x;
 }
 
 const std::valarray<double>& CartesianCoord::value(void) const

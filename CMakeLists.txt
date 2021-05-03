@@ -60,9 +60,11 @@ add_library(flexneuralnet
         layers/transfer_functions/include/NetSumLayer.h layers/transfer_functions/NetSumLayer.cpp
         layers/transfer_functions/include/EuclideanDistLayer.h layers/transfer_functions/EuclideanDistLayer.cpp
         trainers/include/TrainerConfig.h
+        trainers/include/TDTrainerConfig.h
         datasets/include/DataSet.h
         trainers/include/TrainingRecord.h
         evaluators/include/Evaluator.h
+        evaluators/include/TDEvaluator.h
         evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
         datasets/include/NNetIOInterface.h
@@ -92,10 +94,20 @@ add_library(flexneuralnet
         network/include/BaseNeuralNet.h
         network/include/NeuralNet.h
         trainers/include/BaseTrainer.h
-        trainers/include/SuperviseTrainingAlgo.h
+        trainers/include/SupervisedTrainingAlgo.h
         trainers/include/LearningRatePolicy.h
         trainers/include/ConstantLearningRate.h
-        datasets/include/Exemplar.h datasets/include/ExemplarSeries.cpp datasets/include/ExemplarSeries.h)
+        datasets/include/Exemplar.h
+        datasets/include/ExemplarSeries.h
+        trainers/include/DeepRLAlgo.h
+        evaluators/include/TDFinalFitnessFunc.h
+        evaluators/include/TDCostToGoFitnessFunc.h
+        evaluators/include/TDEvaluator.h
+        evaluators/include/TDEvaluatorConfig.h
+        datasets/include/ReinforcementValue.h
+        network/include/NetworkInput.h
+        network/include/NetworkOutput.cpp
+        network/include/NetworkOutput.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

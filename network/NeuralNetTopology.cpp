@@ -19,17 +19,19 @@ NeuralNetTopology::NeuralNetTopology(const NeuralNetTopology& _topo)
 NeuralNetTopology::~NeuralNetTopology()
 {}
 
-void NeuralNetTopology::clear(void)
+void
+NeuralNetTopology::clear(void)
 {
    network_layers.clear();
    ordered_layers.clear();
    network_output_layers.clear();
 }
 
-void NeuralNetTopology::copy(const NeuralNetTopology& _topo)
+void
+NeuralNetTopology::copy(const NeuralNetTopology& _topo)
 {
    // Shallow clone of all network layer layer objects
-  clone_layers(_topo.network_layers);
+   clone_layers(_topo.network_layers);
 
    // Finish deep copy of network layers by reconstructing the layer
    // connection info
@@ -37,11 +39,14 @@ void NeuralNetTopology::copy(const NeuralNetTopology& _topo)
    {
       std::string id = it->first;
       std::shared_ptr<NetworkLayer>& network_layer = it->second;
-      const std::shared_ptr<NetworkLayer>& src_network_layer = _topo.network_layers.at(id);
+      const std::shared_ptr<NetworkLayer>
+         & src_network_layer = _topo.network_layers.at(id);
 
       // Copy layer activation/backprop connections
-      copy_layer_connections(network_layer->activation_connections, src_network_layer->activation_connections);
-      copy_layer_connections(network_layer->backprop_connections, src_network_layer->backprop_connections);
+      copy_layer_connections(network_layer->activation_connections, src_network_layer
+         ->activation_connections);
+      copy_layer_connections(network_layer->backprop_connections, src_network_layer
+         ->backprop_connections);
 
       // Copy external input fields
       network_layer->external_input_fields = src_network_layer->external_input_fields;
@@ -51,7 +56,8 @@ void NeuralNetTopology::copy(const NeuralNetTopology& _topo)
    }
 
    // Add the network layer copies to network_output_layers
-   const std::vector<std::shared_ptr<NetworkLayer>>& netout_layers = _topo.network_output_layers;
+   const std::vector<std::shared_ptr<NetworkLayer>>
+      & netout_layers = _topo.network_output_layers;
    for (auto it = netout_layers.begin(); it != netout_layers.end(); it++)
    {
       std::string id = (*it)->name();
@@ -67,21 +73,24 @@ void NeuralNetTopology::copy(const NeuralNetTopology& _topo)
    }
 }
 
-void NeuralNetTopology::clone_layers(const NETWORK_LAYER_MAP_TYP& _layers)
+void
+NeuralNetTopology::clone_layers(const NETWORK_LAYER_MAP_TYP& _layers)
 {
    network_layers.clear();
 
-   for (auto it = _layers.begin(); it != _layers.end(); it++)
+   for (auto& it : _layers)
    {
-      std::string id = it->first;
-      std::shared_ptr<NetworkLayer> src_layer_ptr = it->second;
+      std::string id = it.first;
+      std::shared_ptr<NetworkLayer> src_layer_ptr = it.second;
 
       // Clone network layer
       network_layers[id] = src_layer_ptr->clone();
    }
 }
 
-void NeuralNetTopology::copy_layer_connections(std::vector<LayerConnRecord>& _to, const std::vector<LayerConnRecord>& _from)
+void
+NeuralNetTopology::copy_layer_connections(std::vector<LayerConnRecord>& _to, const std::vector<
+   LayerConnRecord>& _from)
 {
    _to.clear();
 
