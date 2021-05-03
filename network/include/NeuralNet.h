@@ -9,7 +9,7 @@
 
 namespace flexnnet
 {
-   template<class _InType, class _OutType>
+   template<class InTyp, class OutTyp>
    class NeuralNet : public BaseNeuralNet
    {
 
@@ -19,52 +19,60 @@ namespace flexnnet
 
    public:
 
-      const _OutType&
-      activate(const _InType& _nninput);
+      const OutTyp&
+      activate(const InTyp& _nninput);
 
-
-      const _InType&
+      const InTyp&
       get_network_input(void) const;
 
+      const OutTyp&
+      value(void) const;
+
    private:
-      // network_output_pattern - Cached value for the most recent network activation
-      //
-      _OutType network_output_pattern;
+      // network_output - Cached value for the most recent network activation
+      OutTyp network_output;
 
       // network_input - Cached value for the most recent network input value
-      //
-      _InType network_input;
+      InTyp network_input;
    };
 
-   template<class _InType, class _OutType>
-   const _OutType&
-   NeuralNet<_InType, _OutType>::activate(const _InType& _nninput)
+   template<class InTyp, class OutTyp>
+   const OutTyp&
+   NeuralNet<InTyp, OutTyp>::activate(const InTyp& _nninput)
    {
       BaseNeuralNet::activate(_nninput.value_map());
 
-      network_output_pattern.parse(value_map());
-      return network_output_pattern;
+      network_output.parse(value_map());
+      return network_output;
    }
 
-   template<class _InType, class _OutType>
-   NeuralNet<_InType,
-             _OutType>::NeuralNet(const BaseNeuralNet& _nnet)
+   template<class InTyp, class OutTyp>
+   NeuralNet<InTyp,
+             OutTyp>::NeuralNet(const BaseNeuralNet& _nnet)
       : BaseNeuralNet(_nnet)
    {
 
    }
 
-   template<class _InType, class _OutType>
-   NeuralNet<_InType, _OutType>::~NeuralNet()
+   template<class InTyp, class OutTyp>
+   NeuralNet<InTyp, OutTyp>::~NeuralNet()
    {
 
    }
 
-   template<class _InType, class _OutType>
-   const _InType&
-   NeuralNet<_InType, _OutType>::get_network_input(void) const
+   template<class InTyp, class OutTyp>
+   const InTyp&
+
+   NeuralNet<InTyp, OutTyp>::get_network_input(void) const
    {
       return network_input;
+   }
+
+   template<class InTyp, class OutTyp>
+   const OutTyp&
+   NeuralNet<InTyp, OutTyp>::value(void) const
+   {
+      return network_output;
    }
 }
 

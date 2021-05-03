@@ -17,7 +17,7 @@ LayerState::LayerState(const LayerState& _state)
    copy(_state);
 }
 
-LayerState::LayerState(LayerState&& _state)
+/*LayerState::LayerState(LayerState&& _state)
 {
    copy(_state);
-}
+}*/
