@@ -9,7 +9,7 @@
 #include <map>
 #include <valarray>
 #include <flexnnet.h>
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 
 // Forward declaration for CartesianCoord
 namespace flexnnet { class CartesianCoord; }
@@ -20,7 +20,7 @@ std::istream& operator>>(std::istream& _istrm, flexnnet::CartesianCoord& _coord)
 
 namespace flexnnet
 {
-   class CartesianCoord : public NNetIOInterface
+   class CartesianCoord : public StateView
    {
    public:
       CartesianCoord();
@@ -32,7 +32,7 @@ namespace flexnnet
 
       const flexnnet::ValarrMap& value_map(void) const override;
 
-      void parse(const flexnnet::ValarrMap& _vmap) override;
+      void set(const flexnnet::ValarrMap& _vmap) override;
 
       CartesianCoord& operator=(const CartesianCoord& _value);
 

@@ -16,6 +16,7 @@
 #define RAPIDJSON_ALLOCATORS_H_
 
 #include "rapidjson.h"
+#include "Reinforcement.h"
 
 RAPIDJSON_NAMESPACE_BEGIN
 

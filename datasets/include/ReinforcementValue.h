@@ -9,11 +9,11 @@
 #include <map>
 #include <valarray>
 #include <flexnnet.h>
-#include <NNetIOInterface.h>
+#include <StateView.h>
 
 namespace flexnnet
 {
-   class ReinforcementValue : public NNetIOInterface
+   class ReinforcementValue : public StateView
    {
    public:
       ReinforcementValue();
@@ -25,7 +25,7 @@ namespace flexnnet
 
       const flexnnet::ValarrMap& value_map(void) const override;
 
-      void parse(const flexnnet::ValarrMap& _vmap) override;
+      void parse(const flexnnet::ValarrMap& _vmap);
 
    private:
       ValarrMap reinforcement_value_map;

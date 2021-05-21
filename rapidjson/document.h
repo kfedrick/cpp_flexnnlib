@@ -22,6 +22,7 @@
 #include "internal/strfunc.h"
 #include "memorystream.h"
 #include "encodedstream.h"
+#include "Reinforcement.h"
 #include <new>      // placement new
 #include <limits>
 
@@ -2878,10 +2879,10 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //!@}
 
-      //!@name Handling parse errors
+      //!@name Handling activate errors
       //!@{
 
-      //! Whether a parse error has occurred in the last parsing.
+      //! Whether a activate error has occurred in the last parsing.
       bool HasParseError() const
       { return parseResult_.IsError(); }
 
@@ -2893,15 +2894,15 @@ RAPIDJSON_NAMESPACE_BEGIN
       size_t GetErrorOffset() const
       { return parseResult_.Offset(); }
 
-      //! Implicit conversion to get the last parse result
+      //! Implicit conversion to get the last activate result
 #ifndef __clang // -Wdocumentation
-      /*! \return \ref ParseResult of the last parse operation
+      /*! \return \ref ParseResult of the last activate operation
 
           \code
             Document doc;
             ParseResult ok = doc.Parse(json);
             if (!ok)
-              printf( "JSON parse error: %s (%u)\n", GetParseError_En(ok.Code()), ok.Offset());
+              printf( "JSON activate error: %s (%u)\n", GetParseError_En(ok.Code()), ok.Offset());
           \endcode
        */
 #endif

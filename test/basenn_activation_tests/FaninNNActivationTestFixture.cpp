@@ -3,6 +3,7 @@
 //
 
 #include "FaninNNActivationTestFixture.h"
+#include "Reinforcement.h"
 
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>

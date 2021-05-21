@@ -36,28 +36,30 @@ namespace flexnnet
       InTyp network_input;
    };
 
-   template<class InTyp, class OutTyp>
-   const OutTyp&
-   NeuralNet<InTyp, OutTyp>::activate(const InTyp& _nninput)
-   {
-      BaseNeuralNet::activate(_nninput.value_map());
 
-      network_output.parse(value_map());
-      return network_output;
-   }
 
    template<class InTyp, class OutTyp>
    NeuralNet<InTyp,
              OutTyp>::NeuralNet(const BaseNeuralNet& _nnet)
       : BaseNeuralNet(_nnet)
    {
-
+      network_output = OutTyp(network_output_layers);
    }
 
    template<class InTyp, class OutTyp>
    NeuralNet<InTyp, OutTyp>::~NeuralNet()
    {
 
+   }
+
+   template<class InTyp, class OutTyp>
+   const OutTyp&
+   NeuralNet<InTyp, OutTyp>::activate(const InTyp& _nninput)
+   {
+      BaseNeuralNet::activate(_nninput.value_map());
+
+      network_output.activate();
+      return network_output;
    }
 
    template<class InTyp, class OutTyp>

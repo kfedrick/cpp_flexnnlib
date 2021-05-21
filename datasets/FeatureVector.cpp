@@ -3,49 +3,49 @@
 //
 
 #include <iostream>
-#include "ValarrayMap.h"
+#include "FeatureVector.h"
 
-using flexnnet::ValarrayMap;
+using flexnnet::FeatureVector;
 
-ValarrayMap::ValarrayMap(void)
+FeatureVector::FeatureVector(void)
 {
    stale = true;
 }
 
-ValarrayMap::ValarrayMap(const ValarrayMap& _valarrmap)
+FeatureVector::FeatureVector(const FeatureVector& _valarrmap)
 {
    copy(_valarrmap);
 }
 
-ValarrayMap::ValarrayMap(const ValarrMap& _values)
+FeatureVector::FeatureVector(const ValarrMap& _values)
 {
    stale = true;
    set(_values);
 }
 
-ValarrayMap::~ValarrayMap()
+FeatureVector::~FeatureVector()
 {
 }
 
-void ValarrayMap::set(const ValarrMap& _values)
+void FeatureVector::set(const ValarrMap& _values)
 {
    data = _values;
    init_virtual_vector();
 }
 
-ValarrayMap& ValarrayMap::operator=(const ValarrayMap& _valarrmap)
+FeatureVector& FeatureVector::operator=(const FeatureVector& _valarrmap)
 {
    return copy(_valarrmap);
 }
 
-ValarrayMap& ValarrayMap::operator=(const ValarrMap& _values)
+FeatureVector& FeatureVector::operator=(const ValarrMap& _values)
 {
    stale = true;
    set(_values);
    return *this;
 }
 
-ValarrayMap& ValarrayMap::copy(const ValarrayMap& _valarrmap)
+FeatureVector& FeatureVector::copy(const FeatureVector& _valarrmap)
 {
    data = _valarrmap.data;
    stale = _valarrmap.stale;
@@ -55,7 +55,7 @@ ValarrayMap& ValarrayMap::copy(const ValarrayMap& _valarrmap)
 }
 
 void
-ValarrayMap::init_virtual_vector(void) const
+FeatureVector::init_virtual_vector(void) const
 {
    if (!stale)
       return;
@@ -68,7 +68,7 @@ ValarrayMap::init_virtual_vector(void) const
    stale = false;
 }
 
-void ValarrayMap::concat_virtual_vector(void) const
+void FeatureVector::concat_virtual_vector(void) const
 {
    //if (!stale)
    //   return;

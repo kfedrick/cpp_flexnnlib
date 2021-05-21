@@ -67,12 +67,12 @@ add_library(flexneuralnet
         evaluators/include/TDEvaluator.h
         evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
-        datasets/include/NNetIOInterface.h
+        datasets/include/StateView.h
         util/include/JSONStream.h util/JSONStream.cpp
         util/include/Globals.h util/Globals.cpp
         datasets/stream/CartesianCoordStream.cpp
         datasets/stream/include/DataSetStream.h
-        datasets/include/ValarrayMap.h datasets/ValarrayMap.cpp
+        datasets/include/FeatureVector.h datasets/FeatureVector.cpp
         evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
         datasets/stream/ValarrayMapStream.cpp
         trainers/include/DeltaBarDeltaLearningRate.h
@@ -106,8 +106,18 @@ add_library(flexneuralnet
         evaluators/include/TDEvaluatorConfig.h
         datasets/include/ReinforcementValue.h
         network/include/NetworkInput.h
-        network/include/NetworkOutput.cpp
-        network/include/NetworkOutput.h)
+        network/include/NetworkOutput.h
+        envsimulator/include/ActionView.h
+        envsimulator/include/ESimulator.h
+        ac-network/BaseActorCriticNetwork.cpp
+        ac-network/include/BaseActorCriticNetwork.h
+        envsimulator/include/Environment.h
+        util/include/Thing.h
+        util/include/Thang.h
+        network/include/NetworkReinforcement.h
+        network/include/VariadicNetworkInput.h
+        datasets/include/Vectorizable.h
+        network/include/EnvironReinforcement.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -116,12 +126,15 @@ target_include_directories(flexneuralnet PUBLIC
         datasets/include
         datasets/stream
         datasets/stream/include
+        envsimulator/include
         include
         layers
         layers/include
         layers/transfer_functions/include
         network
         network/include
+        ac-network
+        ac-network/include
         evaluators
         evaluators/include
         trainers

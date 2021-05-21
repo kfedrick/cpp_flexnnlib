@@ -6,13 +6,14 @@
 #define FLEX_NEURALNET_NETWORKINPUT_H_
 
 #include <flexnnet.h>
+#include <Vectorizable.h>
 
 namespace flexnnet
 {
    class NetworkInput
    {
    public:
-      virtual const ValarrMap& get_nnet_encoding() = 0;
+      virtual const ValarrMap& value_map() const = 0;
    };
 }
 #endif //FLEX_NEURALNET_NETWORKINPUT_H_

@@ -11,6 +11,7 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include "TestLayer.h"
+#include "Reinforcement.h"
 
 using flexnnet::Array2D;
 using flexnnet::OldDatum;

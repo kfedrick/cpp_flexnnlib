@@ -3,14 +3,14 @@
 //
 
 
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 #include "picojson.h"
 
-using flexnnet::ValarrayMap;
+using flexnnet::FeatureVector;
 using flexnnet::ValarrMap;
 
 std::ostream&
-operator<<(std::ostream& _ostrm, const ValarrayMap& _vmap)
+operator<<(std::ostream& _ostrm, const FeatureVector& _vmap)
 {
    const ValarrMap& vmap = _vmap.value_map();
 
@@ -39,7 +39,7 @@ operator<<(std::ostream& _ostrm, const ValarrayMap& _vmap)
 }
 
 std::istream&
-operator>>(std::istream& _istrm, ValarrayMap& _coord)
+operator>>(std::istream& _istrm, FeatureVector& _coord)
 {
    picojson::value picoval;
 

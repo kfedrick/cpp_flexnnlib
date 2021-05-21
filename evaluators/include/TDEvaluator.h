@@ -9,6 +9,7 @@
 #include <Exemplar.h>
 #include <ExemplarSeries.h>
 #include <BasicEvalConfig.h>
+#include "Reinforcement.h"
 
 namespace flexnnet
 {
@@ -145,7 +146,7 @@ namespace flexnnet
 
       OutTyp zeronnout;
       ValarrMap vm({{"output",{0}}});
-      zeronnout.parse(vm);
+      zeronnout.activate(vm);
 
       OutTyp tgt = FitnessFunc<OutTyp>::calc_target(last_exemplar.second, zeronnout);
       FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);

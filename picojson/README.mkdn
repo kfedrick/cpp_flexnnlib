@@ -126,7 +126,7 @@ The code below parses a JSON string and prints the contents of the object.
 <pre>
 picojson::value v;
 
-// parse the input
+// activate the input
 std::cin &gt;&gt; v;
 std::string err = picojson::get_last_error();
 if (! err.empty()) {

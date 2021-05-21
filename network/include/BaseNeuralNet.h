@@ -45,6 +45,10 @@ namespace flexnnet
        */
       virtual const ValarrMap& activate(const ValarrMap& _input);
 
+      // TODO - Do this next - it's iterable and indexable if you know the order. Use index for input in base NN
+      //virtual const std::vector<std::pair<std::string,std::valarray<double>>>& activate2(const std::vector<std::valarray<double>>& _input);
+
+
       /**
        * Calculate the Jacobian for most recent network activation as the partial
        * derivatives of the specified gradient with respect to the weights. It

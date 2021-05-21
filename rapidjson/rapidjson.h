@@ -22,11 +22,11 @@
  */
 
 /*! \defgroup RAPIDJSON_CONFIG RapidJSON configuration
-    \brief Configuration macros for library features
+    \brief Configuration macros for library raw_features
 
-    Some RapidJSON features are configurable to adapt the library to a wide
+    Some RapidJSON raw_features are configurable to adapt the library to a wide
     variety of platforms, environments and usage scenarios.  Most of the
-    features can be configured in terms of overridden or predefined
+    raw_features can be configured in terms of overridden or predefined
     preprocessor macros at compile-time.
 
     Some additional customization is available in the \ref RAPIDJSON_ERRORS APIs.
@@ -533,7 +533,7 @@ RAPIDJSON_NAMESPACE_END
 #endif // RAPIDJSON_DIAG_*
 
 ///////////////////////////////////////////////////////////////////////////////
-// C++11 features
+// C++11 raw_features
 
 #ifndef RAPIDJSON_HAS_CXX11_RVALUE_REFS
 #if defined(__clang__)

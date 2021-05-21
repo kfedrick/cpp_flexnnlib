@@ -13,7 +13,7 @@
 #include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
 #include "DataSetStream.h"
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include "MockNN.h"
@@ -25,47 +25,47 @@ using flexnnet::NeuralNet;
 using flexnnet::Evaluator;
 using flexnnet::RMSEFitnessFunc;
 using flexnnet::CartesianCoord;
-using flexnnet::ValarrayMap;
+using flexnnet::FeatureVector;
 using flexnnet::Exemplar;
 
 TEST(TestEvaluator, Constructor)
 {
    std::cout << "***** Test Evaluator Constructor\n" << std::flush;
 
-   ValarrayMap a({{"a",{-1, 0, 0.5}}});
-   ValarrayMap b({{"b",{-1, 0, 0.5}}});
-   ValarrayMap c({{"c",{-1, 0, 0.5}}});
+   FeatureVector a({{"a", {-1, 0, 0.5}}});
+   FeatureVector b({{"b", {-1, 0, 0.5}}});
+   FeatureVector c({{"c", {-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(a, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(b, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(c, {}));
 
    BaseNeuralNet basenet;
-   NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 }
 
 TEST(TestEvaluator, OrderedSingleSampling)
 {
    std::cout << "***** Test Evaluator Normalized Ordering\n" << std::flush;
 
-   ValarrayMap a({{"a",{-1, 0, 0.5}}});
-   ValarrayMap b({{"b",{-1, 0, 0.5}}});
-   ValarrayMap c({{"c",{-1, 0, 0.5}}});
-   ValarrayMap d({{"d",{-1, 0, 0.5}}});
-   ValarrayMap e({{"e",{-1, 0, 0.5}}});
+   FeatureVector a({{"a", {-1, 0, 0.5}}});
+   FeatureVector b({{"b", {-1, 0, 0.5}}});
+   FeatureVector c({{"c", {-1, 0, 0.5}}});
+   FeatureVector d({{"d", {-1, 0, 0.5}}});
+   FeatureVector e({{"e", {-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(a, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(b, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(c, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(d, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(e, {}));
 
    BaseNeuralNet basenet;
-   NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
    eval.set_subsample_fraction(0.25);
@@ -76,22 +76,22 @@ TEST(TestEvaluator, RandomizedSingleSampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering\n" << std::flush;
 
-   ValarrayMap a({{"a",{-1, 0, 0.5}}});
-   ValarrayMap b({{"b",{-1, 0, 0.5}}});
-   ValarrayMap c({{"c",{-1, 0, 0.5}}});
-   ValarrayMap d({{"d",{-1, 0, 0.5}}});
-   ValarrayMap e({{"e",{-1, 0, 0.5}}});
+   FeatureVector a({{"a", {-1, 0, 0.5}}});
+   FeatureVector b({{"b", {-1, 0, 0.5}}});
+   FeatureVector c({{"c", {-1, 0, 0.5}}});
+   FeatureVector d({{"d", {-1, 0, 0.5}}});
+   FeatureVector e({{"e", {-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(a, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(b, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(c, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(d, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(e, {}));
 
    BaseNeuralNet basenet;
-   NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(1);
@@ -103,22 +103,22 @@ TEST(TestEvaluator, Randomized2Sampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering 2 Samplings\n" << std::flush;
 
-   ValarrayMap a({{"a",{-1, 0, 0.5}}});
-   ValarrayMap b({{"b",{-1, 0, 0.5}}});
-   ValarrayMap c({{"c",{-1, 0, 0.5}}});
-   ValarrayMap d({{"d",{-1, 0, 0.5}}});
-   ValarrayMap e({{"e",{-1, 0, 0.5}}});
+   FeatureVector a({{"a", {-1, 0, 0.5}}});
+   FeatureVector b({{"b", {-1, 0, 0.5}}});
+   FeatureVector c({{"c", {-1, 0, 0.5}}});
+   FeatureVector d({{"d", {-1, 0, 0.5}}});
+   FeatureVector e({{"e", {-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(a, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(b, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(c, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(d, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(e, {}));
 
    BaseNeuralNet basenet;
-   NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(2);
@@ -130,22 +130,22 @@ TEST(TestEvaluator, Randomized3SubSampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering 3 Sub-Samplings\n" << std::flush;
 
-   ValarrayMap a({{"a",{-1, 0, 0.5}}});
-   ValarrayMap b({{"b",{-1, 0, 0.5}}});
-   ValarrayMap c({{"c",{-1, 0, 0.5}}});
-   ValarrayMap d({{"d",{-1, 0, 0.5}}});
-   ValarrayMap e({{"e",{-1, 0, 0.5}}});
+   FeatureVector a({{"a", {-1, 0, 0.5}}});
+   FeatureVector b({{"b", {-1, 0, 0.5}}});
+   FeatureVector c({{"c", {-1, 0, 0.5}}});
+   FeatureVector d({{"d", {-1, 0, 0.5}}});
+   FeatureVector e({{"e", {-1, 0, 0.5}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(a, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(b, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(c, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(d, {}));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(e, {}));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(a, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(b, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(c, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(d, {}));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(e, {}));
 
    BaseNeuralNet basenet;
-   NeuralNet<ValarrayMap, ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(3);
@@ -157,10 +157,10 @@ TEST(TestEvaluator, CartesianCoord)
 {
    std::cout << "***** Test Derived Evaluator CartesianCoord\n" << std::flush;
 
-   DataSet<CartesianCoord, ValarrayMap, Exemplar> dataset;
+   DataSet<CartesianCoord, FeatureVector, Exemplar> dataset;
    BaseNeuralNet basenet;
-   NeuralNet<CartesianCoord, ValarrayMap> nnet(basenet);
-   Evaluator<CartesianCoord, ValarrayMap, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   NeuralNet<CartesianCoord, FeatureVector> nnet(basenet);
+   Evaluator<CartesianCoord, FeatureVector, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
    eval.set_subsample_fraction(0.5);
@@ -172,12 +172,12 @@ TEST(TestEvaluator, BasicRMSFitNo0Egradient)
 {
    std::cout << "***** Test RMSE Fitness function with no gradient\n" << std::flush;
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
 
-   ValarrayMap tst;
-   ValarrayMap tgt;
-   ValarrayMap egradient;
-   ValarrayMap tgt_egradient;
+   FeatureVector tst;
+   FeatureVector tgt;
+   FeatureVector egradient;
+   FeatureVector tgt_egradient;
 
    tst = {{"output",{-1, 0, 0.5}}};
    tgt = {{"output",{-1, 0, 0.5}}};
@@ -199,12 +199,12 @@ TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
 {
    std::cout << "***** Test RMSE Fitness function with small error gradient\n" << std::flush;
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
 
-   ValarrayMap tst;
-   ValarrayMap tgt;
-   ValarrayMap egradient;
-   ValarrayMap tgt_egradient;
+   FeatureVector tst;
+   FeatureVector tgt;
+   FeatureVector egradient;
+   FeatureVector tgt_egradient;
 
    tst = {{"output",{-1, 0, 0.5}}};
    tgt = {{"output",{-1.03, 0.1, 0.59}}};
@@ -229,12 +229,12 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
 {
    std::cout << "***** Test RMSE Fitness function with multiple outputs fields\n" << std::flush;
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
 
-   ValarrayMap tst;
-   ValarrayMap tgt;
-   ValarrayMap egradient;
-   ValarrayMap tgt_egradient;
+   FeatureVector tst;
+   FeatureVector tgt;
+   FeatureVector egradient;
+   FeatureVector tgt_egradient;
 
    tst = {{"output1",{-1}}, {"output2",{0}}, {"output3",{0.5}}};
    tgt = {{"output1",{-1.03}}, {"output2",{0.1}}, {"output3",{0.59}}};
@@ -260,12 +260,12 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
 {
    std::cout << "***** Test RMSE Fitness function with multiple samples\n" << std::flush;
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
 
-   ValarrayMap tst1, tst2;
-   ValarrayMap tgt1, tgt2;
-   ValarrayMap egradient1, egradient2;
-   ValarrayMap tgt_egradient1, tgt_egradient2;
+   FeatureVector tst1, tst2;
+   FeatureVector tgt1, tgt2;
+   FeatureVector egradient1, egradient2;
+   FeatureVector tgt_egradient1, tgt_egradient2;
 
    tst1 = {{"output",{-1, 0, 0.5}}};
    tgt1 = {{"output",{-1.03, 0.1, 0.59}}};
@@ -299,27 +299,27 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
 {
    std::cout << "***** Test Basic RMSFitness Evaluator\n" << std::flush;
 
-   ValarrayMap tst1({{"output",{-1, 0, 0.5}}});
-   ValarrayMap tgt1({{"output",{-1.03, 0.1, 0.59}}});
-   ValarrayMap tgt_egradient1({{"output",{0.0003, 0.00333333333, 0.0027}}});
-   ValarrayMap tst2({{"output",{-0.3, -1.3, 0.875}}});
-   ValarrayMap tgt2({{"output",{-0.63, -0.1, 0.59}}});
-   ValarrayMap tgt_egradient2({{"output",{0.0363, 0.48, 0.027075}}});
+   FeatureVector tst1({{"output", {-1, 0, 0.5}}});
+   FeatureVector tgt1({{"output", {-1.03, 0.1, 0.59}}});
+   FeatureVector tgt_egradient1({{"output", {0.0003, 0.00333333333, 0.0027}}});
+   FeatureVector tst2({{"output", {-0.3, -1.3, 0.875}}});
+   FeatureVector tgt2({{"output", {-0.63, -0.1, 0.59}}});
+   FeatureVector tgt_egradient2({{"output", {0.0363, 0.48, 0.027075}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst1, tgt1));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst2, tgt2));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(tst1, tgt1));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(tst2, tgt2));
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
    BaseNeuralNet basenet;
-   MockNN<ValarrayMap,ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, MockNN, DataSet, RMSEFitnessFunc> eval;
+   MockNN<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, MockNN, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
    eval.set_subsample_fraction(1.0);
 
    double rmse, errstd;
-   std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<ValarrayMap,ValarrayMap>&>(nnet), dataset);
+   std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<FeatureVector, FeatureVector>&>(nnet), dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
    EXPECT_NEAR(rmse, 0.64209131, 0.000000001) << "Bad mean fitness score.\n";
@@ -330,34 +330,34 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
 {
    std::cout << "***** Test RMSFitness Evaluator with subsampling\n" << std::flush;
 
-   ValarrayMap tst1({{"output",{-1, 0, 0.5}}});
-   ValarrayMap tgt1({{"output",{-1.03, 0.1, 0.59}}});
-   ValarrayMap tgt_egradient1({{"output",{0.0003, 0.00333333333, 0.0027}}});
+   FeatureVector tst1({{"output", {-1, 0, 0.5}}});
+   FeatureVector tgt1({{"output", {-1.03, 0.1, 0.59}}});
+   FeatureVector tgt_egradient1({{"output", {0.0003, 0.00333333333, 0.0027}}});
 
-   ValarrayMap tst2({{"output",{-0.3, -1.3, 0.875}}});
-   ValarrayMap tgt2({{"output",{-0.63, -0.1, 0.59}}});
-   ValarrayMap tgt_egradient2({{"output",{0.0363, 0.48, 0.027075}}});
+   FeatureVector tst2({{"output", {-0.3, -1.3, 0.875}}});
+   FeatureVector tgt2({{"output", {-0.63, -0.1, 0.59}}});
+   FeatureVector tgt_egradient2({{"output", {0.0363, 0.48, 0.027075}}});
 
-   ValarrayMap tst3({{"output",{0.87, -0.326, 0.001}}});
-   ValarrayMap tgt3({{"output",{0.59, -0.1, 0.59}}});
-   ValarrayMap tgt_egradient3({{"output",{0.0363, 0.48, 0.027075}}});
+   FeatureVector tst3({{"output", {0.87, -0.326, 0.001}}});
+   FeatureVector tgt3({{"output", {0.59, -0.1, 0.59}}});
+   FeatureVector tgt_egradient3({{"output", {0.0363, 0.48, 0.027075}}});
 
-   DataSet<ValarrayMap, ValarrayMap, Exemplar> dataset;
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst1, tgt1));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst2, tgt2));
-   dataset.push_back(Exemplar<ValarrayMap, ValarrayMap>(tst3, tgt3));
+   DataSet<FeatureVector, FeatureVector, Exemplar> dataset;
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(tst1, tgt1));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(tst2, tgt2));
+   dataset.push_back(Exemplar<FeatureVector, FeatureVector>(tst3, tgt3));
 
-   RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   RMSEFitnessFunc<FeatureVector> rmse_fit;
    BaseNeuralNet basenet;
-   MockNN<ValarrayMap,ValarrayMap> nnet(basenet);
-   Evaluator<ValarrayMap, ValarrayMap, MockNN, DataSet, RMSEFitnessFunc> eval;
+   MockNN<FeatureVector, FeatureVector> nnet(basenet);
+   Evaluator<FeatureVector, FeatureVector, MockNN, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1000);
    eval.randomize_order(true);
    eval.set_subsample_fraction(0.67);
 
    double rmse, errstd;
-   std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<ValarrayMap,ValarrayMap>&>(nnet), dataset);
+   std::tie(rmse, errstd) = eval.evaluate(reinterpret_cast<MockNN<FeatureVector, FeatureVector>&>(nnet), dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
    EXPECT_NEAR(rmse, 0.573, 0.01) << "Bad mean fitness score.\n";

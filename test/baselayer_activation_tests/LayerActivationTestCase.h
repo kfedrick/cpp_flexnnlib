@@ -20,6 +20,7 @@
 #include "Array2D.h"
 #include "PureLin.h"
 #include "LogSig.h"
+#include "Reinforcement.h"
 
 template<class _LayerType> class LayerActivationTestCase : public CommonTestFixtureFunctions
 {

@@ -14,11 +14,12 @@
 #include "TDEvaluator.h"
 #include "SupervisedTrainingAlgo.h"
 #include "TDFinalFitnessFunc.h"
+#include "Reinforcement.h"
 
 namespace flexnnet
 {
    /**
-    * Deep Reinforcement Learning Algorithm
+    * Deep NetworkReinforcement Learning Algorithm
     *
     * @tparam InTyp - Neural network input data typename
     * @tparam TgtTyp - Neural net training set target data typename
@@ -68,7 +69,7 @@ namespace flexnnet
       train_final_cost(const std::valarray<double>& _V, const std::valarray<double>& _Re1, const std::valarray<double>& _Re0);
 
       void
-      calc_weight_updates(const ValarrayMap& _tdgradient);
+      calc_weight_updates(const FeatureVector& _tdgradient);
 
       void
       zero_eligibility_traces();
@@ -211,7 +212,7 @@ namespace flexnnet
          //train_final_cost(targetv, nnout1.value(), Re0);
 
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
-         ValarrayMap td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
+         FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
          calc_weight_updates(td_gradient);
 
          // Update the eligibility traces
@@ -282,7 +283,7 @@ namespace flexnnet
          const std::valarray<double>& targetv = exemplar.second.value();
 
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
-         ValarrayMap td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
+         FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
          calc_weight_updates(td_gradient);
 
          // Update the eligibility traces
@@ -293,7 +294,7 @@ namespace flexnnet
       // Train the network on the terminal state.
       const std::valarray<double>& targetv = _series[series_len-1].second.value();
       TgtTyp nnout0 = this->nnet.value();
-      ValarrayMap td_gradient = evaluator.calc_error_gradient(_series[series_len-1].second, nnout0);
+      FeatureVector td_gradient = evaluator.calc_error_gradient(_series[series_len - 1].second, nnout0);
       calc_weight_updates(td_gradient);
 
       //std::cout << "DeepRLAlgo.train_series_cost_to_go() EXIT\n" << std::flush;
@@ -319,7 +320,7 @@ namespace flexnnet
    {
       //std::cout << "calc td error " << _V[0] << " " << _Re0[0] << " " << _Re1[0] << "\n" << std::flush;
       double td_error = _V[0] + get_gamma() * _Re1[0] - _Re0[0];
-      ValarrayMap tdgradient;
+      FeatureVector tdgradient;
       tdgradient["output"] = {td_error};
       calc_weight_updates(tdgradient);
    }
@@ -368,7 +369,7 @@ namespace flexnnet
       class FitFunc,
       class LRPolicy>
    void
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(const ValarrayMap& _tdgradient)
+   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(const FeatureVector& _tdgradient)
    {
       //std::cout << "calc_weight_updates(" << _tderr << ")\n" << std::flush;
       double _tderr = _tdgradient.value()[0];

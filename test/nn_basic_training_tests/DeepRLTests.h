@@ -14,7 +14,7 @@
 #include "DataSet.h"
 #include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include <PureLin.h>
@@ -37,6 +37,7 @@
 
 #include "SimpleBinaryClassifierDataSet.h"
 #include "BoundedRandomWalkDataSet.h"
+#include "Reinforcement.h"
 
 using flexnnet::PureLin;
 using flexnnet::TanSig;
@@ -53,9 +54,9 @@ using flexnnet::Exemplar;
 
 TEST_F (SupervisedTrainerTestFixture, DeepRLAlgoConstructor)
 {
-   DataSet<ValarrayMap, ValarrayMap, flexnnet::ExemplarSeries> trnset;
+   DataSet<FeatureVector, FeatureVector, flexnnet::ExemplarSeries> trnset;
 
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureVector> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
       std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
@@ -68,10 +69,10 @@ TEST_F (SupervisedTrainerTestFixture, DeepRLAlgoConstructor)
    topo.ordered_layers.push_back(ol_ptr);
 
    BaseNeuralNet newbasennet(topo);
-   NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> newnnet(newbasennet);
+   NeuralNet<flexnnet::FeatureVector, flexnnet::FeatureVector> newnnet(newbasennet);
 
-   flexnnet::DeepRLAlgo<flexnnet::ValarrayMap,
-                        flexnnet::ValarrayMap,
+   flexnnet::DeepRLAlgo<flexnnet::FeatureVector,
+                        flexnnet::FeatureVector,
                         NeuralNet,
                         flexnnet::DataSet,
                         flexnnet::TDFinalFitnessFunc,
@@ -81,7 +82,7 @@ TEST_F (SupervisedTrainerTestFixture, DeepRLAlgoConstructor)
 TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 {
 
-   flexnnet::RMSEFitnessFunc<ValarrayMap> td_fit;
+   flexnnet::RMSEFitnessFunc<FeatureVector> td_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
       std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
@@ -93,10 +94,10 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
    topo.ordered_layers.push_back(ol_ptr);
 
    BaseNeuralNet newbasennet(topo);
-   NeuralNet<ValarrayMap, ValarrayMap> newnnet(newbasennet);
+   NeuralNet<FeatureVector, FeatureVector> newnnet(newbasennet);
 
-   flexnnet::DeepRLAlgo<ValarrayMap,
-                        ValarrayMap,
+   flexnnet::DeepRLAlgo<FeatureVector,
+                        FeatureVector,
                         NeuralNet,
                         DataSet,
                         flexnnet::TDFinalFitnessFunc,
@@ -104,8 +105,8 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 
    BoundedRandomWalkDataSet trnset;
 
-   ExemplarSeries<ValarrayMap, ValarrayMap> eseries;
-   Exemplar<ValarrayMap, ValarrayMap> exemplar;
+   ExemplarSeries<FeatureVector, FeatureVector> eseries;
+   Exemplar<FeatureVector, FeatureVector> exemplar;
 
    trnset.generate_final_cost_samples(1000, 7);
 
@@ -146,7 +147,7 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
       for (auto& x : aseries2)
       {
          std::cout << prettyPrintVector("inputv", x.first.at("input"));
-         ValarrayMap nnout = newnnet.activate(x.first);
+         FeatureVector nnout = newnnet.activate(x.first);
          std::cout << prettyPrintVector("nnout", nnout.at("output"));
       }
       std::cout << "\n************************************\n";
@@ -155,12 +156,12 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 
 TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
 {
-   ValarrayMap tstmap;
+   FeatureVector tstmap;
    tstmap["output"] = {};
    const std::valarray<double>& item = tstmap.value();
    std::cout << "OK this seems to work.\n" << std::flush;
 
-   flexnnet::RMSEFitnessFunc<ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<FeatureVector> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<PureLin>> ol_ptr =
       std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(1, "output", PureLin::DEFAULT_PARAMS, true));
@@ -172,10 +173,10 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
    topo.ordered_layers.push_back(ol_ptr);
 
    BaseNeuralNet newbasennet(topo);
-   NeuralNet<ValarrayMap, ValarrayMap> newnnet(newbasennet);
+   NeuralNet<FeatureVector, FeatureVector> newnnet(newbasennet);
 
-   flexnnet::DeepRLAlgo<ValarrayMap,
-                        ValarrayMap,
+   flexnnet::DeepRLAlgo<FeatureVector,
+                        FeatureVector,
                         NeuralNet,
                         DataSet,
                         flexnnet::TDCostToGoFitnessFunc,
@@ -183,8 +184,8 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
 
    BoundedRandomWalkDataSet trnset;
 
-   ExemplarSeries<ValarrayMap, ValarrayMap> eseries;
-   Exemplar<ValarrayMap, ValarrayMap> exemplar;
+   ExemplarSeries<FeatureVector, FeatureVector> eseries;
+   Exemplar<FeatureVector, FeatureVector> exemplar;
 
    trnset.generate_cost_to_go_samples(1000, 7);
 
@@ -226,7 +227,7 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
       for (auto& x : aseries2)
       {
          std::cout << prettyPrintVector("inputv", x.first.at("input"));
-         ValarrayMap nnout = newnnet.activate(x.first);
+         FeatureVector nnout = newnnet.activate(x.first);
          std::cout << prettyPrintVector("nnout", nnout.at("output"));
       }
       std::cout << "\n************************************\n";

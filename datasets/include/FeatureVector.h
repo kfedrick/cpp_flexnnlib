@@ -2,32 +2,32 @@
 // Created by kfedrick on 3/13/21.
 //
 
-#ifndef FLEX_NEURALNET_VALARRAYMAP_H_
-#define FLEX_NEURALNET_VALARRAYMAP_H_
+#ifndef FLEX_NEURALNET_STATEVECTOR_H_
+#define FLEX_NEURALNET_STATEVECTOR_H_
 
 #include <map>
 #include <string>
 #include <valarray>
-#include <NNetIOInterface.h>
+#include <StateView.h>
 
 // Forward declaration for CartesianCoord
-namespace flexnnet { class ValarrayMap; }
+namespace flexnnet { class FeatureVector; }
 
 // Forward declarations for stream operators
-std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::ValarrayMap& _coord);
-std::istream& operator>>(std::istream& _istrm, flexnnet::ValarrayMap& _coord);
+std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::FeatureVector& _coord);
+std::istream& operator>>(std::istream& _istrm, flexnnet::FeatureVector& _coord);
 
 namespace flexnnet
 {
-   class ValarrayMap
-      : public NNetIOInterface
+   class FeatureVector
+      : public StateView
    {
    public:
-      ValarrayMap();
-      ValarrayMap(const ValarrMap& _values);
-      ValarrayMap(const ValarrayMap& _valarrmap);
+      FeatureVector();
+      FeatureVector(const ValarrMap& _values);
+      FeatureVector(const FeatureVector& _valarrmap);
 
-      virtual ~ValarrayMap();
+      virtual ~FeatureVector();
 
       size_t
       size(void) const override;
@@ -41,13 +41,13 @@ namespace flexnnet
       const std::valarray<double>&
       at(const std::string& _key) const;
 
-      void
-      set(const ValarrMap& _values);
+      //void
+      //set(const ValarrMap& _values);
 
-      ValarrayMap&
-      operator=(const ValarrayMap& _valarrmap);
+      FeatureVector&
+      operator=(const FeatureVector& _valarrmap);
 
-      ValarrayMap&
+      FeatureVector&
       operator=(const ValarrMap& _values);
 
       virtual const std::valarray<double>&
@@ -57,15 +57,15 @@ namespace flexnnet
       value_map(void) const override;
 
       virtual void
-      parse(const ValarrMap& _vmap) override;
+      set(const ValarrMap& _vmap) override;
 
-      friend std::ostream& ::operator<<(std::ostream& _ostrm, const ValarrayMap& _valarr);
+      friend std::ostream& ::operator<<(std::ostream& _ostrm, const FeatureVector& _valarr);
 
-      friend std::istream& ::operator>>(std::istream& _istrm, ValarrayMap& _valarr);
+      friend std::istream& ::operator>>(std::istream& _istrm, FeatureVector& _valarr);
 
    private:
-      ValarrayMap&
-      copy(const ValarrayMap& _datum);
+      FeatureVector&
+      copy(const FeatureVector& _datum);
 
       void
       init_virtual_vector(void) const;
@@ -81,7 +81,7 @@ namespace flexnnet
 
    inline
    size_t
-   ValarrayMap::size() const
+   FeatureVector::size() const
    {
       init_virtual_vector();
       return virtual_vector.size();
@@ -89,7 +89,7 @@ namespace flexnnet
 
    inline
    std::valarray<double>&
-   ValarrayMap::operator[](const std::string& _key)
+   FeatureVector::operator[](const std::string& _key)
    {
       stale = true;
       return data[_key];
@@ -97,7 +97,7 @@ namespace flexnnet
 
    inline
    std::valarray<double>&
-   ValarrayMap::at(const std::string& _key)
+   FeatureVector::at(const std::string& _key)
    {
       stale = true;
       return data.at(_key);
@@ -105,14 +105,14 @@ namespace flexnnet
 
    inline
    const std::valarray<double>&
-   ValarrayMap::at(const std::string& _key) const
+   FeatureVector::at(const std::string& _key) const
    {
       return data.at(_key);
    }
 
    inline
    const std::valarray<double>&
-   ValarrayMap::value(void) const
+   FeatureVector::value(void) const
    {
       concat_virtual_vector();
       return virtual_vector;
@@ -120,17 +120,10 @@ namespace flexnnet
 
    inline
    const ValarrMap&
-   ValarrayMap::value_map(void) const
+   FeatureVector::value_map(void) const
    {
       return data;
    }
-
-   inline
-   void
-   ValarrayMap::parse(const ValarrMap& _vmap)
-   {
-      set(_vmap);
-   }
 }
 
-#endif //FLEX_NEURALNET_VALARRAYMAP_H_
+#endif //FLEX_NEURALNET_STATEVECTOR_H_

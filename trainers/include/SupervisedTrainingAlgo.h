@@ -15,6 +15,7 @@
 #include "BaseTrainer.h"
 #include "Exemplar.h"
 #include "ExemplarSeries.h"
+#include "Reinforcement.h"
 
 namespace flexnnet
 {

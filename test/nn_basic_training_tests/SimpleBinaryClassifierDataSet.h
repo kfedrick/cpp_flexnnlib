@@ -6,12 +6,12 @@
 #define _SIMPLEBINARYCLASSIFIERDATASET_H_
 
 #include <DataSet.h>
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 
 using flexnnet::DataSet;
-using flexnnet::ValarrayMap;
+using flexnnet::FeatureVector;
 
-class SimpleBinaryClassifierDataSet : public DataSet<ValarrayMap, ValarrayMap, Exemplar>
+class SimpleBinaryClassifierDataSet : public DataSet<FeatureVector, FeatureVector, Exemplar>
 {
 public:
    SimpleBinaryClassifierDataSet();
@@ -57,7 +57,7 @@ inline
 void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned int _class, double _mean, double _stdev)
 {
    double val;
-   ValarrayMap inmap, tgtmap;
+   FeatureVector inmap, tgtmap;
 
    if (_class > 1)
       std::cout << "Error: Binary classifier must have class of [0,1]\n";
@@ -65,7 +65,7 @@ void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned
    inmap["input"] = std::valarray<double>(1);
    tgtmap["output"] = std::valarray<double>(1);
 
-   flexnnet::Exemplar<ValarrayMap, ValarrayMap> exemplar;
+   flexnnet::Exemplar<FeatureVector, FeatureVector> exemplar;
 
    for (size_t i=0; i<_num; i++)
    {
@@ -73,7 +73,7 @@ void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned
       inmap["input"][0] = val;
       tgtmap["output"][0] = (_class == 0) ? 1.0 : -1.0;
 
-      push_back(Exemplar<ValarrayMap,ValarrayMap>(inmap,tgtmap));
+      push_back(Exemplar<FeatureVector, FeatureVector>(inmap, tgtmap));
    }
 }
 

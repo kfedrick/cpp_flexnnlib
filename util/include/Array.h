@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include <stdexcept>
+#include "Reinforcement.h"
 
 namespace flexnnet
 {

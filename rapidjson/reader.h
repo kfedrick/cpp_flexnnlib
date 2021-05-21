@@ -67,7 +67,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 /*! \def RAPIDJSON_PARSE_ERROR_NORETURN
     \ingroup RAPIDJSON_ERRORS
-    \brief Macro to indicate a parse error.
+    \brief Macro to indicate a activate error.
     \param parseErrorCode \ref rapidjson::ParseErrorCode of the error
     \param offset  position of the error in JSON input (\c size_t)
 
@@ -105,7 +105,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 /*! \def RAPIDJSON_PARSE_ERROR
     \ingroup RAPIDJSON_ERRORS
-    \brief (Internal) macro to indicate and handle a parse error.
+    \brief (Internal) macro to indicate and handle a activate error.
     \param parseErrorCode \ref rapidjson::ParseErrorCode of the error
     \param offset  position of the error in JSON input (\c size_t)
 
@@ -154,7 +154,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       kParseNumbersAsStringsFlag = 64,    //!< Parse all numbers (ints/doubles) as strings.
       kParseTrailingCommasFlag = 128, //!< Allow trailing commas at the end of objects and arrays.
       kParseNanAndInfFlag = 256,      //!< Allow parsing NaN, Inf, Infinity, -Inf and -Infinity as doubles.
-      kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default parse flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
+      kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default activate flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
    };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -555,7 +555,7 @@ concept Handler {
     A GenericReader object can be reused for parsing multiple JSON text.
 
     \tparam SourceEncoding Encoding of the input stream.
-    \tparam TargetEncoding Encoding of the parse output.
+    \tparam TargetEncoding Encoding of the activate output.
     \tparam StackAllocator Allocator type for stack.
 */
    template<typename SourceEncoding, typename TargetEncoding, typename StackAllocator = CrtAllocator>
@@ -718,7 +718,7 @@ concept Handler {
          return IsIterativeParsingCompleteState(state_);
       }
 
-      //! Whether a parse error has occurred in the last parsing.
+      //! Whether a activate error has occurred in the last parsing.
       bool HasParseError() const
       { return parseResult_.IsError(); }
 
@@ -976,7 +976,7 @@ concept Handler {
             return false;
       }
 
-      // Helper function to parse four hexadecimal digits in \uXXXX in ParseString().
+      // Helper function to activate four hexadecimal digits in \uXXXX in ParseString().
       template<typename InputStream>
       unsigned ParseHex4(InputStream& is, size_t escapeOffset)
       {

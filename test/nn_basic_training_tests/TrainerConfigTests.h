@@ -16,7 +16,7 @@
 #include "DataSet.h"
 #include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
-#include <ValarrayMap.h>
+#include <FeatureVector.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include <SupervisedTrainingAlgo.h>
@@ -27,18 +27,18 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 {
    std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::DataSet<flexnnet::FeatureVector, flexnnet::FeatureVector, Exemplar> dataset;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureVector> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   MockNN<flexnnet::FeatureVector, flexnnet::FeatureVector> nnet(basenet);
+   flexnnet::Evaluator<flexnnet::FeatureVector,
+                       flexnnet::FeatureVector,
                        MockNN,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureVector,
+                                    flexnnet::FeatureVector,
                                     Exemplar,
                                     MockNN,
                                     flexnnet::DataSet,
@@ -53,18 +53,18 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
 {
    std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::DataSet<flexnnet::FeatureVector, flexnnet::FeatureVector, Exemplar> dataset;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureVector> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<flexnnet::ValarrayMap, flexnnet::ValarrayMap> nnet(basenet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   MockNN<flexnnet::FeatureVector, flexnnet::FeatureVector> nnet(basenet);
+   flexnnet::Evaluator<flexnnet::FeatureVector,
+                       flexnnet::FeatureVector,
                        MockNN,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureVector,
+                                    flexnnet::FeatureVector,
                                     Exemplar,
                                     MockNN,
                                     flexnnet::DataSet,
