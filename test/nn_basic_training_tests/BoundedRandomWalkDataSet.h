@@ -6,15 +6,14 @@
 #define _BOUNDEDRANDOMWALKDATASET_H_
 
 #include <DataSet.h>
-#include <ValarrayMap.h>
 #include <ExemplarSeries.h>
 
 using flexnnet::DataSet;
-using flexnnet::ValarrayMap;
+using flexnnet::FeatureVector;
 using flexnnet::Exemplar;
 using flexnnet::ExemplarSeries;
 
-class BoundedRandomWalkDataSet : public DataSet<ValarrayMap, ValarrayMap, ExemplarSeries>
+class BoundedRandomWalkDataSet : public DataSet<FeatureVector, FeatureVector, ExemplarSeries>
 {
 public:
    BoundedRandomWalkDataSet();
@@ -52,13 +51,13 @@ inline
 void BoundedRandomWalkDataSet::generate_final_cost_samples(unsigned int _num, unsigned int _size, double _rprop)
 {
    double val;
-   ValarrayMap inmap, tgtmap;
+   FeatureVector inmap, tgtmap;
 
    inmap["input"] = std::valarray<double>(_size+2);
    tgtmap["output"] = std::valarray<double>(0);
 
-   flexnnet::Exemplar<ValarrayMap, ValarrayMap> exemplar;
-   flexnnet::ExemplarSeries<ValarrayMap, ValarrayMap> series;
+   flexnnet::Exemplar<FeatureVector, FeatureVector> exemplar;
+   flexnnet::ExemplarSeries<FeatureVector, FeatureVector> series;
 
    std::uniform_int_distribution<int> binary_dist(1, 100);
    std::uniform_int_distribution<int> uniform_dist(1, _size);
@@ -76,7 +75,7 @@ void BoundedRandomWalkDataSet::generate_final_cost_samples(unsigned int _num, un
 
       do
       {
-         series.push_back(Exemplar<ValarrayMap,ValarrayMap>(inmap, tgtmap));
+         series.push_back(Exemplar<FeatureVector, FeatureVector>(inmap, tgtmap));
 
          position_ndx += (binary_dist(rand_engine)<50) ? -1 : 1;
          inmap["input"] = -1.0;
@@ -86,7 +85,7 @@ void BoundedRandomWalkDataSet::generate_final_cost_samples(unsigned int _num, un
 
       tgtmap["output"].resize(1);
       tgtmap["output"][0] = {(position_ndx == 0) ? -1.0 : 1.0};
-      series.push_back(Exemplar<ValarrayMap,ValarrayMap>(inmap, tgtmap));
+      series.push_back(Exemplar<FeatureVector, FeatureVector>(inmap, tgtmap));
 
       push_back(series);
    }
@@ -97,13 +96,13 @@ inline
 void BoundedRandomWalkDataSet::generate_cost_to_go_samples(unsigned int _num, unsigned int _size, double _rprop)
 {
    double val;
-   ValarrayMap inmap, tgtmap;
+   FeatureVector inmap, tgtmap;
 
    inmap["input"] = std::valarray<double>(_size+2);
    tgtmap["output"] = std::valarray<double>(1);
 
-   flexnnet::Exemplar<ValarrayMap, ValarrayMap> exemplar;
-   flexnnet::ExemplarSeries<ValarrayMap, ValarrayMap> series;
+   flexnnet::Exemplar<FeatureVector, FeatureVector> exemplar;
+   flexnnet::ExemplarSeries<FeatureVector, FeatureVector> series;
 
    std::uniform_int_distribution<int> binary_dist(1, 100);
    std::uniform_int_distribution<int> uniform_dist(1, _size);
@@ -121,7 +120,7 @@ void BoundedRandomWalkDataSet::generate_cost_to_go_samples(unsigned int _num, un
 
       do
       {
-         series.push_back(Exemplar<ValarrayMap,ValarrayMap>(inmap, tgtmap));
+         series.push_back(Exemplar<FeatureVector, FeatureVector>(inmap, tgtmap));
 
          position_ndx += (binary_dist(rand_engine)<50) ? -1 : 1;
          inmap["input"] = -1.0;
@@ -130,7 +129,7 @@ void BoundedRandomWalkDataSet::generate_cost_to_go_samples(unsigned int _num, un
       } while (0 < position_ndx && position_ndx < _size+1);
 
       tgtmap["output"][0] = {0.0};
-      series.push_back(Exemplar<ValarrayMap,ValarrayMap>(inmap, tgtmap));
+      series.push_back(Exemplar<FeatureVector, FeatureVector>(inmap, tgtmap));
 
       push_back(series);
    }

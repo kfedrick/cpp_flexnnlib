@@ -5,46 +5,36 @@
 #ifndef _MOCKNN_H_
 #define _MOCKNN_H_
 
-#include <ValarrayMap.h>
 #include <NeuralNet.h>
+#include <FeatureSet.h>
+#include <RawFeature.h>
 
-template<class _InType, class _OutType>
+template<class _InType, class _OutType=flexnnet::FeatureSet<flexnnet::RawFeature<1>>>
 class MockNN : public flexnnet::NeuralNet<_InType, _OutType>
 {
 public:
    MockNN(const flexnnet::BaseNeuralNet& _nnet);
-   const flexnnet::ValarrayMap&
-   activate(const flexnnet::ValarrayMap& _nninput);
-
-   const std::valarray<double>&
-   backprop(const flexnnet::ValarrayMap& _errormap);
+   const flexnnet::NNFeatureSet<_OutType>&
+   activate(const _InType& _nninput);
 
 private:
-   flexnnet::ValarrayMap cached_input;
+   flexnnet::FeatureSet<flexnnet::RawFeature<1>> cached_input;
 };
 
 template<class _InType, class _OutType>
 MockNN<_InType, _OutType>::MockNN(const flexnnet::BaseNeuralNet& _nnet) : flexnnet::NeuralNet<_InType, _OutType>(_nnet)
 {
-
 }
 
 template<class _InType, class _OutType>
-const flexnnet::ValarrayMap&
-MockNN<_InType, _OutType>::activate(const flexnnet::ValarrayMap& _nninput)
+const flexnnet::NNFeatureSet<_OutType>&
+MockNN<_InType, _OutType>::activate(const _InType& _nninput)
 {
    std::cout << "activate ordered layer count = 0 for Mock" << "\n";
 
-   cached_input = _nninput;
-   return cached_input;
-}
-
-template<class _InType, class _OutType>
-const std::valarray<double>&
-MockNN<_InType, _OutType>::backprop(const flexnnet::ValarrayMap& _errorv)
-{
-   static std::valarray<double> e;
-   return e;
+   //cached_input = _nninput;
+   //return cached_input;
+   return this->value();
 }
 
 #endif //_MOCKNN_H_

@@ -52,7 +52,7 @@ namespace flexnnet
       {
          std::ostringstream err_str;
          err_str
-            << "Error : TDCostToGoFitnessFunc.set_gamma() - illegal value" << _gamma << "\n";
+            << "Error : TDCostToGoFitnessFunc.set_gamma() - illegal vectorize" << _gamma << "\n";
          throw std::invalid_argument(err_str.str());
       }
 

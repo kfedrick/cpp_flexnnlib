@@ -9,8 +9,9 @@
 #include <NeuralNet.h>
 #include <DataSet.h>
 #include <CommonTestFixtureFunctions.h>
-#include <ValarrayMap.h>
 #include <Exemplar.h>
+#include <FeatureSet.h>
+#include <RawFeature.h>
 
 using flexnnet::NeuralNet;
 using flexnnet::Exemplar;
@@ -24,9 +25,8 @@ public:
    virtual void TearDown();
 
 protected:
-   std::unique_ptr<NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap>> nnet;
-
-   flexnnet::DataSet<flexnnet::ValarrayMap, flexnnet::ValarrayMap, Exemplar> trnset;
+   std::unique_ptr<NeuralNet<flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>>> nnet;
+   flexnnet::DataSet<flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>, Exemplar> trnset;
 };
 
 void SupervisedTrainerTestFixture::SetUp()

@@ -8,6 +8,7 @@
 #include <flexnnet.h>
 #include <Exemplar.h>
 #include <BasicEvalConfig.h>
+#include "Reinforcement.h"
 
 namespace flexnnet
 {

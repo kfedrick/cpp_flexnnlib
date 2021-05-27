@@ -1,6 +1,6 @@
 {
-  "input_type":"flexnnet::ValarrayMap",
-  "output_type":"flexnnet::ValarrayMap",
+  "input_type":"flexnnet::FeatureVector",
+  "output_type":"flexnnet::FeatureVector",
   "exemplars":
   [
     {

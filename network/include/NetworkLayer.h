@@ -55,7 +55,7 @@ namespace flexnnet
       virtual bool
       is_output_layer(void) const;
 
-      // Return the activation value vector of this layer.
+      // Return the activation vectorize vector of this layer.
       virtual const std::valarray<double>&
       value() const;
 

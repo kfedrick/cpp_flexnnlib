@@ -56,7 +56,7 @@ RAPIDJSON_NAMESPACE_BEGIN
    template<typename Encoding, typename Allocator, typename StackAllocator>
    class GenericDocument;
 
-//! Name-value pair in a JSON object value.
+//! Name-vectorize pair in a JSON object vectorize.
 /*!
     This class was internal to GenericValue. It used to be a inner struct.
     But a compiler (IBM XL C/C++ for AIX) have reported to have problem with that so it moved as a namespace scope struct.
@@ -66,7 +66,7 @@ RAPIDJSON_NAMESPACE_BEGIN
    struct GenericMember
    {
       GenericValue<Encoding, Allocator> name;     //!< name of member (must be a string)
-      GenericValue<Encoding, Allocator> value;    //!< value of member.
+      GenericValue<Encoding, Allocator> value;    //!< vectorize of member.
 
       // swap() for std::sort() and other potential use in STL.
       friend inline void swap(GenericMember& a, GenericMember& b) RAPIDJSON_NOEXCEPT
@@ -81,10 +81,10 @@ RAPIDJSON_NAMESPACE_BEGIN
 
 #ifndef RAPIDJSON_NOMEMBERITERATORCLASS
 
-//! (Constant) member iterator for a JSON object value
+//! (Constant) member iterator for a JSON object vectorize
 /*!
     \tparam Const Is this a constant iterator?
-    \tparam Encoding    Encoding of the value. (Even non-string values need to have the same encoding in a document)
+    \tparam Encoding    Encoding of the vectorize. (Even non-string values need to have the same encoding in a document)
     \tparam Allocator   Allocator type for allocating memory of object, array and string.
 
     This class implements a Random Access Iterator for GenericMember elements
@@ -134,7 +134,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //! Signed integer type (e.g. \c ptrdiff_t)
       typedef difference_type DifferenceType;
 
-      //! Default constructor (singular value)
+      //! Default constructor (singular vectorize)
       /*! Creates an iterator pointing to no element.
           \note All operations, except for comparisons, are undefined on such values.
        */
@@ -406,7 +406,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 //! Mark a character pointer as constant string
 /*! Mark a plain character pointer as a "string literal".  This function
     can be used to avoid copying a character string to be referenced as a
-    value in a JSON GenericValue object, if the string's lifetime is known
+    vectorize in a JSON GenericValue object, if the string's lifetime is known
     to be valid long enough.
     \tparam CharType Character type of the string
     \param str Constant string, lifetime assumed to be longer than the use of the string in e.g. a GenericValue
@@ -424,7 +424,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 //! Mark a character pointer as constant string
 /*! Mark a plain character pointer as a "string literal".  This function
     can be used to avoid copying a character string to be referenced as a
-    value in a JSON GenericValue object, if the string's lifetime is known
+    vectorize in a JSON GenericValue object, if the string's lifetime is known
     to be valid long enough.
 
     This version has better performance with supplied length, and also
@@ -446,7 +446,7 @@ RAPIDJSON_NAMESPACE_BEGIN
    //! Mark a string object as constant string
    /*! Mark a string object (e.g. \c std::string) as a "string literal".
        This function can be used to avoid copying a string to be referenced as a
-       value in a JSON GenericValue object, if the string's lifetime is known
+       vectorize in a JSON GenericValue object, if the string's lifetime is known
        to be valid long enough.
 
        \tparam CharType character type of the string
@@ -689,21 +689,21 @@ RAPIDJSON_NAMESPACE_BEGIN
 ///////////////////////////////////////////////////////////////////////////////
 // GenericValue
 
-//! Represents a JSON value. Use Value for UTF8 encoding and default allocator.
+//! Represents a JSON vectorize. Use Value for UTF8 encoding and default allocator.
 /*!
-    A JSON value can be one of 7 types. This class is a variant type supporting
+    A JSON vectorize can be one of 7 types. This class is a variant type supporting
     these types.
 
     Use the Value if UTF8 and default allocator
 
-    \tparam Encoding    Encoding of the value. (Even non-string values need to have the same encoding in a document)
+    \tparam Encoding    Encoding of the vectorize. (Even non-string values need to have the same encoding in a document)
     \tparam Allocator   Allocator type for allocating memory of object, array and string.
 */
    template<typename Encoding, typename Allocator = MemoryPoolAllocator<> >
    class GenericValue
    {
    public:
-      //! Name-value pair in an object.
+      //! Name-vectorize pair in an object.
       typedef GenericMember<Encoding, Allocator> Member;
       typedef Encoding EncodingType;                  //!< Encoding type from template parameter.
       typedef Allocator AllocatorType;                //!< Allocator type from template parameter.
@@ -716,7 +716,7 @@ RAPIDJSON_NAMESPACE_BEGIN
                                              Encoding,
                                              Allocator>::Iterator ConstMemberIterator;  //!< Constant member iterator for iterating in object.
       typedef GenericValue* ValueIterator;            //!< Value iterator for iterating in array.
-      typedef const GenericValue* ConstValueIterator; //!< Constant value iterator for iterating in array.
+      typedef const GenericValue* ConstValueIterator; //!< Constant vectorize iterator for iterating in array.
       typedef GenericValue<Encoding, Allocator> ValueType;    //!< Value type of itself.
       typedef GenericArray<false, ValueType> Array;
       typedef GenericArray<true, ValueType> ConstArray;
@@ -726,7 +726,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //!@name Constructors and destructor.
       //@{
 
-      //! Default constructor creates a null value.
+      //! Default constructor creates a null vectorize.
       GenericValue() RAPIDJSON_NOEXCEPT : data_()
       { data_.f.flags = kNullFlag; }
 
@@ -754,9 +754,9 @@ RAPIDJSON_NAMESPACE_BEGIN
 
    public:
 
-      //! Constructor with JSON value type.
+      //! Constructor with JSON vectorize type.
       /*! This creates a Value of specified type with default content.
-          \param type Type of the value.
+          \param type Type of the vectorize.
           \note Default content for number is zero.
       */
       explicit GenericValue(Type type) RAPIDJSON_NOEXCEPT : data_()
@@ -829,11 +829,11 @@ RAPIDJSON_NAMESPACE_BEGIN
          }
       }
 
-      //! Constructor for boolean value.
-      /*! \param b Boolean value
+      //! Constructor for boolean vectorize.
+      /*! \param b Boolean vectorize
           \note This constructor is limited to \em real boolean values and rejects
               implicitly converted types like arbitrary pointers.  Use an explicit cast
-              to \c bool, if you want to construct a boolean JSON value in such cases.
+              to \c bool, if you want to construct a boolean JSON vectorize in such cases.
        */
 #ifndef RAPIDJSON_DOXYGEN_RUNNING // hide SFINAE from Doxygen
       template<typename T>
@@ -848,21 +848,21 @@ RAPIDJSON_NAMESPACE_BEGIN
          data_.f.flags = b ? kTrueFlag : kFalseFlag;
       }
 
-      //! Constructor for int value.
+      //! Constructor for int vectorize.
       explicit GenericValue(int i) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.i64 = i;
          data_.f.flags = (i >= 0) ? (kNumberIntFlag | kUintFlag | kUint64Flag) : kNumberIntFlag;
       }
 
-      //! Constructor for unsigned value.
+      //! Constructor for unsigned vectorize.
       explicit GenericValue(unsigned u) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.u64 = u;
          data_.f.flags = (u & 0x80000000) ? kNumberUintFlag : (kNumberUintFlag | kIntFlag | kInt64Flag);
       }
 
-      //! Constructor for int64_t value.
+      //! Constructor for int64_t vectorize.
       explicit GenericValue(int64_t i64) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.i64 = i64;
@@ -879,7 +879,7 @@ RAPIDJSON_NAMESPACE_BEGIN
             data_.f.flags |= kIntFlag;
       }
 
-      //! Constructor for uint64_t value.
+      //! Constructor for uint64_t vectorize.
       explicit GenericValue(uint64_t u64) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.u64 = u64;
@@ -892,14 +892,14 @@ RAPIDJSON_NAMESPACE_BEGIN
             data_.f.flags |= kIntFlag;
       }
 
-      //! Constructor for double value.
+      //! Constructor for double vectorize.
       explicit GenericValue(double d) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.d = d;
          data_.f.flags = kNumberDoubleFlag;
       }
 
-      //! Constructor for float value.
+      //! Constructor for float vectorize.
       explicit GenericValue(float f) RAPIDJSON_NOEXCEPT : data_()
       {
          data_.n.d = static_cast<double>(f);
@@ -932,8 +932,8 @@ RAPIDJSON_NAMESPACE_BEGIN
       //! Constructor for Array.
       /*!
           \param a An array obtained by \c GetArray().
-          \note \c Array is always pass-by-value.
-          \note the source array is moved into this value and the sourec array becomes empty.
+          \note \c Array is always pass-by-vectorize.
+          \note the source array is moved into this vectorize and the sourec array becomes empty.
       */
       GenericValue(Array a) RAPIDJSON_NOEXCEPT : data_(a.value_.data_)
       {
@@ -944,8 +944,8 @@ RAPIDJSON_NAMESPACE_BEGIN
       //! Constructor for Object.
       /*!
           \param o An object obtained by \c GetObject().
-          \note \c Object is always pass-by-value.
-          \note the source object is moved into this value and the sourec object becomes empty.
+          \note \c Object is always pass-by-vectorize.
+          \note the source object is moved into this vectorize and the sourec object becomes empty.
       */
       GenericValue(Object o) RAPIDJSON_NOEXCEPT : data_(o.value_.data_)
       {
@@ -991,7 +991,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //@{
 
       //! Assignment with move semantics.
-      /*! \param rhs Source of the assignment. It will become a null value after assignment.
+      /*! \param rhs Source of the assignment. It will become a null vectorize after assignment.
       */
       GenericValue& operator=(GenericValue& rhs) RAPIDJSON_NOEXCEPT
       {
@@ -1024,7 +1024,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //! Assignment with primitive types.
       /*! \tparam T Either \ref Type, \c int, \c unsigned, \c int64_t, \c uint64_t
-          \param value The value to be assigned.
+          \param value The vectorize to be assigned.
 
           \note The source type \c T explicitly disallows all pointer types,
               especially (\c const) \ref Ch*.  This helps avoiding implicitly
@@ -1059,9 +1059,9 @@ RAPIDJSON_NAMESPACE_BEGIN
          return *this;
       }
 
-      //! Exchange the contents of this value with those of other.
+      //! Exchange the contents of this vectorize with those of other.
       /*!
-          \param other Another value.
+          \param other Another vectorize.
           \note Constant complexity.
       */
       GenericValue& Swap(GenericValue& other) RAPIDJSON_NOEXCEPT
@@ -1079,7 +1079,7 @@ RAPIDJSON_NAMESPACE_BEGIN
           \code
           void swap(MyClass& a, MyClass& b) {
               using std::swap;
-              swap(a.value, b.value);
+              swap(a.vectorize, b.vectorize);
               // ...
           }
           \endcode
@@ -1296,7 +1296,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          RAPIDJSON_ASSERT(IsBool());
          return data_.f.flags == kTrueFlag;
       }
-      //!< Set boolean value
+      //!< Set boolean vectorize
       /*! \post IsBool() == true */
       GenericValue& SetBool(bool b)
       {
@@ -1310,7 +1310,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //!@name Object
       //@{
 
-      //! Set this value as an empty object.
+      //! Set this vectorize as an empty object.
       /*! \post IsObject() == true */
       GenericValue& SetObject()
       {
@@ -1340,10 +1340,10 @@ RAPIDJSON_NAMESPACE_BEGIN
          return data_.o.size == 0;
       }
 
-      //! Get a value from an object associated with the name.
+      //! Get a vectorize from an object associated with the name.
       /*! \pre IsObject() == true
           \tparam T Either \c Ch or \c const \c Ch (template used for disambiguation with \ref operator[](SizeType))
-          \note In version 0.1x, if the member is not found, this function returns a null value. This makes issue 7.
+          \note In version 0.1x, if the member is not found, this function returns a null vectorize. This makes issue 7.
           Since 0.2, if the name is not correct, it will assert.
           If user is unsure whether a member exists, user should use HasMember() first.
           A better approach is to use FindMember().
@@ -1362,9 +1362,9 @@ RAPIDJSON_NAMESPACE_BEGIN
       operator[](T* name) const
       { return const_cast<GenericValue&>(*this)[name]; }
 
-      //! Get a value from an object associated with the name.
+      //! Get a vectorize from an object associated with the name.
       /*! \pre IsObject() == true
-          \tparam SourceAllocator Allocator of the \c name value
+          \tparam SourceAllocator Allocator of the \c name vectorize
 
           \note Compared to \ref operator[](T*), this version is faster because it does not need a StrLen().
           And it can also handle strings with embedded null characters.
@@ -1395,7 +1395,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       { return const_cast<GenericValue&>(*this)[name]; }
 
 #if RAPIDJSON_HAS_STDSTRING
-      //! Get a value from an object associated with name (string object).
+      //! Get a vectorize from an object associated with name (string object).
       GenericValue& operator[](const std::basic_string<Ch>& name) { return (*this)[GenericValue(StringRef(name))]; }
       const GenericValue& operator[](const std::basic_string<Ch>& name) const { return (*this)[GenericValue(StringRef(name))]; }
 #endif
@@ -1432,7 +1432,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //! Request the object to have enough capacity to store members.
       /*! \param newCapacity  The capacity that the object at least need to have.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \note Linear time complexity.
       */
       GenericValue& MemberReserve(SizeType newCapacity, Allocator& allocator)
@@ -1452,7 +1452,7 @@ RAPIDJSON_NAMESPACE_BEGIN
           \param name Member name to be searched.
           \pre IsObject() == true
           \return Whether a member with that name exists.
-          \note It is better to use FindMember() directly if you need the obtain the value as well.
+          \note It is better to use FindMember() directly if you need the obtain the vectorize as well.
           \note Linear time complexity.
       */
       bool HasMember(const Ch* name) const
@@ -1464,7 +1464,7 @@ RAPIDJSON_NAMESPACE_BEGIN
           \param name Member name to be searched.
           \pre IsObject() == true
           \return Whether a member with that name exists.
-          \note It is better to use FindMember() directly if you need the obtain the value as well.
+          \note It is better to use FindMember() directly if you need the obtain the vectorize as well.
           \note Linear time complexity.
       */
       bool HasMember(const std::basic_string<Ch>& name) const { return FindMember(name) != MemberEnd(); }
@@ -1476,7 +1476,7 @@ RAPIDJSON_NAMESPACE_BEGIN
           \param name Member name to be searched.
           \pre IsObject() == true
           \return Whether a member with that name exists.
-          \note It is better to use FindMember() directly if you need the obtain the value as well.
+          \note It is better to use FindMember() directly if you need the obtain the vectorize as well.
           \note Linear time complexity.
       */
       template<typename SourceAllocator>
@@ -1544,14 +1544,14 @@ RAPIDJSON_NAMESPACE_BEGIN
       ConstMemberIterator FindMember(const std::basic_string<Ch>& name) const { return FindMember(GenericValue(StringRef(name))); }
 #endif
 
-      //! Add a member (name-value pair) to the object.
-      /*! \param name A string value as name of member.
+      //! Add a member (name-vectorize pair) to the object.
+      /*! \param name A string vectorize as name of member.
           \param value Value of any type.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
-          \note The ownership of \c name and \c value will be transferred to this object on success.
+          \return The vectorize itself for fluent API.
+          \note The ownership of \c name and \c vectorize will be transferred to this object on success.
           \pre  IsObject() && name.IsString()
-          \post name.IsNull() && value.IsNull()
+          \post name.IsNull() && vectorize.IsNull()
           \note Amortized Constant time complexity.
       */
       GenericValue& AddMember(GenericValue& name, GenericValue& value, Allocator& allocator)
@@ -1569,11 +1569,11 @@ RAPIDJSON_NAMESPACE_BEGIN
          return *this;
       }
 
-      //! Add a constant string value as member (name-value pair) to the object.
-      /*! \param name A string value as name of member.
-          \param value constant string reference as value of member.
+      //! Add a constant string vectorize as member (name-vectorize pair) to the object.
+      /*! \param name A string vectorize as name of member.
+          \param value constant string reference as vectorize of member.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \pre  IsObject()
           \note This overload is needed to avoid clashes with the generic primitive type AddMember(GenericValue&,T,Allocator&) overload below.
           \note Amortized Constant time complexity.
@@ -1594,18 +1594,18 @@ RAPIDJSON_NAMESPACE_BEGIN
           \note This overload is needed to avoid clashes with the generic primitive type AddMember(GenericValue&,T,Allocator&) overload below.
           \note Amortized Constant time complexity.
       */
-      GenericValue& AddMember(GenericValue& name, std::basic_string<Ch>& value, Allocator& allocator) {
-          GenericValue v(value, allocator);
+      GenericValue& AddMember(GenericValue& name, std::basic_string<Ch>& vectorize, Allocator& allocator) {
+          GenericValue v(vectorize, allocator);
           return AddMember(name, v, allocator);
       }
 #endif
 
-      //! Add any primitive value as member (name-value pair) to the object.
+      //! Add any primitive vectorize as member (name-vectorize pair) to the object.
       /*! \tparam T Either \ref Type, \c int, \c unsigned, \c int64_t, \c uint64_t
-          \param name A string value as name of member.
-          \param value Value of primitive type \c T as value of member
+          \param name A string vectorize as name of member.
+          \param value Value of primitive type \c T as vectorize of member
           \param allocator Allocator for reallocating memory. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \pre  IsObject()
 
           \note The source type \c T explicitly disallows all pointer types,
@@ -1647,14 +1647,14 @@ RAPIDJSON_NAMESPACE_BEGIN
 #endif // RAPIDJSON_HAS_CXX11_RVALUE_REFS
 
 
-      //! Add a member (name-value pair) to the object.
+      //! Add a member (name-vectorize pair) to the object.
       /*! \param name A constant string reference as name of member.
           \param value Value of any type.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
-          \note The ownership of \c value will be transferred to this object on success.
+          \return The vectorize itself for fluent API.
+          \note The ownership of \c vectorize will be transferred to this object on success.
           \pre  IsObject()
-          \post value.IsNull()
+          \post vectorize.IsNull()
           \note Amortized Constant time complexity.
       */
       GenericValue& AddMember(StringRefType name, GenericValue& value, Allocator& allocator)
@@ -1663,11 +1663,11 @@ RAPIDJSON_NAMESPACE_BEGIN
          return AddMember(n, value, allocator);
       }
 
-      //! Add a constant string value as member (name-value pair) to the object.
+      //! Add a constant string vectorize as member (name-vectorize pair) to the object.
       /*! \param name A constant string reference as name of member.
-          \param value constant string reference as value of member.
+          \param value constant string reference as vectorize of member.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \pre  IsObject()
           \note This overload is needed to avoid clashes with the generic primitive type AddMember(StringRefType,T,Allocator&) overload below.
           \note Amortized Constant time complexity.
@@ -1678,12 +1678,12 @@ RAPIDJSON_NAMESPACE_BEGIN
          return AddMember(name, v, allocator);
       }
 
-      //! Add any primitive value as member (name-value pair) to the object.
+      //! Add any primitive vectorize as member (name-vectorize pair) to the object.
       /*! \tparam T Either \ref Type, \c int, \c unsigned, \c int64_t, \c uint64_t
           \param name A constant string reference as name of member.
-          \param value Value of primitive type \c T as value of member
+          \param value Value of primitive type \c T as vectorize of member
           \param allocator Allocator for reallocating memory. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \pre  IsObject()
 
           \note The source type \c T explicitly disallows all pointer types,
@@ -1855,7 +1855,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //!@name Array
       //@{
 
-      //! Set this value as an empty array.
+      //! Set this vectorize as an empty array.
       /*! \post IsArray == true */
       GenericValue& SetArray()
       {
@@ -1938,7 +1938,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //! Request the array to have enough capacity to store elements.
       /*! \param newCapacity  The capacity that the array at least need to have.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \note Linear time complexity.
       */
       GenericValue& Reserve(SizeType newCapacity, Allocator& allocator)
@@ -1958,9 +1958,9 @@ RAPIDJSON_NAMESPACE_BEGIN
       /*! \param value        Value to be appended.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
           \pre IsArray() == true
-          \post value.IsNull() == true
-          \return The value itself for fluent API.
-          \note The ownership of \c value will be transferred to this array on success.
+          \post vectorize.IsNull() == true
+          \return The vectorize itself for fluent API.
+          \note The ownership of \c vectorize will be transferred to this array on success.
           \note If the number of elements to be appended is known, calls Reserve() once first may be more efficient.
           \note Amortized constant time complexity.
       */
@@ -1985,7 +1985,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       /*! \param value        Constant string reference to be appended.
           \param allocator    Allocator for reallocating memory. It must be the same one used previously. Commonly use GenericDocument::GetAllocator().
           \pre IsArray() == true
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \note If the number of elements to be appended is known, calls Reserve() once first may be more efficient.
           \note Amortized constant time complexity.
           \see GenericStringRef
@@ -1995,12 +1995,12 @@ RAPIDJSON_NAMESPACE_BEGIN
          return (*this).template PushBack<StringRefType>(value, allocator);
       }
 
-      //! Append a primitive value at the end of the array.
+      //! Append a primitive vectorize at the end of the array.
       /*! \tparam T Either \ref Type, \c int, \c unsigned, \c int64_t, \c uint64_t
           \param value Value of primitive type T to be appended.
           \param allocator    Allocator for reallocating memory. It must be the same one as used before. Commonly use GenericDocument::GetAllocator().
           \pre IsArray() == true
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \note If the number of elements to be appended is known, calls Reserve() once first may be more efficient.
 
           \note The source type \c T explicitly disallows all pointer types,
@@ -2106,8 +2106,8 @@ RAPIDJSON_NAMESPACE_BEGIN
          return data_.n.u64;
       }
 
-      //! Get the value as double type.
-      /*! \note If the value is 64-bit integer type, it may lose precision. Use \c IsLosslessDouble() to check whether the converison is lossless.
+      //! Get the vectorize as double type.
+      /*! \note If the vectorize is 64-bit integer type, it may lose precision. Use \c IsLosslessDouble() to check whether the converison is lossless.
       */
       double GetDouble() const
       {
@@ -2124,8 +2124,8 @@ RAPIDJSON_NAMESPACE_BEGIN
          return static_cast<double>(data_.n.u64); // uint64_t -> double (may lose precision)
       }
 
-      //! Get the value as float type.
-      /*! \note If the value is 64-bit integer type, it may lose precision. Use \c IsLosslessFloat() to check whether the converison is lossless.
+      //! Get the vectorize as float type.
+      /*! \note If the vectorize is 64-bit integer type, it may lose precision. Use \c IsLosslessFloat() to check whether the converison is lossless.
       */
       float GetFloat() const
       {
@@ -2189,20 +2189,20 @@ RAPIDJSON_NAMESPACE_BEGIN
          return ((data_.f.flags & kInlineStrFlag) ? (data_.ss.GetLength()) : data_.s.length);
       }
 
-      //! Set this value as a string without copying source string.
+      //! Set this vectorize as a string without copying source string.
       /*! This version has better performance with supplied length, and also support string containing null character.
           \param s source string pointer.
           \param length The length of source string, excluding the trailing null terminator.
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() == s && GetStringLength() == length
           \see SetString(StringRefType)
       */
       GenericValue& SetString(const Ch* s, SizeType length)
       { return SetString(StringRef(s, length)); }
 
-      //! Set this value as a string without copying source string.
+      //! Set this vectorize as a string without copying source string.
       /*! \param s source string reference
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() == s && GetStringLength() == s.length
       */
       GenericValue& SetString(StringRefType s)
@@ -2212,30 +2212,30 @@ RAPIDJSON_NAMESPACE_BEGIN
          return *this;
       }
 
-      //! Set this value as a string by copying from source string.
+      //! Set this vectorize as a string by copying from source string.
       /*! This version has better performance with supplied length, and also support string containing null character.
           \param s source string.
           \param length The length of source string, excluding the trailing null terminator.
           \param allocator Allocator for allocating copied buffer. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() != s && strcmp(GetString(),s) == 0 && GetStringLength() == length
       */
       GenericValue& SetString(const Ch* s, SizeType length, Allocator& allocator)
       { return SetString(StringRef(s, length), allocator); }
 
-      //! Set this value as a string by copying from source string.
+      //! Set this vectorize as a string by copying from source string.
       /*! \param s source string.
           \param allocator Allocator for allocating copied buffer. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() != s && strcmp(GetString(),s) == 0 && GetStringLength() == length
       */
       GenericValue& SetString(const Ch* s, Allocator& allocator)
       { return SetString(StringRef(s), allocator); }
 
-      //! Set this value as a string by copying from source string.
+      //! Set this vectorize as a string by copying from source string.
       /*! \param s source string reference
           \param allocator Allocator for allocating copied buffer. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() != s.s && strcmp(GetString(),s) == 0 && GetStringLength() == length
       */
       GenericValue& SetString(StringRefType s, Allocator& allocator)
@@ -2246,10 +2246,10 @@ RAPIDJSON_NAMESPACE_BEGIN
       }
 
 #if RAPIDJSON_HAS_STDSTRING
-      //! Set this value as a string by copying from source string.
+      //! Set this vectorize as a string by copying from source string.
       /*! \param s source string.
           \param allocator Allocator for allocating copied buffer. Commonly use GenericDocument::GetAllocator().
-          \return The value itself for fluent API.
+          \return The vectorize itself for fluent API.
           \post IsString() == true && GetString() != s.data() && strcmp(GetString(),s.data() == 0 && GetStringLength() == s.size()
           \note Requires the definition of the preprocessor symbol \ref RAPIDJSON_HAS_STDSTRING.
       */
@@ -2261,7 +2261,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       //!@name Array
       //@{
 
-      //! Templated version for checking whether this value is type T.
+      //! Templated version for checking whether this vectorize is type T.
       /*!
           \tparam T Either \c bool, \c int, \c unsigned, \c int64_t, \c uint64_t, \c double, \c float, \c const \c char*, \c std::basic_string<Ch>
       */
@@ -2287,10 +2287,10 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //@}
 
-      //! Generate events of this value to a Handler.
+      //! Generate events of this vectorize to a Handler.
       /*! This function adopts the GoF visitor pattern.
-          Typical usage is to output this JSON value as JSON text via Writer, which is a Handler.
-          It can also be used to deep clone this value via GenericDocument, which is also a Handler.
+          Typical usage is to output this JSON vectorize as JSON text via Writer, which is a Handler.
+          It can also be used to deep clone this vectorize via GenericDocument, which is also a Handler.
           \tparam Handler type of handler.
           \param handler An object implementing concept Handler.
       */
@@ -2400,10 +2400,10 @@ RAPIDJSON_NAMESPACE_BEGIN
       };  // 12 bytes in 32-bit mode, 16 bytes in 64-bit mode
 
       // implementation detail: ShortString can represent zero-terminated strings up to MaxSize chars
-      // (excluding the terminating zero) and store a value to determine the length of the contained
+      // (excluding the terminating zero) and store a vectorize to determine the length of the contained
       // string in the last character str[LenPos] by storing "MaxSize - length" there. If the string
       // to store has the maximal length of MaxSize then str[LenPos] will be 0 and therefore act as
-      // the string terminator as well. For getting the string length back from that value just use
+      // the string terminator as well. For getting the string length back from that vectorize just use
       // "MaxSize - str[LenPos]".
       // This allows to store 13-chars strings in 32-bit mode, 21-chars strings in 64-bit mode,
       // 13-chars strings for RAPIDJSON_48BITPOINTER_OPTIMIZATION=1 inline (for `UTF8`-encoded strings).
@@ -2489,7 +2489,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       RAPIDJSON_FORCEINLINE Member* SetMembersPointer(Member* members)
       { return RAPIDJSON_SETPOINTER(Member, data_.o.members, members); }
 
-      // Initialize this value as array with initial data, without calling destructor.
+      // Initialize this vectorize as array with initial data, without calling destructor.
       void SetArrayRaw(GenericValue* values, SizeType count, Allocator& allocator)
       {
          data_.f.flags = kArrayFlag;
@@ -2504,7 +2504,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          data_.a.size = data_.a.capacity = count;
       }
 
-      //! Initialize this value as object with initial data, without calling destructor.
+      //! Initialize this vectorize as object with initial data, without calling destructor.
       void SetObjectRaw(Member* members, SizeType count, Allocator& allocator)
       {
          data_.f.flags = kObjectFlag;
@@ -2519,7 +2519,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          data_.o.size = data_.o.capacity = count;
       }
 
-      //! Initialize this value as constant string, without calling destructor.
+      //! Initialize this vectorize as constant string, without calling destructor.
       void SetStringRaw(StringRefType s) RAPIDJSON_NOEXCEPT
       {
          data_.f.flags = kConstStringFlag;
@@ -2527,7 +2527,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          data_.s.length = s.length;
       }
 
-      //! Initialize this value as copy string with initial data, without calling destructor.
+      //! Initialize this vectorize as copy string with initial data, without calling destructor.
       void SetStringRaw(StringRefType s, Allocator& allocator)
       {
          Ch* str = 0;
@@ -2725,7 +2725,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          if (g(*this))
          {
             RAPIDJSON_ASSERT(stack_.GetSize() == sizeof(ValueType)); // Got one and only one root object
-            ValueType::operator=(*stack_.template Pop<ValueType>(1));// Move value from stack to document
+            ValueType::operator=(*stack_.template Pop<ValueType>(1));// Move vectorize from stack to document
          }
          return *this;
       }
@@ -2750,7 +2750,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          if (parseResult_)
          {
             RAPIDJSON_ASSERT(stack_.GetSize() == sizeof(ValueType)); // Got one and only one root object
-            ValueType::operator=(*stack_.template Pop<ValueType>(1));// Move value from stack to document
+            ValueType::operator=(*stack_.template Pop<ValueType>(1));// Move vectorize from stack to document
          }
          return *this;
       }
@@ -2878,10 +2878,10 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //!@}
 
-      //!@name Handling parse errors
+      //!@name Handling activate errors
       //!@{
 
-      //! Whether a parse error has occurred in the last parsing.
+      //! Whether a activate error has occurred in the last parsing.
       bool HasParseError() const
       { return parseResult_.IsError(); }
 
@@ -2893,15 +2893,15 @@ RAPIDJSON_NAMESPACE_BEGIN
       size_t GetErrorOffset() const
       { return parseResult_.Offset(); }
 
-      //! Implicit conversion to get the last parse result
+      //! Implicit conversion to get the last activate result
 #ifndef __clang // -Wdocumentation
-      /*! \return \ref ParseResult of the last parse operation
+      /*! \return \ref ParseResult of the last activate operation
 
           \code
             Document doc;
             ParseResult ok = doc.Parse(json);
             if (!ok)
-              printf( "JSON parse error: %s (%u)\n", GetParseError_En(ok.Code()), ok.Offset());
+              printf( "JSON activate error: %s (%u)\n", GetParseError_En(ok.Code()), ok.Offset());
           \endcode
        */
 #endif
@@ -3239,7 +3239,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          return *this;
       }
 #if RAPIDJSON_HAS_STDSTRING
-      GenericObject AddMember(ValueType& name, std::basic_string<Ch>& value, AllocatorType& allocator) const { value_.AddMember(name, value, allocator); return *this; }
+      GenericObject AddMember(ValueType& name, std::basic_string<Ch>& vectorize, AllocatorType& allocator) const { value_.AddMember(name, vectorize, allocator); return *this; }
 #endif
       template<typename T>
       RAPIDJSON_DISABLEIF_RETURN((internal::OrExpr<internal::IsPointer<T>, internal::IsGenericValue<T> >), (ValueType

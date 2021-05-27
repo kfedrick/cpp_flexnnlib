@@ -67,14 +67,11 @@ add_library(flexneuralnet
         evaluators/include/TDEvaluator.h
         evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
-        datasets/include/NNetIOInterface.h
         util/include/JSONStream.h util/JSONStream.cpp
         util/include/Globals.h util/Globals.cpp
         datasets/stream/CartesianCoordStream.cpp
         datasets/stream/include/DataSetStream.h
-        datasets/include/ValarrayMap.h datasets/ValarrayMap.cpp
         evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
-        datasets/stream/ValarrayMapStream.cpp
         trainers/include/DeltaBarDeltaLearningRate.h
         trainers/include/TrainingReport.h
         util/include/URandArray2DInitializer.h
@@ -104,10 +101,21 @@ add_library(flexneuralnet
         evaluators/include/TDCostToGoFitnessFunc.h
         evaluators/include/TDEvaluator.h
         evaluators/include/TDEvaluatorConfig.h
-        datasets/include/ReinforcementValue.h
         network/include/NetworkInput.h
-        network/include/NetworkOutput.cpp
-        network/include/NetworkOutput.h)
+        network/include/NetworkOutput.h
+        envsimulator/include/ActionView.h
+        ac-network/BaseActorCriticNetwork.cpp
+        ac-network/include/BaseActorCriticNetwork.h
+        envsimulator/include/Environment.h
+        util/include/Thing.h
+        util/include/Thang.h
+        network/include/VariadicInput.h
+        datasets/include/Vectorizable.h
+        network/include/ActionOutput.h
+        envsimulator/include/State.h
+        nnetio/include/Feature.h
+        nnetio/include/FeatureSet.h
+        nnetio/include/FixedSizeFeature.h nnetio/include/FeatureDecorator.h nnetio/include/NNFeatureSet.h nnetio/include/ValueMapFeatureSet.h nnetio/include/RawFeatureIOStream.h nnetio/include/RawFeature.h nnetio/include/FeatureSetIOStream.h nnetio/include/Reinforcement.h nnetio/include/RawFeatureSet.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -116,12 +124,15 @@ target_include_directories(flexneuralnet PUBLIC
         datasets/include
         datasets/stream
         datasets/stream/include
+        envsimulator/include
         include
         layers
         layers/include
         layers/transfer_functions/include
         network
         network/include
+        ac-network
+        ac-network/include
         evaluators
         evaluators/include
         trainers
@@ -130,6 +141,8 @@ target_include_directories(flexneuralnet PUBLIC
         util/include
         rapidjson
         picojson
+        nnetio
+        nnetio/include
         )
 
 enable_testing()

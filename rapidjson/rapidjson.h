@@ -22,11 +22,11 @@
  */
 
 /*! \defgroup RAPIDJSON_CONFIG RapidJSON configuration
-    \brief Configuration macros for library features
+    \brief Configuration macros for library raw_features
 
-    Some RapidJSON features are configurable to adapt the library to a wide
+    Some RapidJSON raw_features are configurable to adapt the library to a wide
     variety of platforms, environments and usage scenarios.  Most of the
-    features can be configured in terms of overridden or predefined
+    raw_features can be configured in terms of overridden or predefined
     preprocessor macros at compile-time.
 
     Some additional customization is available in the \ref RAPIDJSON_ERRORS APIs.
@@ -424,7 +424,7 @@ RAPIDJSON_NAMESPACE_END
 #endif
 RAPIDJSON_NAMESPACE_BEGIN
 template <bool x> struct STATIC_ASSERTION_FAILURE;
-template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+template <> struct STATIC_ASSERTION_FAILURE<true> { enum { vectorize = 1 }; };
 template <size_t x> struct StaticAssertTest {};
 RAPIDJSON_NAMESPACE_END
 
@@ -533,7 +533,7 @@ RAPIDJSON_NAMESPACE_END
 #endif // RAPIDJSON_DIAG_*
 
 ///////////////////////////////////////////////////////////////////////////////
-// C++11 features
+// C++11 raw_features
 
 #ifndef RAPIDJSON_HAS_CXX11_RVALUE_REFS
 #if defined(__clang__)
@@ -640,7 +640,7 @@ RAPIDJSON_NAMESPACE_END
 */
 RAPIDJSON_NAMESPACE_BEGIN
 
-//! Type of JSON value
+//! Type of JSON vectorize
    enum Type
    {
       kNullType = 0,      //!< null

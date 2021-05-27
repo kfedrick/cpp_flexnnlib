@@ -24,7 +24,7 @@ NetSumLayer::~NetSumLayer()
 }
 
 /**
- * Calculate the net input value based on the raw input std::vector and weights specified in the
+ * Calculate the net input vectorize based on the raw input std::vector and weights specified in the
  * argument list and writes it into the _netin argument.
  */
 void NetSumLayer::calc_netin(const std::valarray<double>& _rawinv, std::valarray<double>& _netinv)
@@ -44,7 +44,7 @@ void NetSumLayer::calc_netin(const std::valarray<double>& _rawinv, std::valarray
    size_t bias_ndx = rawinv_sz;
    for (size_t netin_ndx = 0; netin_ndx < netinv_sz; netin_ndx++)
    {
-      // Initialize netin value with bias, then add weighted sum of input vector
+      // Initialize netin vectorize with bias, then add weighted sum of input vector
       _netinv[netin_ndx] = lweights.at(netin_ndx, bias_ndx);
       for (size_t rawin_ndx = 0; rawin_ndx < _rawinv.size(); rawin_ndx++)
          _netinv[netin_ndx] += _rawinv[rawin_ndx] * lweights.at(netin_ndx, rawin_ndx);

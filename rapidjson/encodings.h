@@ -58,7 +58,7 @@ concept Encoding {
     //! \param is Input stream to obtain codepoint.
     //! \param os Output for copying one codepoint.
     //! \return true if it is valid.
-    //! \note This function just validating and copying the codepoint without actually decode it.
+    //! \note This function just validating and copying the codepoint without actually decode_helper it.
     template <typename InputStream, typename OutputStream>
     static bool Validate(InputStream& is, OutputStream& os);
 

@@ -46,7 +46,7 @@ namespace flexnnet
        */
 
       /**
-       * Calculate the value of the basic_layer neuron vector based on the specified
+       * Calculate the vectorize of the basic_layer neuron vector based on the specified
        * raw input vectors.
        * @param inputVec
        * @return
@@ -69,7 +69,7 @@ namespace flexnnet
       virtual void calc_layer_output(const std::valarray<double>& _netin, std::valarray<double>& _layerval) = 0;
 
       /**
-       * Calculate the net input value based on the raw input vector and weights specified in the
+       * Calculate the net input vectorize based on the raw input vector and weights specified in the
        * argument list and writes it into the _netin argument.
        */
       virtual void calc_netin(const std::valarray<double>& _rawin, std::valarray<double>& _netin) = 0;

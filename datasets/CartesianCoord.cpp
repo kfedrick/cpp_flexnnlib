@@ -46,7 +46,7 @@ CartesianCoord::value_map(void) const
 }
 
 void
-CartesianCoord::parse(const flexnnet::ValarrMap& _vmap)
+CartesianCoord::set(const flexnnet::ValarrMap& _vmap)
 {
 }
 

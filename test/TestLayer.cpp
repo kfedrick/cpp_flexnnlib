@@ -62,7 +62,7 @@ TestLayer::datum_near(const flexnnet::OldDatum& _target, const flexnnet::OldDatu
    if (target_fields != test_fields)
       return false;
 
-   // Hash value for fields information should match
+   // Hash vectorize for fields information should match
    if (_target.hashval() != _test.hashval())
       return false;
 

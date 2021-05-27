@@ -19,7 +19,7 @@ namespace flexnnet
 
    public:
       /**
-       * Set the value of the cumulative temporal-difference error discount
+       * Set the vectorize of the cumulative temporal-difference error discount
        * discount parameter, gamma : (0 <= gamma <= 1.0)
        *
        * @param _gamma
@@ -27,7 +27,7 @@ namespace flexnnet
       void set_td_discount(double _gamma);
 
       /**
-       * Get the value of the cumulative temporal-difference error discount
+       * Get the vectorize of the cumulative temporal-difference error discount
        * paramater, gamma.
        *
        * @return
@@ -49,7 +49,7 @@ namespace flexnnet
       {
          std::ostringstream err_str;
          err_str
-            << "Error : TDEvaluatorConfig.set_td_discount() - illegal value " << _gamma << "\n";
+            << "Error : TDEvaluatorConfig.set_td_discount() - illegal vectorize " << _gamma << "\n";
          throw std::invalid_argument(err_str.str());
       }
 

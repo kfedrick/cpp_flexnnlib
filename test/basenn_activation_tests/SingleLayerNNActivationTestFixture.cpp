@@ -2,6 +2,7 @@
 // Created by kfedrick on 2/22/21.
 //
 #include "SingleLayerNNActivationTestFixture.h"
+#include "Reinforcement.h"
 
 #include <fstream>
 #include <rapidjson/istreamwrapper.h>

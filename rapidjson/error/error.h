@@ -68,7 +68,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       kParseErrorDocumentEmpty,                   //!< The document is empty.
       kParseErrorDocumentRootNotSingular,         //!< The document root must not follow by other values.
 
-      kParseErrorValueInvalid,                    //!< Invalid value.
+      kParseErrorValueInvalid,                    //!< Invalid vectorize.
 
       kParseErrorObjectMissName,                  //!< Missing a name for object member.
       kParseErrorObjectMissColon,                 //!< Missing a colon after a name of object member.
@@ -97,7 +97,7 @@ RAPIDJSON_NAMESPACE_BEGIN
         Document doc;
         ParseResult ok = doc.Parse("[42]");
         if (!ok) {
-            fprintf(stderr, "JSON parse error: %s (%u)",
+            fprintf(stderr, "JSON activate error: %s (%u)",
                     GetParseError_En(ok.Code()), ok.Offset());
             exit(EXIT_FAILURE);
         }

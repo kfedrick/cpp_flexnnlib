@@ -14,7 +14,6 @@
 #include "DataSet.h"
 #include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
-#include <ValarrayMap.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include <PureLin.h>
@@ -30,7 +29,6 @@
 #include <SupervisedTrainingAlgo.h>
 #include <ConstantLearningRate.h>
 #include <ExemplarSeries.h>
-#include <DeepRLAlgo.h>
 #include <CartesianCoord.h>
 
 #include "SimpleBinaryClassifierDataSet.h"
@@ -77,10 +75,10 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<RawFeature<1>>> rmse_fit;
 
-   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
-   ol_ptr->add_external_input_field("input", 1);
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("F0", 1);
    /*
     * Configure NN topology and base neural net
     */
@@ -100,9 +98,9 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -112,8 +110,8 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -131,12 +129,12 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
 
    EXPECT_NO_THROW("Unexpected exception thrown while configuring trainer.");
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = newnnet.get_weights("F0");
 
    trainer.train(trnset);
    EXPECT_NO_THROW("Unexpected exception thrown while training network.");
 
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   flexnnet::LayerWeights tow = newnnet.get_weights("F0");
 
 /*
    std::cout << prettyPrintArray("initial output weights", iow.const_weights_ref);
@@ -169,13 +167,10 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    // successful training rate should be greater than 90%
    EXPECT_GE(success_rate, 0.9) << "Successful training rate less than expected.";
 
-/*
 
    std::cout << "perf of first entry = " << trecs.begin()->best_performance << "\n";
    for (auto it = trace.begin(); it != trace.end(); it++)
       std::cout << it->epoch << " " << it->performance << "\n";
-
-*/
 
    std::cout << "\n eval after return\n";
    double tst_perf, tst_stdev;
@@ -217,20 +212,20 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
 
-   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<TanSig>> hl_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(7, "hidden", TanSig::DEFAULT_PARAMS, false));
 
-   hl_ptr->add_external_input_field("input", 1);
+   hl_ptr->add_external_input_field("F0", 1);
    ol_ptr->add_connection("activation", hl_ptr, flexnnet::LayerConnRecord::Forward);
    hl_ptr->add_connection("backprop", ol_ptr, flexnnet::LayerConnRecord::Forward);
 
    /*
     * Configure NN topology and base neural net
     */
-   flexnnet::ValarrMap nninput;
-   nninput["input"] = {1};
+   //flexnnet::ValarrMap nninput;
+   //nninput["input"] = {1};
 
    NeuralNetTopology topo;
    topo.network_layers[ol_ptr->name()] = ol_ptr;
@@ -249,9 +244,9 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -261,8 +256,8 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -272,7 +267,7 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
 
    trainer.set_saved_nnet_limit(20);
    trainer.set_batch_mode(0);
-   trainer.set_training_runs(1);
+   trainer.set_training_runs(5);
    trainer.set_max_epochs(200);
    trainer.set_learning_rate(0.001);
    trainer.set_error_goal(ERROR_GOAL);
@@ -283,13 +278,13 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
 
    newnnet.initialize_weights();
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = newnnet.get_weights("F0");
    flexnnet::LayerWeights ihw = newnnet.get_weights("hidden");
 
    trainer.train(trnset);
    EXPECT_NO_THROW("Unexpected exception thrown while training network.");
 
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   flexnnet::LayerWeights tow = newnnet.get_weights("F0");
    flexnnet::LayerWeights thw = newnnet.get_weights("hidden");
 
 /*
@@ -348,7 +343,7 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    for (auto it = trecs.begin(); it != trecs.end(); it++)
       std::cout << it->best_performance << " " << it->best_epoch << "\n";
 
-/*   ValarrayMap nnout;
+/*   FeatureVector nnout;
    std::ofstream cof("binclassifier_run.txt");
    trnset.randomize_order();
    std::cout << "\nactual classification\n";
@@ -397,12 +392,12 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
 
-   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<LogSig>> hl_ptr = std::make_shared<NetworkLayerImpl<LogSig>>(NetworkLayerImpl<LogSig>(5, "hidden", LogSig::DEFAULT_PARAMS, false));
 
-   hl_ptr->add_external_input_field("input", 1);
+   hl_ptr->add_external_input_field("F0", 1);
    ol_ptr->add_connection("activation", hl_ptr, flexnnet::LayerConnRecord::Forward);
    hl_ptr->add_connection("backprop", ol_ptr, flexnnet::LayerConnRecord::Forward);
 
@@ -429,9 +424,9 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -441,8 +436,8 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -461,13 +456,13 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
 
    EXPECT_NO_THROW("Unexpected exception thrown while configuring trainer.");
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = newnnet.get_weights("F0");
    flexnnet::LayerWeights ihw = newnnet.get_weights("hidden");
 
    trainer.train(trnset);
    EXPECT_NO_THROW("Unexpected exception thrown while training network.");
 
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   flexnnet::LayerWeights tow = newnnet.get_weights("F0");
    flexnnet::LayerWeights thw = newnnet.get_weights("hidden");
 
 /*
@@ -532,7 +527,7 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
       std::cout << it->best_performance << " " << it->best_epoch << "\n";
 
 
-   ValarrayMap nnout;
+   flexnnet::FeatureSet<std::tuple<RawFeature<1>>> nnout;
 
 /*
 
@@ -586,12 +581,12 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::ValarrayMap> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
 
-   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<PureLin>> hl_ptr = std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(3, "hidden", PureLin::DEFAULT_PARAMS, false));
 
-   hl_ptr->add_external_input_field("input", 1);
+   hl_ptr->add_external_input_field("F0", 1);
    ol_ptr->add_connection("activation", hl_ptr, flexnnet::LayerConnRecord::Forward);
    hl_ptr->add_connection("backprop", ol_ptr, flexnnet::LayerConnRecord::Forward);
 
@@ -618,9 +613,9 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::ValarrayMap, flexnnet::ValarrayMap> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::ValarrayMap,
-                       flexnnet::ValarrayMap,
+   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -630,8 +625,8 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::ValarrayMap,
-                                    flexnnet::ValarrayMap,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -650,13 +645,13 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
 
    EXPECT_NO_THROW("Unexpected exception thrown while configuring trainer.");
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = newnnet.get_weights("F0");
    flexnnet::LayerWeights ihw = newnnet.get_weights("hidden");
 
    trainer.train(trnset);
    EXPECT_NO_THROW("Unexpected exception thrown while training network.");
 
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   flexnnet::LayerWeights tow = newnnet.get_weights("F0");
    flexnnet::LayerWeights thw = newnnet.get_weights("hidden");
 
 /*
@@ -718,7 +713,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    for (auto it = trecs.begin(); it != trecs.end(); it++)
       std::cout << it->best_performance << " " << it->best_epoch << "\n";
 
-   ValarrayMap nnout;
+   flexnnet::FeatureSet<std::tuple<RawFeature<1>>> nnout;
 
 /*
 

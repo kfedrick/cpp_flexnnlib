@@ -59,7 +59,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          }
          else if (value < 100000000)
          {
-            // value = bbbbcccc
+            // vectorize = bbbbcccc
             const uint32_t b = value / 10000;
             const uint32_t c = value % 10000;
 
@@ -84,7 +84,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          }
          else
          {
-            // value = aabbbbcccc in decimal
+            // vectorize = aabbbbcccc in decimal
 
             const uint32_t a = value / 100000000; // 1 to 42
             value %= 100000000;
@@ -164,7 +164,7 @@ RAPIDJSON_NAMESPACE_BEGIN
             }
             else
             {
-               // value = bbbbcccc
+               // vectorize = bbbbcccc
                const uint32_t b = v / 10000;
                const uint32_t c = v % 10000;
 

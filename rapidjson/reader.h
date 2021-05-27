@@ -67,7 +67,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 /*! \def RAPIDJSON_PARSE_ERROR_NORETURN
     \ingroup RAPIDJSON_ERRORS
-    \brief Macro to indicate a parse error.
+    \brief Macro to indicate a activate error.
     \param parseErrorCode \ref rapidjson::ParseErrorCode of the error
     \param offset  position of the error in JSON input (\c size_t)
 
@@ -76,7 +76,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
     A common usage model is to throw an exception instead of requiring the
     caller to explicitly check the \ref rapidjson::GenericReader::Parse's
-    return value:
+    return vectorize:
 
     \code
     #define RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode,offset) \
@@ -105,7 +105,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
 /*! \def RAPIDJSON_PARSE_ERROR
     \ingroup RAPIDJSON_ERRORS
-    \brief (Internal) macro to indicate and handle a parse error.
+    \brief (Internal) macro to indicate and handle a activate error.
     \param parseErrorCode \ref rapidjson::ParseErrorCode of the error
     \param offset  position of the error in JSON input (\c size_t)
 
@@ -154,7 +154,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       kParseNumbersAsStringsFlag = 64,    //!< Parse all numbers (ints/doubles) as strings.
       kParseTrailingCommasFlag = 128, //!< Allow trailing commas at the end of objects and arrays.
       kParseNanAndInfFlag = 256,      //!< Allow parsing NaN, Inf, Infinity, -Inf and -Infinity as doubles.
-      kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default parse flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
+      kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default activate flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
    };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -555,7 +555,7 @@ concept Handler {
     A GenericReader object can be reused for parsing multiple JSON text.
 
     \tparam SourceEncoding Encoding of the input stream.
-    \tparam TargetEncoding Encoding of the parse output.
+    \tparam TargetEncoding Encoding of the activate output.
     \tparam StackAllocator Allocator type for stack.
 */
    template<typename SourceEncoding, typename TargetEncoding, typename StackAllocator = CrtAllocator>
@@ -718,7 +718,7 @@ concept Handler {
          return IsIterativeParsingCompleteState(state_);
       }
 
-      //! Whether a parse error has occurred in the last parsing.
+      //! Whether a activate error has occurred in the last parsing.
       bool HasParseError() const
       { return parseResult_.IsError(); }
 
@@ -791,7 +791,7 @@ concept Handler {
          }
       }
 
-      // Parse object: { string : value, ... }
+      // Parse object: { string : vectorize, ... }
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseObject(InputStream& is, Handler& handler)
       {
@@ -863,7 +863,7 @@ concept Handler {
          }
       }
 
-      // Parse array: [ value, ... ]
+      // Parse array: [ vectorize, ... ]
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseArray(InputStream& is, Handler& handler)
       {
@@ -976,7 +976,7 @@ concept Handler {
             return false;
       }
 
-      // Helper function to parse four hexadecimal digits in \uXXXX in ParseString().
+      // Helper function to activate four hexadecimal digits in \uXXXX in ParseString().
       template<typename InputStream>
       unsigned ParseHex4(InputStream& is, size_t escapeOffset)
       {
@@ -1899,7 +1899,7 @@ concept Handler {
             RAPIDJSON_PARSE_ERROR(kParseErrorTermination, startOffset);
       }
 
-      // Parse any JSON value
+      // Parse any JSON vectorize
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseValue(InputStream& is, Handler& handler)
       {
@@ -1943,7 +1943,7 @@ concept Handler {
          IterativeParsingElementState,
          IterativeParsingArrayFinishState,
 
-         // Single value state
+         // Single vectorize state
             IterativeParsingValueState,
 
          // Delimiter states (at bottom)
@@ -2193,7 +2193,7 @@ concept Handler {
             case IterativeParsingObjectInitialState:
             case IterativeParsingArrayInitialState:
             {
-               // Push the state(Element or MemeberValue) if we are nested in another array or value of member.
+               // Push the state(Element or MemeberValue) if we are nested in another array or vectorize of member.
                // In this way we can get the correct state on ObjectFinish or ArrayFinish by frame pop.
                IterativeParsingState n = src;
                if (src == IterativeParsingArrayInitialState || src == IterativeParsingElementDelimiterState)
@@ -2230,7 +2230,7 @@ concept Handler {
                return dst;
 
             case IterativeParsingMemberValueState:
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {
@@ -2239,7 +2239,7 @@ concept Handler {
                return dst;
 
             case IterativeParsingElementState:
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {
@@ -2332,7 +2332,7 @@ concept Handler {
                // Therefore it cannot happen here. And it can be caught by following assertion.
                RAPIDJSON_ASSERT(dst == IterativeParsingValueState);
 
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {

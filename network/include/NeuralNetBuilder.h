@@ -60,6 +60,9 @@ namespace flexnnet
 
       template<typename _InTyp, typename _OutTyp>
       NeuralNet<_InTyp, _OutTyp> build(void);
+      
+      template<typename ... Os>
+      void map_outputs(const Os&... _outputs, const std::string& _olayers...);
 
    private:
       void validate_forward_connection(const std::string& _to, const std::string& _from, const std::set<std::string>& _from_dep);

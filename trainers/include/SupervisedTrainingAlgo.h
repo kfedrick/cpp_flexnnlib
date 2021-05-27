@@ -15,6 +15,7 @@
 #include "BaseTrainer.h"
 #include "Exemplar.h"
 #include "ExemplarSeries.h"
+#include "Reinforcement.h"
 
 namespace flexnnet
 {
@@ -225,7 +226,7 @@ namespace flexnnet
 
       LRPolicy::reset();
 
-      // Previous performance value - used for failback testing
+      // Previous performance vectorize - used for failback testing
       double prev_trn_perf = std::numeric_limits<double>::max();
       double failback_limit = TrainerConfig::error_increase_limit();
 
@@ -450,9 +451,9 @@ namespace flexnnet
    {
       //std::cout << "SupervisedTrainerAlgo.train_exemplar()\n" << std::flush;
 
-      const TgtTyp& nn_out = this->nnet.activate(_exemplar.first);
+      const NNFeatureSet<TgtTyp>& nn_out = this->nnet.activate(_exemplar.first);
 
-      const std::map<std::string, std::valarray<double>>& nnoutv_map = nn_out.value_map();
+      //const std::map<std::string, std::valarray<double>>& nnoutv_map = nn_out.value_map();
       const std::map<std::string, std::valarray<double>>
          & targetv_map = _exemplar.second.value_map();
 

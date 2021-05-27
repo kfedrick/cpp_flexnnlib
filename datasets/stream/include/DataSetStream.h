@@ -112,7 +112,7 @@ operator>>(std::istream& _istrm, flexnnet::DataSet<_InTyp, _OutTyp, ItemTyp>& _d
          std::stringstream ss(it->serialize());
 
          ItemTyp<_InTyp, _OutTyp> x;
-         //ss >> x;
+         ss >> x;
 
          //flexnnet::CartesianCoord cc = *i;
          _dataset.push_back(x);

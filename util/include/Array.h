@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include <stdexcept>
+#include "Reinforcement.h"
 
 namespace flexnnet
 {
@@ -322,7 +323,7 @@ namespace flexnnet
       data.resize(rows);
 
       /*
-       * resize the columns of each row with the specified fill value
+       * resize the columns of each row with the specified fill vectorize
        */
       for (unsigned int i = 0; i < rows; i++)
          data[i].resize(cols, fill);
@@ -569,7 +570,7 @@ namespace flexnnet
       data.resize(xdim);
 
       /*
-       * resize the columns of each row with the specified fill value
+       * resize the columns of each row with the specified fill vectorize
        */
       for (unsigned int i = 0; i < x_dim; i++)
       {

@@ -9,6 +9,7 @@
 #include <Exemplar.h>
 #include <ExemplarSeries.h>
 #include <BasicEvalConfig.h>
+#include "Reinforcement.h"
 
 namespace flexnnet
 {
@@ -132,7 +133,7 @@ namespace flexnnet
       int series_len = _series.size();
       for (int ndx=1; ndx < series_len-1; ndx++)
       {
-         const OutTyp nnout0 = _nnet.value();
+         const OutTyp nnout0 = _nnet.vectorize_features();
 
          const ExemplarTyp& exemplar = _series[ndx];
          const OutTyp& nnout1 = _nnet.activate(exemplar.first);
@@ -141,11 +142,11 @@ namespace flexnnet
          FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);
       }
       const ExemplarTyp& last_exemplar = _series[series_len-1];
-      const OutTyp nnout0 = _nnet.value();
+      const OutTyp nnout0 = _nnet.vectorize_features();
 
       OutTyp zeronnout;
       ValarrMap vm({{"output",{0}}});
-      zeronnout.parse(vm);
+      zeronnout.activate(vm);
 
       OutTyp tgt = FitnessFunc<OutTyp>::calc_target(last_exemplar.second, zeronnout);
       FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);

@@ -11,6 +11,7 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include "TestLayer.h"
+#include "Reinforcement.h"
 
 using flexnnet::Array2D;
 using flexnnet::OldDatum;
@@ -44,7 +45,7 @@ template<typename T> NNetIO_Typ TestSingleLayerNNActivation<T>::parse_datum(cons
 
       datum_fields[field] = std::valarray<double>(field_sz);
 
-      const rapidjson::Value& vec = _obj[i]["value"];
+      const rapidjson::Value& vec = _obj[i]["vectorize"];
       for (rapidjson::SizeType i = 0; i < vec.Size(); i++)
          datum_fields[field][i] = vec[i].GetDouble();
    }

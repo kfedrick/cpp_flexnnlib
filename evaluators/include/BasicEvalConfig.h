@@ -79,7 +79,7 @@ namespace flexnnet
       {
          static std::stringstream sout;
          sout << "Error : BasicEvalConfig::set_subsample_fraction() - "
-              << "Bad value, must be 0 < _frac <= 1 : \"" << _frac << "\"\n";
+              << "Bad vectorize, must be 0 < _frac <= 1 : \"" << _frac << "\"\n";
          throw std::invalid_argument(sout.str());
       }
       sub_sample_fraction = _frac;

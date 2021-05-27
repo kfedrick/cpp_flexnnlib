@@ -17,7 +17,7 @@ operator>>(std::istream& _istrm, flexnnet::CartesianCoord& _coord)
 {
    picojson::value picoval;
 
-   // Read next json value
+   // Read next json vectorize
    _istrm >> picoval;
 
    // Get the picojson object, extract the elements and assign

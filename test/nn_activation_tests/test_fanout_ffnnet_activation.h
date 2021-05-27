@@ -17,9 +17,7 @@
 #include "RadBas.h"
 #include "SoftMax.h"
 #include "LogSig.h"
-#include "ValarrayMap.h"
 
-using flexnnet::ValarrayMap;
 
 #define TESTCASE_PATH "test/nn_activation_tests/samples/"
 
@@ -37,8 +35,8 @@ struct FanoutTestCase
    flexnnet::Array2D<double> olayer1_weights;
    flexnnet::Array2D<double> olayer2_weights;
 
-   flexnnet::ValarrayMap input;
-   flexnnet::ValarrayMap target_output;
+   flexnnet::FeatureVector input;
+   flexnnet::FeatureVector target_output;
 };
 
 template<typename T>
@@ -54,7 +52,7 @@ public:
    void create_fanout_ffnnet(const FanoutTestCase& _testcase);
 
    std::vector<FanoutTestCase> read_samples(std::string _fpath);
-   ValarrayMap parse_datum(const rapidjson::Value& _obj);
+   FeatureVector parse_datum(const rapidjson::Value& _obj);
    flexnnet::Array2D<double> parse_weights(const rapidjson::Value& _obj, size_t _rows, size_t _cols);
 
 public:

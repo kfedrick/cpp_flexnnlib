@@ -9,7 +9,7 @@ add_executable(baselayer_activation_tests baselayer_activation_tests/test_main.c
         baselayer_activation_tests/test_tansig_activation.cpp
         baselayer_activation_tests/test_logsig_activation.cpp
         baselayer_activation_tests/test_radbas_activation.cpp
-        baselayer_activation_tests/test_softmax_activation.cpp)
+        baselayer_activation_tests/test_softmax_activation.cpp esimulator_tests/DerbySim.h esimulator_tests/SteeringAction.h esimulator_tests/DerbyTests.h)
 target_link_libraries(baselayer_activation_tests gtest flexneuralnet)
 add_test(NAME baselayer_activation_tests COMMAND test_main)
 
@@ -19,14 +19,6 @@ add_executable(networklayer_tests networklayer_tests/NNBuilderTestFixture.h
         )
 target_link_libraries(networklayer_tests gtest flexneuralnet)
 add_test(NAME networklayer_tests COMMAND test_main)
-
-add_executable(test_nn_activation nn_activation_tests/test_nn_activation.cpp
-        nn_activation_tests/test_single_layer_nnet_activation.cpp nn_activation_tests/test_single_layer_nnet_activation.h
-        nn_activation_tests/test_fanin_ffnnet_activation.cpp nn_activation_tests/test_fanin_ffnnet_activation.h
-        nn_activation_tests/test_fanout_ffnnet_activation.cpp nn_activation_tests/test_fanout_ffnnet_activation.h
-        TestLayer.cpp)
-target_link_libraries(test_nn_activation gtest flexneuralnet)
-add_test(NAME nn_activation_tests COMMAND test_nn_activation)
 
 add_executable(test_basenn_activation
         include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
@@ -61,3 +53,23 @@ add_executable(test_nn_basic_training
         )
 target_link_libraries(test_nn_basic_training gtest flexneuralnet)
 add_test(NAME test_nn_basic_training COMMAND test_main)
+
+add_executable(esimulator_tests esimulator_tests/test_main.cpp
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        esimulator_tests/DerbySim.h esimulator_tests/SteeringAction.h)
+target_link_libraries(esimulator_tests gtest flexneuralnet)
+add_test(NAME esimulator_tests COMMAND test_main)
+
+add_executable(actorcritic_tests actorcritic_tests/test_main.cpp
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        actorcritic_tests/TestAction.h actorcritic_tests/TestActionFeature.h
+        actorcritic_tests/BasicACTests.h actorcritic_tests/ACActivationTests.h)
+target_link_libraries(actorcritic_tests gtest flexneuralnet)
+add_test(NAME actorcritic_tests COMMAND test_main)
+
+add_executable(nnio_tests nnio_tests/test_main.cpp
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        nnio_tests/FeatureSetTests.h nnio_tests/LabeledFeatureSet.h
+        nnio_tests/TestAction.h nnio_tests/TestActionFeature.h)
+target_link_libraries(nnio_tests gtest flexneuralnet)
+add_test(NAME nnio_tests COMMAND test_main)
