@@ -10,7 +10,6 @@
 
 #include "Array2D.h"
 #include "BasicLayer.h"
-#include "OldDatum.h"
 
 class TestLayer
 {
