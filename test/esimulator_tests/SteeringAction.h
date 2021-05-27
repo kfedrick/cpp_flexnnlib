@@ -8,6 +8,8 @@
 #include <ActionView.h>
 #include "DerbySim.h"
 
+enum class ActionEnum { Left, Right };
+
 class SteeringAction : public flexnnet::ActionView<ActionEnum>
 {
    ActionEnum decode_action(void)

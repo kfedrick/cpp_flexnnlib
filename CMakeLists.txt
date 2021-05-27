@@ -67,14 +67,11 @@ add_library(flexneuralnet
         evaluators/include/TDEvaluator.h
         evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
-        datasets/include/StateView.h
         util/include/JSONStream.h util/JSONStream.cpp
         util/include/Globals.h util/Globals.cpp
         datasets/stream/CartesianCoordStream.cpp
         datasets/stream/include/DataSetStream.h
-        datasets/include/FeatureVector.h datasets/FeatureVector.cpp
         evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
-        datasets/stream/ValarrayMapStream.cpp
         trainers/include/DeltaBarDeltaLearningRate.h
         trainers/include/TrainingReport.h
         util/include/URandArray2DInitializer.h
@@ -104,20 +101,21 @@ add_library(flexneuralnet
         evaluators/include/TDCostToGoFitnessFunc.h
         evaluators/include/TDEvaluator.h
         evaluators/include/TDEvaluatorConfig.h
-        datasets/include/ReinforcementValue.h
         network/include/NetworkInput.h
         network/include/NetworkOutput.h
         envsimulator/include/ActionView.h
-        envsimulator/include/ESimulator.h
         ac-network/BaseActorCriticNetwork.cpp
         ac-network/include/BaseActorCriticNetwork.h
         envsimulator/include/Environment.h
         util/include/Thing.h
         util/include/Thang.h
-        network/include/NetworkReinforcement.h
-        network/include/VariadicNetworkInput.h
+        network/include/VariadicInput.h
         datasets/include/Vectorizable.h
-        network/include/EnvironReinforcement.h)
+        network/include/ActionOutput.h
+        envsimulator/include/State.h
+        nnetio/include/Feature.h
+        nnetio/include/FeatureSet.h
+        nnetio/include/FixedSizeFeature.h nnetio/include/FeatureDecorator.h nnetio/include/NNFeatureSet.h nnetio/include/ValueMapFeatureSet.h nnetio/include/RawFeatureIOStream.h nnetio/include/RawFeature.h nnetio/include/FeatureSetIOStream.h nnetio/include/Reinforcement.h nnetio/include/RawFeatureSet.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic
@@ -143,6 +141,8 @@ target_include_directories(flexneuralnet PUBLIC
         util/include
         rapidjson
         picojson
+        nnetio
+        nnetio/include
         )
 
 enable_testing()

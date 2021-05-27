@@ -199,17 +199,17 @@ namespace flexnnet
       int series_len = _series.size();
       for (int ndx=1; ndx < series_len; ndx++)
       {
-         // Save value estimate
-         //Re0 = this->nnet.value().value();
-         TgtTyp nnout0 = this->nnet.value();
+         // Save vectorize estimate
+         //Re0 = this->nnet.vectorize().vectorize();
+         TgtTyp nnout0 = this->nnet.vectorize_features();
 
          // Activate the network for the next exemplar
          const ExemplarTyp& exemplar = _series[ndx];
          const TgtTyp& nnout1 = this->nnet.activate(exemplar.first);
 
-         // Train the network using the target and value estimates
-         const std::valarray<double>& targetv = exemplar.second.value();
-         //train_final_cost(targetv, nnout1.value(), Re0);
+         // Train the network using the target and vectorize estimates
+         const std::valarray<double>& targetv = exemplar.second.vectorize_features();
+         //train_final_cost(targetv, nnout1.vectorize(), Re0);
 
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
          FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
@@ -271,16 +271,16 @@ namespace flexnnet
       int series_len = _series.size();
       for (int ndx=1; ndx < series_len-1; ndx++)
       {
-         // Save value estimate from step t-1
-         Re0 = this->nnet.value().value();
-         TgtTyp nnout0 = this->nnet.value();
+         // Save vectorize estimate from step t-1
+         Re0 = this->nnet.vectorize_features().vectorize_features();
+         TgtTyp nnout0 = this->nnet.vectorize_features();
 
          // Activate the network for exemplar at time t
          const ExemplarTyp& exemplar = _series[ndx];
          const TgtTyp& nnout1 = this->nnet.activate(exemplar.first);
 
-         // Train the network using the target and value estimates
-         const std::valarray<double>& targetv = exemplar.second.value();
+         // Train the network using the target and vectorize estimates
+         const std::valarray<double>& targetv = exemplar.second.vectorize_features();
 
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
          FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
@@ -292,8 +292,8 @@ namespace flexnnet
       }
 
       // Train the network on the terminal state.
-      const std::valarray<double>& targetv = _series[series_len-1].second.value();
-      TgtTyp nnout0 = this->nnet.value();
+      const std::valarray<double>& targetv = _series[series_len - 1].second.vectorize_features();
+      TgtTyp nnout0 = this->nnet.vectorize_features();
       FeatureVector td_gradient = evaluator.calc_error_gradient(_series[series_len - 1].second, nnout0);
       calc_weight_updates(td_gradient);
 
@@ -348,8 +348,8 @@ namespace flexnnet
 
       double td_error;
 
-      // If there is a external reinforcement specified value, use it. Otherwise
-      // use the current network estimate as the target value function.
+      // If there is a external reinforcement specified vectorize, use it. Otherwise
+      // use the current network estimate as the target vectorize function.
       if (_V.size() > 0)
          td_error = _V[0] - _Re0[0];
       else

@@ -18,7 +18,7 @@ namespace flexnnet
     * LayerWeights holds the learned parameters of the basic_layer, including:
     *
     *    weights - basic_layer inter-connection weights
-    *    initial_layer_value - the initial value of the basic_layer neurons
+    *    initial_layer_value - the initial vectorize of the basic_layer neurons
     */
    class LayerWeights
    {
@@ -75,12 +75,12 @@ namespace flexnnet
       void set(double _val);
 
       /**
-       * Initialize basic_layer weights to specified value.
+       * Initialize basic_layer weights to specified vectorize.
        */
       void set(const Array2D<double>& _weights);
 
       /**
-       * Initialize basic_layer weights to specified value.
+       * Initialize basic_layer weights to specified vectorize.
        *
        * @param _weights
        */
@@ -101,19 +101,19 @@ namespace flexnnet
       void set_biases(const std::valarray<double>& _biases);
 
       /**
-       * Set the initial value of the neurons upon basic_layer clear.
+       * Set the initial vectorize of the neurons upon basic_layer clear.
        *
        * @param _ival
        */
       void set_initial_value(const std::valarray<double>& _ival);
 
       /**
-       * Initialize basic_layer weights to specified value.
+       * Initialize basic_layer weights to specified vectorize.
        */
       void copy(const LayerWeights& _weights);
 
       /**
-       * Initialize basic_layer weights to specified value.
+       * Initialize basic_layer weights to specified vectorize.
        */
       void copy(const LayerWeights&& _weights);
 

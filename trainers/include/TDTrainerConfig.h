@@ -25,7 +25,7 @@ namespace flexnnet
       void set_td_mode(TD_TRAINING_MODE _mode);
 
       /**
-       * Set the value of the cumulative temporal-difference reinforcement
+       * Set the vectorize of the cumulative temporal-difference reinforcement
        * discount parameter, gamma : (0 <= get_gamma <= 1.0)
        *
        * @param _val
@@ -33,7 +33,7 @@ namespace flexnnet
       void set_gamma(double _val);
 
       /**
-       * Set the value of the eligibility trace discount parameter
+       * Set the vectorize of the eligibility trace discount parameter
        * lambda : (0 <= get_lambda <= 1.0)
        *
        * @param _val
@@ -91,7 +91,7 @@ namespace flexnnet
       {
          std::ostringstream err_str;
          err_str
-            << "Error : TDTrainerConfig.set_gamma() - illegal value " << _val << "\n";
+            << "Error : TDTrainerConfig.set_gamma() - illegal vectorize " << _val << "\n";
          throw std::invalid_argument(err_str.str());
       }
 
@@ -105,7 +105,7 @@ namespace flexnnet
       {
          std::ostringstream err_str;
          err_str
-            << "Error : TDTrainerConfig.set_lambda() - illegal value " << _val << "\n";
+            << "Error : TDTrainerConfig.set_lambda() - illegal vectorize " << _val << "\n";
          throw std::invalid_argument(err_str.str());
       }
 

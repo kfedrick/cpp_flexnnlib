@@ -27,6 +27,7 @@ TEST_F(DerbySimTestFixture, Constructor)
    std::cout << "Derby Constructor Test\n";
 
    DerbySim derbysim;
+
 }
 
 TEST_F(DerbySimTestFixture, Reset)
@@ -34,10 +35,12 @@ TEST_F(DerbySimTestFixture, Reset)
    std::cout << "Derby Reset Test\n";
 
    DerbySim derbysim;
-   flexnnet::VariadicNetworkInput<std::valarray<double>> state = derbysim.reset();
+   flexnnet::RawFeatureSet<12> state = derbysim.reset();
    flexnnet::ValarrMap vmap = state.value_map();
 
-   std::cout << this->prettyPrintVector("state(value)", vmap["position"]) << "\n";
+   std::cout << "state size = " << state.size() << "\n";
+   std::cout << "state vector size = " << state.size() << "\n";
+   std::cout << this->prettyPrintVector("state(vectorize)", vmap["F0"]) << "\n";
 }
 
 TEST_F(DerbySimTestFixture, Left)
@@ -47,16 +50,16 @@ TEST_F(DerbySimTestFixture, Left)
    DerbySim derbysim;
 
    derbysim.reset();
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& state = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& state = derbysim.state();
    flexnnet::ValarrMap vmap = state.value_map();
 
-   std::cout << this->prettyPrintVector("start state", vmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
    derbysim.next(ActionEnum::Left);
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& newstate = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& newstate = derbysim.state();
    flexnnet::ValarrMap newvmap = newstate.value_map();
 
-   std::cout << this->prettyPrintVector("next(Left) state", newvmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("next(Left) state", newvmap["F0"]) << "\n";
 }
 
 TEST_F(DerbySimTestFixture, Right)
@@ -65,16 +68,16 @@ TEST_F(DerbySimTestFixture, Right)
 
    DerbySim derbysim;
 
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& state = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& state = derbysim.state();
    flexnnet::ValarrMap vmap = state.value_map();
 
-   std::cout << this->prettyPrintVector("start state", vmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
    derbysim.next(ActionEnum::Right);
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& newstate = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& newstate = derbysim.state();
    flexnnet::ValarrMap newvmap = newstate.value_map();
 
-   std::cout << this->prettyPrintVector("next(Right) state", newvmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("next(Right) state", newvmap["F0"]) << "\n";
 }
 
 TEST_F(DerbySimTestFixture, NotTerminal)
@@ -83,10 +86,10 @@ TEST_F(DerbySimTestFixture, NotTerminal)
 
    DerbySim derbysim;
 
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& state = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& state = derbysim.state();
    flexnnet::ValarrMap vmap = state.value_map();
 
-   std::cout << this->prettyPrintVector("start state", vmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
    bool terminal = derbysim.is_terminal();
    EXPECT_FALSE(terminal);
@@ -98,26 +101,26 @@ TEST_F(DerbySimTestFixture, Reinforcement)
 
    DerbySim derbysim;
 
-   const flexnnet::VariadicNetworkInput<std::valarray<double>>& state = derbysim.state();
+   const flexnnet::RawFeatureSet<12>& state = derbysim.state();
    flexnnet::ValarrMap vmap = state.value_map();
 
-   std::cout << this->prettyPrintVector("start state", vmap["position"]) << "\n";
+   std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
    derbysim.get_reinforcement();
-   const flexnnet::EnvironReinforcement<1>& r = derbysim.get_reinforcement();
+   const flexnnet::Reinforcement<1>& r = derbysim.get_reinforcement();
 
    std::cout << "EnvironReinforcement values " << r.size() << "\n" << std::flush;
    for (int i=0; i<r.size(); i++)
-      std::cout << r.at(i) << "\n";
+      std::cout << r[i] << "\n";
 }
 
 TEST_F(DerbySimTestFixture, ReinforcementConstructor)
 {
-   flexnnet::EnvironReinforcement<2> r;
+   flexnnet::Reinforcement<2> r;
 
    std::cout << "EnvironReinforcement values " << r.size() << "\n" << std::flush;
    for (int i=0; i<r.size(); i++)
-      std::cout << i << " " << r.get_fields()[i]  << "\n";
+      std::cout << i << " " << r.get_feature_names()[i] << "\n";
 }
 
 TEST_F(DerbySimTestFixture, SteeringActionConstructor)

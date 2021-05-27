@@ -164,7 +164,7 @@ namespace flexnnet
       data.resize(xdim);
 
       /*
-       * resize the columns of each row with the specified fill value
+       * resize the columns of each row with the specified fill vectorize
        */
       for (unsigned int i = 0; i < x_dim; i++)
       {

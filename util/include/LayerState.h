@@ -24,13 +24,13 @@ namespace flexnnet
       //LayerState& operator=(LayerState&& _state);
       
    public:
-      // The cached value of the most recent raw input value.
+      // The cached vectorize of the most recent raw input vectorize.
       std::valarray<double> rawinv;
 
-      // The net input value (e.g. net sum of the layer input)
+      // The net input vectorize (e.g. net sum of the layer input)
       std::valarray<double> netinv;
 
-      // The layer output value.
+      // The layer output vectorize.
       std::valarray<double> outputv;
 
       // Partial derivative of layer state wrt net input.
@@ -42,11 +42,11 @@ namespace flexnnet
       // Partial derivative of net input wrt layer input vector.
       Array2D<double> dnet_dx;
 
-      // The cached value of the most recent external layer error.
+      // The cached vectorize of the most recent external layer error.
       std::valarray<double> dE_dy;
 
       // Partial derivative of the external layer error with respect
-      // to the net input value (e.g. net sum).
+      // to the net input vectorize (e.g. net sum).
       std::valarray<double> dE_dnet;
 
       // Partial derivative of instantaneous error wrt weights.

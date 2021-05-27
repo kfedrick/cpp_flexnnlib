@@ -14,11 +14,18 @@
 #include "DataSetStream.h"
 #include "Exemplar.h"
 #include "ExemplarSeries.h"
+#include <FeatureSet.h>
+#include <RawFeature.h>
+#include <RawFeatureIOStream.h>
+#include <FeatureSetIOStream.h>
 
 using flexnnet::CartesianCoord;
 using flexnnet::DataSet;
 using flexnnet::Exemplar;
 using flexnnet::ExemplarSeries;
+using flexnnet::FeatureSet;
+using flexnnet::RawFeature;
+
 
 class DataSetTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
 {
@@ -191,6 +198,28 @@ TEST_F(DataSetTestFixture, OStream)
    std::cout << dataset;
 }
 
+TEST_F(DataSetTestFixture, FSetOStream)
+{
+   std::cout << "Test Dataset FeatureSet output Stream\n" << std::flush;
+
+   DataSet<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+
+   std::vector<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>> in_fs(3);
+   std::vector<FeatureSet<std::tuple<RawFeature<1>>>> tgt_fs(3);
+
+   in_fs[0].decode({{3.1419, 2.17, 9.5},{-0.125}});
+   tgt_fs[0].decode({{666}});
+   in_fs[1].decode({{-1.2,5.9, -0.001},{357.0}});
+   tgt_fs[1].decode({{3}});
+   in_fs[2].decode({{6.65, 69.3, 8.7},{-7}});
+   tgt_fs[2].decode({{2.7}});
+
+   for (int ndx=0; ndx<in_fs.size(); ndx++)
+      dataset.push_back(Exemplar<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>>(in_fs[ndx], tgt_fs[ndx]));
+
+   std::cout << dataset;
+}
+
 TEST_F(DataSetTestFixture, Write)
 {
    std::cout << "Test Dataset File Stream Write\n" << std::flush;
@@ -228,6 +257,35 @@ TEST_F(DataSetTestFixture, IStream)
    {
       std::cout << exemplar.first;
       std::cout << exemplar.second;
+   }
+   std::cout << "\n-----------------------\n" << std::flush;
+
+   if_strm.close();
+}
+
+TEST_F(DataSetTestFixture, FSetIStream)
+{
+   std::cout << "Test Dataset Input File FeatureSet Stream\n" << std::flush;
+
+   std::string infname = "fstest1.json";
+   std::string fname = "testfs_write.txt";
+
+   DataSet<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+
+   // Open file for writing
+   std::ifstream if_strm(infname);
+   if_strm >> dataset;
+
+   ASSERT_EQ(dataset.size() , 3) << "Unexpected data set size" << dataset.size();
+
+
+   std::cout << "Read exemplar:\n" << std::flush;
+   int ndx = 0;
+   for (auto& exemplar : dataset)
+   {
+      std::cout << "\n--- exemplar " << ndx++ << " ---\n";
+      std::cout << exemplar.first << "\n";
+      std::cout << exemplar.second << "\n";
    }
    std::cout << "\n-----------------------\n" << std::flush;
 

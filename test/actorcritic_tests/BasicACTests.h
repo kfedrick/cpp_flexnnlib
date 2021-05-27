@@ -8,17 +8,24 @@
 #include <gtest/gtest.h>
 #include <CommonTestFixtureFunctions.h>
 
-#include <Thing.h>
-#include <Thang.h>
-#include <FeatureVector.h>
 #include <BaseActorCriticNetwork.h>
 #include <NetworkLayerImpl.h>
 #include <BaseNeuralNet.h>
 #include <NeuralNet.h>
-#include <VariadicNetworkInput.h>
+#include <RawFeature.h>
+#include <FeatureSet.h>
+#include <Reinforcement.h>
 
 #include <TanSig.h>
-#include <NetworkReinforcement.h>
+#include "TestAction.h"
+
+#include "State.h"
+#include "TestActionFeature.h"
+#include <RawFeatureSet.h>
+
+using flexnnet::FeatureSet;
+using flexnnet::RawFeature;
+using flexnnet::RawFeatureSet;
 
 class BasicACTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
 {
@@ -31,275 +38,79 @@ public:
    {}
 };
 
-TEST_F(BasicACTestFixture, UnpackTest)
+TEST_F(BasicACTestFixture, StupidACTest)
 {
+
+   std::cout << "Stupid AC Test\n" << std::flush;
+
    enum class ActionEnum { Left, Right };
-   flexnnet::Thing thing1("one");
-   flexnnet::Thang thang2("two");
-   flexnnet::Thing thing3("three");
 
-   flexnnet::BaseActorCriticNetwork<ActionEnum, flexnnet::FeatureVector, flexnnet::Thing, flexnnet::Thang, flexnnet::Thing> nn;
+   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> c_ol_ptr =
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   c_ol_ptr->add_external_input_field("F0", 3);
+   c_ol_ptr->add_external_input_field("action", 1);
 
-   nn.activate(thing1, thang2, thing3);
-}
 
-class AFunctor
-{
-public:
-   template<typename T>
-   void operator()(const T& _t)
+   flexnnet::NeuralNetTopology ctopo;
+   ctopo.network_layers[c_ol_ptr->name()] = c_ol_ptr;
+   ctopo.network_output_layers.push_back(c_ol_ptr);
+   ctopo.ordered_layers.push_back(c_ol_ptr);
+
+   flexnnet::BaseNeuralNet basecritic(ctopo);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
+   critic.initialize_weights();
+
+   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> a_ol_ptr =
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   a_ol_ptr->add_external_input_field("F0", 3);
+
+   flexnnet::NeuralNetTopology atopo;
+   atopo.network_layers[a_ol_ptr->name()] = a_ol_ptr;
+   atopo.network_output_layers.push_back(a_ol_ptr);
+   atopo.ordered_layers.push_back(a_ol_ptr);
+
+   flexnnet::BaseNeuralNet baseactor(atopo);
+   flexnnet::NeuralNet<RawFeatureSet<3>, TestAction> actor(baseactor);
+   actor.initialize_weights();
+
+   flexnnet::BaseActorCriticNetwork<RawFeatureSet<3>, TestAction, 1> acnn(actor,critic);
+
+   RawFeatureSet<3> in;
+   in.decode({{0, 1, 2}});
+
+   std::tuple<TestAction, flexnnet::Reinforcement<1>> nnout;
+
+   std::cout << "activate\n" << std::flush;
+   //std::tuple<TestAction, flexnnet::Reinforcement<1>> nnout = acnn.activate(in);
+   nnout = acnn.activate(in);
+   std::cout << "after activate\n" << std::flush;
+
+   //nnout = acnn.value();
+   //std::get<0>(std::get<0>(nnout).get_features()).decode({1});
+
+   std::cout << prettyPrintVector("Reinforcement", std::get<0>(std::get<1>(nnout).get_features()).get_encoding()) << "\n";
+   std::cout << prettyPrintVector("Action encoding", std::get<0>(std::get<0>(nnout).get_features()).get_encoding()) << "\n";
+
+   std::cout << "Decoded Action: ";
+   switch (std::get<0>(std::get<0>(nnout).get_features()).get_action())
    {
-      std::cout << "this is it " << _t << "\n";
-   }
-};
-
-template<typename ...Fs>
-class FeatureVec
-{
-public:
-   int count() const
-   {
-      return sizeof...(Fs);
-   }
-
-   void printit() const
-   {
-      print(data);
-   }
-
-   void foreach() const
-   {
-      AFunctor afunctor;
-      for_each(data, afunctor);
-   }
-
-protected:
-
-
-   //template<std::size_t I = 0, typename... Tp>
-   template<std::size_t I = 0>
-   typename std::enable_if<I == sizeof...(Fs), void>::type
-   print(const std::tuple<Fs...>& t) const
-   { }
-
-   template<std::size_t I = 0>
-   typename std::enable_if<I < sizeof...(Fs), void>::type
-   print(const std::tuple<Fs...>& t) const
-   {
-      std::cout << std::get<I>(t) << std::endl;
-      print<I + 1>(t);
-   }
-
-   // ******************************************
-   template<std::size_t I = 0, typename FuncT>
-   inline typename std::enable_if<I == sizeof...(Fs), void>::type
-   for_each(const std::tuple<Fs...> &, FuncT) const // Unused arguments are given no names.
-   { }
-
-   template<std::size_t I = 0, typename FuncT>
-   inline typename std::enable_if<I < sizeof...(Fs), void>::type
-   for_each(const std::tuple<Fs...>& t, FuncT f) const
-   {
-      f(std::get<I>(t));
-      for_each<I + 1, FuncT>(t, f);
-   }
-
-public:
-   std::tuple<Fs...> data;
-};
-
-
-
-template<typename Input>
-class MockNeuralNet
-{
-public:
-   MockNeuralNet(const Input& _in)
-   {
-      std::cout << _in.count() << "\n";
-      _in.printit();
-      _in.foreach();
-   }
-};
-
-template<size_t N>
-class BasicFeature : public flexnnet::Vectorizable
-{
-public:
-   BasicFeature() : Vectorizable()
-   {}
-
-   const std::valarray<double>& vectorize() const
-   {
-      return data;
-   }
-
-   const Vectorizable& assign(const std::valarray<double>& _val)
-   {
-      return *this;
+      case TestActionFeature::ActionEnum::Left:
+         std::cout << "Left\n";
+         break;
+      case TestActionFeature::ActionEnum::Right:
+         std::cout << "Right\n";
+         break;
+      default:
+         std::cout << "neither\n";
    };
 
-   Vectorizable operator=(const BasicFeature& _f)
-   {
-      data = _f.data;
-      return *this;
-   }
+   const flexnnet::NeuralNet<RawFeatureSet<3>, TestAction>& act = acnn.get_actor();
+   flexnnet::LayerWeights iow = act.get_weights("F0");
 
-   std::valarray<double> data;
-};
+   std::cout << prettyPrintArray("initial output weights", iow.const_weights_ref);
 
-TEST_F(BasicACTestFixture, Constructor)
-{
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol_ptr = std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "output", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol_ptr->add_external_input_field("input", 1);
-
-   flexnnet::NeuralNetTopology topo;
-   topo.network_layers[ol_ptr->name()] = ol_ptr;
-   topo.network_output_layers.push_back(ol_ptr);
-   topo.ordered_layers.push_back(ol_ptr);
-
-   flexnnet::BaseNeuralNet basennet(topo);
-
-   FeatureVec<int,double,char> a_featurevec;
-   std::get<0>(a_featurevec.data) = 666;
-   MockNeuralNet<FeatureVec<int,double,char>> mocknnet(a_featurevec);
 }
 
-TEST_F(BasicACTestFixture, VariadicNullConstructor)
-{
-   std::cout << "VariadicNullConstructor Test\n" << std::flush;
-
-   BasicFeature<3> f1;
-   BasicFeature<5> f2;
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v;
-}
-
-TEST_F(BasicACTestFixture, VariadicConstructor)
-{
-   std::cout << "VariadicPairConstructor Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {1,2,3};
-   BasicFeature<5> f2; f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   flexnnet::ValarrMap vmap = v.value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicAsNetworkInputRef)
-{
-   std::cout << "VariadicAsNetworkInputRef Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {1,2,3};
-   BasicFeature<5> f2; f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   flexnnet::NetworkInput& ni = v;
-
-   flexnnet::ValarrMap vmap = ni.value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicAsNetworkInputPtr)
-{
-   std::cout << "VariadicAsNetworkInputPtr Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {1,2,3};
-   BasicFeature<5> f2; f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   flexnnet::NetworkInput* ni = &v;
-
-   flexnnet::ValarrMap vmap = ni->value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicCopyConstructor)
-{
-   std::cout << "VariadicCopyConstructor Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {1,2,3};
-   BasicFeature<5> f2; f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v2(v);
-
-   flexnnet::ValarrMap vmap2 = v2.value_map();
-   std::cout << this->prettyPrintVector("first", vmap2["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap2["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicAssignment)
-{
-   std::cout << "VariadicAssign Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {1,2,3};
-   BasicFeature<5> f2; f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v2;
-   v2 = v;
-
-   flexnnet::ValarrMap vmap2 = v2.value_map();
-   std::cout << this->prettyPrintVector("first", vmap2["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap2["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicSetFromTuple)
-{
-   std::cout << "VariadicSetFromTuple Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {0,0,0};
-   BasicFeature<5> f2; f2.data = {0,0,0,0,0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   f1.data = {1,2,3};
-   f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-
-   std::tuple<BasicFeature<3>,BasicFeature<5>> t(f1,f2);
-   v.set(t);
-
-   flexnnet::ValarrMap vmap = v.value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicSetFromPack)
-{
-   std::cout << "VariadicSetFromPack Test\n" << std::flush;
-
-   BasicFeature<3> f1; f1.data = {0,0,0};
-   BasicFeature<5> f2; f2.data = {0,0,0,0,0};
-   flexnnet::VariadicNetworkInput<BasicFeature<3>, BasicFeature<5>> v(std::pair<std::string,BasicFeature<3>>("first", f1), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   f1.data = {1,2,3};
-   f2.data = {0.1, -1.3, 3.14159, 2.17, 0};
-
-   v.set(f1,f2);
-
-   flexnnet::ValarrMap vmap = v.value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
-
-TEST_F(BasicACTestFixture, VariadicModSingleFeature)
-{
-   std::cout << "VariadicModSingleFeature Test\n" << std::flush;
-
-   std::valarray<double> va = {0,0,0};
-   BasicFeature<5> f2; f2.data = {0,0,0,0,0};
-   flexnnet::VariadicNetworkInput<std::valarray<double>, BasicFeature<5>> v(std::pair<std::string,std::valarray<double>>("first", va), std::pair<std::string,BasicFeature<5>>("second", f2));
-
-   std::tuple<std::valarray<double>, BasicFeature<5>>& t = v.values();
-   std::get<0>(t)[0] = 1;
-
-   flexnnet::ValarrMap vmap = v.value_map();
-   std::cout << this->prettyPrintVector("first", vmap["first"]) << "\n";
-   std::cout << this->prettyPrintVector("second", vmap["second"]) << "\n";
-}
 
 TEST_F(BasicACTestFixture, CriticNetConstructor)
 {
@@ -316,7 +127,7 @@ TEST_F(BasicACTestFixture, CriticNetConstructor)
    topo.ordered_layers.push_back(ol_ptr);
 
    flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<1>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
 }
 
 TEST_F(BasicACTestFixture, SingleCriticActivate)
@@ -324,8 +135,8 @@ TEST_F(BasicACTestFixture, SingleCriticActivate)
    std::cout << "Single Critic Activate Test\n" << std::flush;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "output", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol_ptr->add_external_input_field("input", 3);
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("F0", 3);
 
 
    flexnnet::NeuralNetTopology topo;
@@ -334,47 +145,15 @@ TEST_F(BasicACTestFixture, SingleCriticActivate)
    topo.ordered_layers.push_back(ol_ptr);
 
    flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<1>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
    critic.initialize_weights();
 
-   flexnnet::FeatureVector f({{"input",{0, 1, 2}}});
-   critic.activate(f);
+   RawFeatureSet<3> f;
+   f.decode({{0, 1, 2}});
 
-   flexnnet::NetworkReinforcement<1> nnout = critic.activate(f);
-   std::cout << prettyPrintVector("nnout", nnout.value());
-}
-
-TEST_F(BasicACTestFixture, MultiCriticActivate)
-{
-   std::cout << "Multi Critic Activate Test\n" << std::flush;
-
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol1_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf1", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol2_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf2", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol1_ptr->add_external_input_field("input", 3);
-   ol2_ptr->add_external_input_field("input", 3);
-
-
-   flexnnet::NeuralNetTopology topo;
-   topo.network_layers[ol1_ptr->name()] = ol1_ptr;
-   topo.network_layers[ol2_ptr->name()] = ol2_ptr;
-
-   topo.network_output_layers.push_back(ol1_ptr);
-   topo.network_output_layers.push_back(ol2_ptr);
-
-   topo.ordered_layers.push_back(ol1_ptr);
-   topo.ordered_layers.push_back(ol2_ptr);
-
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<2>> critic(basecritic);
-   critic.initialize_weights();
-
-   flexnnet::FeatureVector f({{"input",{0, 1, 2}}});
-   critic.activate(f);
-
-   flexnnet::NetworkReinforcement<2> nnout = critic.activate(f);
-   std::cout << prettyPrintVector("nnout", nnout.value());
+   flexnnet::Reinforcement<1> nnout = critic.activate(f);
+   std::cout << "vectorized size " << std::get<0>(nnout.get_features()).size() << "\n" << std::flush;
+   //std::cout << prettyPrintVector("nnout", nnout.vectorize());
 }
 
 TEST_F(BasicACTestFixture, MultiCriticAccessField)
@@ -382,36 +161,28 @@ TEST_F(BasicACTestFixture, MultiCriticAccessField)
    std::cout << "Multi Critic Access by field Test\n" << std::flush;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol1_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf1", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol2_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf2", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol1_ptr->add_external_input_field("input", 3);
-   ol2_ptr->add_external_input_field("input", 3);
-
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(2, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   ol1_ptr->add_external_input_field("F0", 3);
 
    flexnnet::NeuralNetTopology topo;
    topo.network_layers[ol1_ptr->name()] = ol1_ptr;
-   topo.network_layers[ol2_ptr->name()] = ol2_ptr;
-
    topo.network_output_layers.push_back(ol1_ptr);
-   topo.network_output_layers.push_back(ol2_ptr);
-
    topo.ordered_layers.push_back(ol1_ptr);
-   topo.ordered_layers.push_back(ol2_ptr);
 
    flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<2>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
    critic.initialize_weights();
 
-   flexnnet::FeatureVector f({{"input",{0, 1, 2}}});
+   RawFeatureSet<3> f;
+   f.decode({{0, 1, 2}});
    critic.activate(f);
 
-   flexnnet::NetworkReinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<2> nnout = critic.activate(f);
 
-   std::vector<std::string> fields = nnout.get_fields();
+   std::array<std::string,1> fields = nnout.get_feature_names();
    for (auto a_field : fields)
    {
-      std::cout << a_field << " " << nnout.at(a_field) << "\n";
+      std::cout << a_field << " " << nnout.at("F0") << "\n";
    }
 }
 
@@ -420,33 +191,25 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndex)
    std::cout << "Multi Critic Access by Index Test\n" << std::flush;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol1_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf1", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol2_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf2", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol1_ptr->add_external_input_field("input", 3);
-   ol2_ptr->add_external_input_field("input", 3);
-
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   ol1_ptr->add_external_input_field("F0", 3);
 
    flexnnet::NeuralNetTopology topo;
    topo.network_layers[ol1_ptr->name()] = ol1_ptr;
-   topo.network_layers[ol2_ptr->name()] = ol2_ptr;
-
    topo.network_output_layers.push_back(ol1_ptr);
-   topo.network_output_layers.push_back(ol2_ptr);
-
    topo.ordered_layers.push_back(ol1_ptr);
-   topo.ordered_layers.push_back(ol2_ptr);
 
    flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<2>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
    critic.initialize_weights();
 
-   flexnnet::FeatureVector f({{"input",{0, 1, 2}}});
+   RawFeatureSet<3> f;
+   f.decode({{0, 1, 2}});
    critic.activate(f);
 
-   flexnnet::NetworkReinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<2> nnout = critic.activate(f);
 
-   std::vector<std::string> fields = nnout.get_fields();
+   std::array<std::string,1> fields = nnout.get_feature_names();
    for (int ndx=0; ndx<fields.size(); ndx++)
    {
       std::cout << ndx << " " << fields[ndx] << " " << nnout[ndx] << "\n";
@@ -458,38 +221,83 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndexAt)
    std::cout << "Multi Critic Access by Index at Test\n" << std::flush;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol1_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf1", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol2_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "reinf2", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   ol1_ptr->add_external_input_field("input", 3);
-   ol2_ptr->add_external_input_field("input", 3);
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+   ol1_ptr->add_external_input_field("F0", 3);
 
 
    flexnnet::NeuralNetTopology topo;
    topo.network_layers[ol1_ptr->name()] = ol1_ptr;
-   topo.network_layers[ol2_ptr->name()] = ol2_ptr;
-
    topo.network_output_layers.push_back(ol1_ptr);
-   topo.network_output_layers.push_back(ol2_ptr);
-
    topo.ordered_layers.push_back(ol1_ptr);
-   topo.ordered_layers.push_back(ol2_ptr);
 
    flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<flexnnet::FeatureVector, flexnnet::NetworkReinforcement<2>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
    critic.initialize_weights();
 
-   flexnnet::FeatureVector f({{"input",{0, 1, 2}}});
-   critic.activate(f);
+   RawFeatureSet<3> f;
+   f.decode({{0, 1, 2}});
 
-   flexnnet::NetworkReinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<2> nnout = critic.activate(f);
 
-   EXPECT_EQ(nnout.size(), 2) << "Reinforcement size not correct\n";
+   EXPECT_EQ(nnout.size(), 1) << "Reinforcement size not correct\n";
 
-   std::vector<std::string> fields = nnout.get_fields();
+   std::array<std::string,1> fields = nnout.get_feature_names();
    for (int ndx=0; ndx<fields.size(); ndx++)
    {
-      std::cout << ndx << " " << fields[ndx] << " " << nnout.at(ndx) << "\n";
+      std::cout << ndx << " " << fields[ndx] << " " << nnout[ndx] << "\n";
    }
 }
+template<typename T1, typename T2>
+using tuple_cat_t = decltype(std::tuple_cat(std::declval<T1>(),
+                                            std::declval<T2>()));
+
+TEST_F(BasicACTestFixture, TuplecatTest)
+{
+   std::cout << "tuple_cat Test\n" << std::flush;
+
+   typedef std::tuple<int, long, char> T1;
+   typedef std::tuple<float, double> T2;
+
+   T1 t1(1,666,'a');
+   T2 t2(3.14159, 2.17);
+
+   auto t3 = std::tuple_cat(t1, t2);
+
+   std::cout << std::get<0>(t3) << " " << std::get<3>(t3) << "\n";
+
+   tuple_cat_t<T1,T2> t4;
+   t4 = t3;
+
+   std::cout << std::get<0>(t4) << " " << std::get<3>(t4) << "\n";
+}
+
+class TS1 : public std::tuple<int, long, char> {};
+class TS2 : public std::tuple<float, double> {};
+
+template<typename T1, typename T2>
+using tuple_cat2_t = decltype(std::tuple_cat(std::declval<T1>().get_features(),
+                                            std::declval<T2>().get_features()));
+
+TEST_F(BasicACTestFixture, TupleClassTest)
+{
+   std::cout << "tuple_cat featureset Test\n" << std::flush;
+
+   RawFeatureSet<2> fs1;
+   RawFeatureSet<1,1> fs2;
+
+   fs1.decode({{3.14159,2.17}});
+   fs2.decode({{9.5},{666.0}});
+
+   typedef tuple_cat2_t<RawFeatureSet<2>,RawFeatureSet<1,1>> TCAT;
+   TCAT tcat;
+   tcat = std::tuple_cat(fs1.get_features(), fs2.get_features());
+
+   std::cout << "sizeof concat tuple " << std::tuple_size<TCAT>{} << "\n";
+   std::cout << std::get<0>(tcat).get_encoding()[0] << " "
+             << std::get<0>(tcat).get_encoding()[1] << " "
+             << std::get<1>(tcat).get_encoding()[0] << " "
+             << std::get<2>(tcat).get_encoding()[0] << "\n";
+
+}
+
 #endif //_BASICACTESTS_H_

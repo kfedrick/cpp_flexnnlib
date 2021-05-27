@@ -6,11 +6,12 @@
 #define FLEX_NEURALNET_NETWORKOUTPUT_H_
 
 #include <flexnnet.h>
-#include "NetworkLayer.h"
+#include <Vectorizable.h>
+#include <NetworkLayer.h>
 
 namespace flexnnet
 {
-   class NetworkOutput
+   class NetworkOutput : public Vectorizable
    {
    public:
       NetworkOutput();
@@ -26,14 +27,16 @@ namespace flexnnet
 
       const std::valarray<double>& at(const std::string& _field) const;
 
-      const std::vector<std::string>& get_fields() const;
-      const std::valarray<double>& value() const;
+      const std::vector<std::string>& get_field_names() const;
+      const std::valarray<double>& vectorize() const;
 
-      void activate();
+      virtual void activate();
+      void connect(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers);
 
    protected:
       void copy(const NetworkOutput& _nout);
 
+      const std::vector<std::shared_ptr<NetworkLayer>>& get_output_layers() const;
       void update_concatenated_size() const;
       void concatenate_values() const;
 
@@ -53,6 +56,12 @@ namespace flexnnet
 
    inline
    NetworkOutput::NetworkOutput(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers)
+   {
+      connect(_olayers);
+   }
+
+   inline
+   void NetworkOutput::connect(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers)
    {
       output_layers = _olayers;
 
@@ -122,6 +131,12 @@ namespace flexnnet
    }
 
    inline
+   const std::vector<std::shared_ptr<NetworkLayer>>& NetworkOutput::get_output_layers() const
+   {
+      return output_layers;
+   }
+
+   inline
    void NetworkOutput::activate()
    {
       stale_cvalue = true;
@@ -139,13 +154,13 @@ namespace flexnnet
    }
 
    inline
-   const std::vector<std::string>& NetworkOutput::get_fields() const
+   const std::vector<std::string>& NetworkOutput::get_field_names() const
    {
       return fields;
    }
 
    inline
-   const std::valarray<double>& NetworkOutput::value() const
+   const std::valarray<double>& NetworkOutput::vectorize() const
    {
       if (stale_cvalue)
       {

@@ -220,9 +220,9 @@ RAPIDJSON_NAMESPACE_BEGIN
          return EndValue(WriteUint64(u64));
       }
 
-      //! Writes the given \c double value to the stream
+      //! Writes the given \c double vectorize to the stream
       /*!
-          \param d The value to be written.
+          \param d The vectorize to be written.
           \return Whether it is succeed.
       */
       bool Double(double d)
@@ -308,11 +308,11 @@ RAPIDJSON_NAMESPACE_BEGIN
 
       //@}
 
-      //! Write a raw JSON value.
+      //! Write a raw JSON vectorize.
       /*!
-          For user to write a stringified JSON as a value.
+          For user to write a stringified JSON as a vectorize.
 
-          \param json A well-formed JSON value. It should not contain null character within [0, length - 1] range.
+          \param json A well-formed JSON vectorize. It should not contain null character within [0, length - 1] range.
           \param length Length of the json.
           \param type Type of the root of json.
       */
@@ -584,7 +584,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       {
          (void) type;
          if (RAPIDJSON_LIKELY(level_stack_.GetSize() != 0))
-         { // this value is not at root
+         { // this vectorize is not at root
             Level* level = level_stack_.template Top<Level>();
             if (level->valueCount > 0)
             {
@@ -604,7 +604,7 @@ RAPIDJSON_NAMESPACE_BEGIN
          }
       }
 
-      // Flush the value if it is the top level one.
+      // Flush the vectorize if it is the top level one.
       bool EndValue(bool ret)
       {
          if (RAPIDJSON_UNLIKELY(level_stack_.Empty()))   // end of json text

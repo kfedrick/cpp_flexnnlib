@@ -68,8 +68,17 @@ add_executable(esimulator_tests esimulator_tests/test_main.cpp
 target_link_libraries(esimulator_tests gtest flexneuralnet)
 add_test(NAME esimulator_tests COMMAND test_main)
 
-
 add_executable(actorcritic_tests actorcritic_tests/test_main.cpp
-        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp actorcritic_tests/BasicACTests.h)
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        actorcritic_tests/LabeledFeatureSet.h
+        actorcritic_tests/TestAction.h actorcritic_tests/TestActionFeature.h
+        actorcritic_tests/BasicACTests.h actorcritic_tests/ACActivationTests.h)
 target_link_libraries(actorcritic_tests gtest flexneuralnet)
 add_test(NAME actorcritic_tests COMMAND test_main)
+
+add_executable(nnio_tests nnio_tests/test_main.cpp
+        include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
+        nnio_tests/FeatureSetTests.h nnio_tests/LabeledFeatureSet.h
+        nnio_tests/TestAction.h nnio_tests/TestActionFeature.h)
+target_link_libraries(nnio_tests gtest flexneuralnet)
+add_test(NAME nnio_tests COMMAND test_main)

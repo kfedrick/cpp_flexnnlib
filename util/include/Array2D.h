@@ -12,7 +12,6 @@
 #include <valarray>
 #include <sstream>
 #include <stdexcept>
-#include "Reinforcement.h"
 
 namespace flexnnet
 {

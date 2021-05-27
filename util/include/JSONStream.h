@@ -16,7 +16,7 @@ namespace flexnnet
    public:
 
       /**
-       * Return a JSON encoded key/value pair.
+       * Return a JSON encoded key/vectorize pair.
        *
        * @tparam _Typ
        * @param _key
@@ -48,7 +48,7 @@ namespace flexnnet
       }
 
       /**
-       * Return a json encoded string value.
+       * Return a json encoded string vectorize.
        *
        * @param _val
        * @param _indent

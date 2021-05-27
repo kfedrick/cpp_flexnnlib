@@ -6,7 +6,6 @@
 #define _BOUNDEDRANDOMWALKDATASET_H_
 
 #include <DataSet.h>
-#include <FeatureVector.h>
 #include <ExemplarSeries.h>
 
 using flexnnet::DataSet;

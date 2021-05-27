@@ -46,7 +46,7 @@ template<typename T> NNetIO_Typ TestFanoutFFNNActivation<T>::parse_datum(const r
 
       datum_fields[field] = std::valarray<double>(field_sz);
 
-      const rapidjson::Value& vec = _obj[i]["value"];
+      const rapidjson::Value& vec = _obj[i]["vectorize"];
       for (rapidjson::SizeType i = 0; i < vec.Size(); i++)
          datum_fields[field][i] = vec[i].GetDouble();
    }

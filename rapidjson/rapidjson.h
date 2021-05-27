@@ -424,7 +424,7 @@ RAPIDJSON_NAMESPACE_END
 #endif
 RAPIDJSON_NAMESPACE_BEGIN
 template <bool x> struct STATIC_ASSERTION_FAILURE;
-template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+template <> struct STATIC_ASSERTION_FAILURE<true> { enum { vectorize = 1 }; };
 template <size_t x> struct StaticAssertTest {};
 RAPIDJSON_NAMESPACE_END
 
@@ -640,7 +640,7 @@ RAPIDJSON_NAMESPACE_END
 */
 RAPIDJSON_NAMESPACE_BEGIN
 
-//! Type of JSON value
+//! Type of JSON vectorize
    enum Type
    {
       kNullType = 0,      //!< null

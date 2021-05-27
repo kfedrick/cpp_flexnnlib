@@ -2,25 +2,25 @@
 // Created by kfedrick on 5/18/21.
 //
 
-#ifndef FLEX_NEURALNET_VARIADICNETWORKINPUT_H_
-#define FLEX_NEURALNET_VARIADICNETWORKINPUT_H_
+#ifndef FLEX_NEURALNET_VARIADICINPUT_H_
+#define FLEX_NEURALNET_VARIADICINPUT_H_
 
 #include <NetworkInput.h>
 
 namespace flexnnet
 {
    template<typename ...Features>
-   class VariadicNetworkInput : public NetworkInput
+   class VariadicInput : public NetworkInput, public Vectorizable
    {
    public:
       static const size_t FEATURE_COUNT = sizeof...(Features);
 
    public:
-      VariadicNetworkInput();
-      VariadicNetworkInput(const std::pair<std::string, Features>&... _features);
-      VariadicNetworkInput(const VariadicNetworkInput<Features...>& _vni);
+      VariadicInput();
+      VariadicInput(const std::pair<std::string, Features>&... _features);
+      VariadicInput(const VariadicInput<Features...>& _vni);
 
-      VariadicNetworkInput<Features...>& operator=(const VariadicNetworkInput<Features...>& _vni);
+      VariadicInput<Features...>& operator=(const VariadicInput<Features...>& _vni);
 
       int count() const;
       void set(const std::tuple<Features...>& _features);
@@ -29,11 +29,14 @@ namespace flexnnet
       const std::vector<std::string>& get_labels() const;
       const std::tuple<Features...>& values() const;
       std::tuple<Features...>& values();
+      const std::valarray<double>& vectorize() const;
       virtual const ValarrMap& value_map() const;
 
    protected:
 
-      void vectorize() const;
+      void vectorize_features() const;
+      void update_concatenated_size() const;
+      void concatenate_values() const;
 
       /*
        * Assignment helper functions
@@ -54,7 +57,7 @@ namespace flexnnet
       set();
 
    private:
-      void copy(const VariadicNetworkInput<Features...>& _vni);
+      void copy(const VariadicInput<Features...>& _vni);
 
       template<std::size_t I, typename F, typename ...R>
       void reset_feature_ptrs();
@@ -71,7 +74,7 @@ namespace flexnnet
       template<size_t I, typename F>
       void set_feature_ptr(F& _f);
 
-      template<size_t I, typename F>
+      template<size_t I>
       void set_feature_ptr(std::valarray<double>& _f);
 
       template<std::size_t I, typename F, typename ...R>
@@ -87,16 +90,22 @@ namespace flexnnet
       std::map<std::string, size_t> feature_indices;
 
       mutable std::map<std::string, std::valarray<double>> feature_vectors;
+      mutable std::valarray<double> concatenated_value_vector;
+
    };
 
+
+
+
    template<typename ...Fs>
-   VariadicNetworkInput<Fs...>::VariadicNetworkInput()
+   VariadicInput<Fs...>::VariadicInput()
    {
-      labels.resize(count());
+      labels.resize(FEATURE_COUNT);
+      vectorizable_feature_ptrs.resize(FEATURE_COUNT);
    }
 
    template<typename ...Fs>
-   VariadicNetworkInput<Fs...>::VariadicNetworkInput(const std::pair<std::string, Fs>&... _fs)
+   VariadicInput<Fs...>::VariadicInput(const std::pair<std::string, Fs>&... _fs)
    {
       labels.resize(FEATURE_COUNT);
       vectorizable_feature_ptrs.resize(FEATURE_COUNT);
@@ -104,7 +113,7 @@ namespace flexnnet
    }
 
    template<typename ...Fs>
-   VariadicNetworkInput<Fs...>::VariadicNetworkInput(const VariadicNetworkInput<Fs...>& _vni)
+   VariadicInput<Fs...>::VariadicInput(const VariadicInput<Fs...>& _vni)
    {
       vectorizable_feature_ptrs.resize(FEATURE_COUNT);
       copy(_vni);
@@ -112,7 +121,7 @@ namespace flexnnet
 
    template<typename ...Fs>
    void
-   VariadicNetworkInput<Fs...>::copy(const VariadicNetworkInput<Fs...>& _vni)
+   VariadicInput<Fs...>::copy(const VariadicInput<Fs...>& _vni)
    {
       labels = _vni.labels;
       raw_features = _vni.raw_features;
@@ -123,7 +132,7 @@ namespace flexnnet
    }
 
    template<typename ...Fs>
-   VariadicNetworkInput<Fs...>& VariadicNetworkInput<Fs...>::operator=(const VariadicNetworkInput<Fs...>& _vni)
+   VariadicInput<Fs...>& VariadicInput<Fs...>::operator=(const VariadicInput<Fs...>& _vni)
    {
       vectorizable_feature_ptrs.resize(FEATURE_COUNT);
       copy(_vni);
@@ -131,52 +140,89 @@ namespace flexnnet
    }
 
    template<typename ...Fs>
-   int VariadicNetworkInput<Fs...>::count() const
+   int VariadicInput<Fs...>::count() const
    {
       return sizeof...(Fs);
    }
 
    template<typename ...Fs>
    void
-   VariadicNetworkInput<Fs...>::set(const std::tuple<Fs...>& _fs)
+   VariadicInput<Fs...>::set(const std::tuple<Fs...>& _fs)
    {
       set<0>(_fs);
+      reset_feature_ptrs<0>();
    }
 
    template<typename ...Fs>
-   void VariadicNetworkInput<Fs...>::set(const Fs&... _fs)
+   void VariadicInput<Fs...>::set(const Fs&... _fs)
    {
       set<0>(_fs...);
+      reset_feature_ptrs<0>();
    }
 
    template<typename ...Fs>
-   const std::vector<std::string>& VariadicNetworkInput<Fs...>::get_labels() const
+   const std::vector<std::string>& VariadicInput<Fs...>::get_labels() const
    {
       return labels;
    }
 
    template<typename ...Fs>
-   const std::tuple<Fs...>& VariadicNetworkInput<Fs...>::values() const
+   const std::tuple<Fs...>& VariadicInput<Fs...>::values() const
    {
       return raw_features;
    }
 
    template<typename ...Fs>
-   std::tuple<Fs...>& VariadicNetworkInput<Fs...>::values()
+   std::tuple<Fs...>& VariadicInput<Fs...>::values()
    {
       return raw_features;
    }
 
    template<typename ...Fs>
-   const ValarrMap& VariadicNetworkInput<Fs...>::value_map() const
+   const ValarrMap& VariadicInput<Fs...>::value_map() const
    {
-      vectorize();
+      vectorize_features();
       return feature_vectors;
    }
 
    template<typename ...Fs>
-   void VariadicNetworkInput<Fs...>::vectorize() const
+   const std::valarray<double>& VariadicInput<Fs...>::vectorize() const
    {
+      vectorize_features();
+      concatenate_values();
+      return concatenated_value_vector;
+   }
+
+   template<typename ...Fs>
+   void VariadicInput<Fs...>::concatenate_values() const
+   {
+      update_concatenated_size();
+
+      unsigned int vndx = 0;
+      for (auto a_vector : feature_vectors)
+      {
+         const std::valarray<double>& vec = a_vector.second;
+         int vsz = vec.size();
+         for (int ndx=0; ndx<vsz; ndx++)
+            concatenated_value_vector[vndx++] = vec[ndx];
+      }
+   }
+
+   template<typename ...Fs>
+   void VariadicInput<Fs...>::update_concatenated_size() const
+   {
+      size_t cvec_sz = 0;
+      for (auto a_fv : feature_vectors)
+         cvec_sz += a_fv.second.size();
+
+      if (concatenated_value_vector.size() != cvec_sz)
+         concatenated_value_vector.resize(cvec_sz);
+   }
+
+   template<typename ...Fs>
+   void VariadicInput<Fs...>::vectorize_features() const
+   {
+//      std::cout << "feature vector size " << feature_vectors.size() << "\n" << std::flush;
       for (int ndx=0; ndx < FEATURE_COUNT; ndx++)
          feature_vectors[labels[ndx]] = vectorizable_feature_ptrs[ndx]->vectorize();
    }
@@ -187,13 +233,13 @@ namespace flexnnet
    template<typename ...Fs>
    template<std::size_t I>
    typename std::enable_if<I == sizeof...(Fs), void>::type
-   VariadicNetworkInput<Fs...>::set(const std::tuple<Fs...>& t)
+   VariadicInput<Fs...>::set(const std::tuple<Fs...>& t)
    { }
 
    template<typename ...Fs>
    template<std::size_t I>
    typename std::enable_if<I < sizeof...(Fs), void>::type
-   VariadicNetworkInput<Fs...>::set(const std::tuple<Fs...>& t)
+   VariadicInput<Fs...>::set(const std::tuple<Fs...>& t)
    {
       std::get<I>(raw_features) = std::get<I>(t);
       set<I + 1>(t);
@@ -205,7 +251,7 @@ namespace flexnnet
    template<typename ...Fs>
    template<std::size_t I, typename F, typename ...R>
    void
-   VariadicNetworkInput<Fs...>::set(const F& _first, const R&... _rem)
+   VariadicInput<Fs...>::set(const F& _first, const R&... _rem)
    {
       std::get<I>(raw_features) = _first;
       set<I+1,R...>(_rem...);
@@ -214,17 +260,17 @@ namespace flexnnet
    template<typename ...Fs>
    template<std::size_t I, typename ...R>
    void
-   VariadicNetworkInput<Fs...>::set()
+   VariadicInput<Fs...>::set()
    {
    }
 
    template<typename ...Fs>
    template<std::size_t I, typename F, typename ...R>
-   void VariadicNetworkInput<Fs...>::alloc(const std::pair<std::string, F>& _feature, const std::pair<std::string, R>&... _rem)
+   void VariadicInput<Fs...>::alloc(const std::pair<std::string, F>& _feature, const std::pair<std::string, R>&... _rem)
    {
       labels[I] = _feature.first;
       std::get<I>(raw_features) = _feature.second;
-      set_feature_ptr<I, F>(std::get<I>(raw_features));
+      set_feature_ptr<I>(std::get<I>(raw_features));
       feature_indices[_feature.first] = I;
 
       // recursive call to alloc
@@ -234,38 +280,38 @@ namespace flexnnet
    template<typename ...Fs>
    template<std::size_t I, typename ...R>
    void
-   VariadicNetworkInput<Fs...>::alloc()
+   VariadicInput<Fs...>::alloc()
    {
    }
 
    template<typename ...Fs>
    template<std::size_t I, typename F, typename ...R>
-   void VariadicNetworkInput<Fs...>::reset_feature_ptrs()
+   void VariadicInput<Fs...>::reset_feature_ptrs()
    {
-      set_feature_ptr<I,F>(std::get<I>(raw_features));
+      set_feature_ptr<I>(std::get<I>(raw_features));
       reset_feature_ptrs<I + 1, R...>();
    }
 
    template<typename ...Fs>
    template<std::size_t I>
    void
-   VariadicNetworkInput<Fs...>::reset_feature_ptrs()
+   VariadicInput<Fs...>::reset_feature_ptrs()
    {
    }
 
    template<typename ...Fs>
    template<size_t I, typename F>
-   void VariadicNetworkInput<Fs...>::set_feature_ptr(F& _f)
+   void VariadicInput<Fs...>::set_feature_ptr(F& _f)
    {
       vectorizable_feature_ptrs[I] = &_f;
    }
 
    template<typename ...Fs>
-   template<size_t I, typename F>
-   void VariadicNetworkInput<Fs...>::set_feature_ptr(std::valarray<double>& _f)
+   template<size_t I>
+   void VariadicInput<Fs...>::set_feature_ptr(std::valarray<double>& _f)
    {
       vectorizable_feature_ptrs[I] = new Vectorizable(std::get<I>(raw_features));
    }
 } // end namespace flexnnet
 
-#endif //FLEX_NEURALNET_VARIADICNETWORKINPUT_H_
+#endif //FLEX_NEURALNET_VARIADICINPUT_H_

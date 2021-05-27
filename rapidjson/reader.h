@@ -76,7 +76,7 @@ RAPIDJSON_DIAG_OFF(effc++)
 
     A common usage model is to throw an exception instead of requiring the
     caller to explicitly check the \ref rapidjson::GenericReader::Parse's
-    return value:
+    return vectorize:
 
     \code
     #define RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode,offset) \
@@ -791,7 +791,7 @@ concept Handler {
          }
       }
 
-      // Parse object: { string : value, ... }
+      // Parse object: { string : vectorize, ... }
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseObject(InputStream& is, Handler& handler)
       {
@@ -863,7 +863,7 @@ concept Handler {
          }
       }
 
-      // Parse array: [ value, ... ]
+      // Parse array: [ vectorize, ... ]
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseArray(InputStream& is, Handler& handler)
       {
@@ -1899,7 +1899,7 @@ concept Handler {
             RAPIDJSON_PARSE_ERROR(kParseErrorTermination, startOffset);
       }
 
-      // Parse any JSON value
+      // Parse any JSON vectorize
       template<unsigned parseFlags, typename InputStream, typename Handler>
       void ParseValue(InputStream& is, Handler& handler)
       {
@@ -1943,7 +1943,7 @@ concept Handler {
          IterativeParsingElementState,
          IterativeParsingArrayFinishState,
 
-         // Single value state
+         // Single vectorize state
             IterativeParsingValueState,
 
          // Delimiter states (at bottom)
@@ -2193,7 +2193,7 @@ concept Handler {
             case IterativeParsingObjectInitialState:
             case IterativeParsingArrayInitialState:
             {
-               // Push the state(Element or MemeberValue) if we are nested in another array or value of member.
+               // Push the state(Element or MemeberValue) if we are nested in another array or vectorize of member.
                // In this way we can get the correct state on ObjectFinish or ArrayFinish by frame pop.
                IterativeParsingState n = src;
                if (src == IterativeParsingArrayInitialState || src == IterativeParsingElementDelimiterState)
@@ -2230,7 +2230,7 @@ concept Handler {
                return dst;
 
             case IterativeParsingMemberValueState:
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {
@@ -2239,7 +2239,7 @@ concept Handler {
                return dst;
 
             case IterativeParsingElementState:
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {
@@ -2332,7 +2332,7 @@ concept Handler {
                // Therefore it cannot happen here. And it can be caught by following assertion.
                RAPIDJSON_ASSERT(dst == IterativeParsingValueState);
 
-               // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+               // Must be non-compound vectorize. Or it would be ObjectInitial or ArrayInitial state.
                ParseValue<parseFlags>(is, handler);
                if (HasParseError())
                {

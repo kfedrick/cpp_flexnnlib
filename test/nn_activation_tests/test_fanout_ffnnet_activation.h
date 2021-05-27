@@ -17,9 +17,7 @@
 #include "RadBas.h"
 #include "SoftMax.h"
 #include "LogSig.h"
-#include "FeatureVector.h"
 
-using flexnnet::FeatureVector;
 
 #define TESTCASE_PATH "test/nn_activation_tests/samples/"
 

@@ -6,7 +6,6 @@
 #define FLEX_NEURALNET_ACTIONVIEW_H_
 
 #include <flexnnet.h>
-#include <StateView.h>
 
 namespace flexnnet
 {

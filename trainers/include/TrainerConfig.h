@@ -43,7 +43,7 @@ namespace flexnnet
 
       /**
        * Set maximum training epochs. Training will stop after at most _epochs training
-       * epochs. The value of _epochs must be greater than zero.
+       * epochs. The vectorize of _epochs must be greater than zero.
        *
        * @param _epochs
        */
@@ -217,7 +217,7 @@ namespace flexnnet
       if (_limit < 0)
       {
          err_str.clear();
-         err_str << "Error : set_error_increase_limit - min value must be >= 0\n";
+         err_str << "Error : set_error_increase_limit - min vectorize must be >= 0\n";
          throw std::invalid_argument(err_str.str());
       }
 

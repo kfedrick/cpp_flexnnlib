@@ -68,7 +68,7 @@ RAPIDJSON_NAMESPACE_BEGIN
       kParseErrorDocumentEmpty,                   //!< The document is empty.
       kParseErrorDocumentRootNotSingular,         //!< The document root must not follow by other values.
 
-      kParseErrorValueInvalid,                    //!< Invalid value.
+      kParseErrorValueInvalid,                    //!< Invalid vectorize.
 
       kParseErrorObjectMissName,                  //!< Missing a name for object member.
       kParseErrorObjectMissColon,                 //!< Missing a colon after a name of object member.

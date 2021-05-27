@@ -5,18 +5,18 @@
 #ifndef FLEX_NEURALNET_ENVIRONMENT_H_
 #define FLEX_NEURALNET_ENVIRONMENT_H_
 
-#include <EnvironReinforcement.h>
+#include <Reinforcement.h>
 
 namespace flexnnet
 {
    /**
     * Environment specifies the interface for the basis environment simulator.
     *
-    * @tparam Features - The class encoding the state features (implements NetworkInput)
-    * @tparam Action - the class that encodes the actions (implements ActionView)
+    * @tparam EState - The class encoding the state features (implements NetworkInput)
+    * @tparam EAction - the class that encodes the actions (implements ActionView)
     * @tparam RSZ - the number of reinforcement signals returned by the environment (>0)
     */
-   template<class Features, typename Action, size_t RSZ>
+   template<class EState, typename EAction, size_t RSZ>
    class Environment
    {
    public:
@@ -28,7 +28,7 @@ namespace flexnnet
        *
        * @return - The start state
        */
-      virtual const Features& reset(void) = 0;
+      virtual const EState& reset(void) = 0;
 
       /**
        * Advance the episode to the next state given the specified dynamic
@@ -37,20 +37,20 @@ namespace flexnnet
        * @param _dynamic_input
        * @return  - the next state
        */
-      const Features& next(const Action& _action);
+      const EState& next(const EAction& _action);
 
       /**
        * Return the current state vector.
        * @return
        */
-      virtual const Features& state() const = 0;
+      virtual const EState& state() const = 0;
 
       /**
        * Return the reinforcement signal for the current state.
        *
        * @return
        */
-      virtual const EnvironReinforcement<RSZ>& get_reinforcement() const = 0;
+      virtual const Reinforcement<RSZ>& get_reinforcement() const = 0;
 
       /**
        * Return a boolean indicating whether the episode has reached a terminal state.

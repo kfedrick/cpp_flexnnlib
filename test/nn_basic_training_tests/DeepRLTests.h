@@ -14,7 +14,6 @@
 #include "DataSet.h"
 #include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
-#include <FeatureVector.h>
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include <PureLin.h>

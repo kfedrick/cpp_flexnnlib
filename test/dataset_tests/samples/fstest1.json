@@ -1,0 +1,35 @@
+{
+  "input_type":"flexnnet::FeatureSet<flexnnet::RawFeature<3ul>, flexnnet::RawFeature<1ul> >",
+  "output_type":"flexnnet::FeatureSet<flexnnet::RawFeature<1ul> >",
+  "item_type":"flexnnet::Exemplar<flexnnet::FeatureSet<flexnnet::RawFeature<3ul>, flexnnet::RawFeature<1ul> >, flexnnet::FeatureSet<flexnnet::RawFeature<1ul> > >",
+  "exemplars":
+  [
+    {
+      "input":{
+        "F0":[3.1419,2.17,9.5],
+        "F1":[-0.125]
+      },
+      "target":{
+        "F0":[666]
+      }
+    },
+    {
+      "input":{
+        "F0":[-1.2,5.9,-0.001],
+        "F1":[357]
+      },
+      "target":{
+        "F0":[3]
+      }
+    },
+    {
+      "input":{
+        "F0":[6.65,69.3,8.7],
+        "F1":[-7]
+      },
+      "target":{
+        "F0":[2.7]
+      }
+    }
+  ]
+}

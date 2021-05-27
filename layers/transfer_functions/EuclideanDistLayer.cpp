@@ -19,7 +19,7 @@ EuclideanDistLayer::~EuclideanDistLayer()
 }
 
 /**
- * Calculate the net input value based on the raw input std::vector and weights specified in the
+ * Calculate the net input vectorize based on the raw input std::vector and weights specified in the
  * argument list and writes it into the _netin argument.
  */
 void
