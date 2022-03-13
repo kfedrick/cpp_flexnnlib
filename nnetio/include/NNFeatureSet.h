@@ -5,7 +5,7 @@
 #ifndef FLEX_NEURALNET_NNFEATURESET_H_
 #define FLEX_NEURALNET_NNFEATURESET_H_
 
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <NetworkOutput.h>
 
 namespace flexnnet
@@ -32,6 +32,9 @@ namespace flexnnet
    template<typename Fs>
    NNFeatureSet<Fs>::NNFeatureSet(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers) : NetworkOutput(_olayers)
    {
+      int i = 0;
+      for (auto& it : _olayers)
+         Fs::feature_names[i++] = it->name();
    }
 
    template<typename Fs>
@@ -53,6 +56,7 @@ namespace flexnnet
 
       for (int i=0; i<layer_count; i++)
          fptrs[i]->decode(olayers[i]->value());
+
    }
 
 } // end namespace

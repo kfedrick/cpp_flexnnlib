@@ -15,7 +15,7 @@
 namespace flexnnet
 {
    template<typename _TLAYER>
-class NetworkLayerImpl : public NetworkLayer, protected _TLAYER
+   class NetworkLayerImpl : public NetworkLayer, protected _TLAYER
    {
 
    public:
@@ -95,8 +95,12 @@ class NetworkLayerImpl : public NetworkLayer, protected _TLAYER
    inline
    const std::valarray<double>& NetworkLayerImpl<_TLAYER>::activate(const ValarrMap& _externin)
    {
+      //std::cout << "NetworkLayerImpl.activate()\n" << std::flush;
+
       concat_inputs(_externin, layer_state.rawinv);
       _TLAYER::activate(layer_state.rawinv, layer_state);
+
+      //std::cout << "NetworkLayerImpl.activate() EXIT\n" << std::flush;
       return layer_state.outputv;
    }
 

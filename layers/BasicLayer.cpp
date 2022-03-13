@@ -48,9 +48,14 @@ void BasicLayer::activate(const std::valarray<double>& _rawinv, LayerState& _lst
 /*   std::cout << "BaseLayer::netinv " << name() << "\n";
    for (auto v : _lstate.netinv)
       std::cout << v << " ";
-   std::cout << "\n";*/
+   std::cout << "\n"; */
 
    calc_layer_output(_lstate.netinv, _lstate.outputv);
+
+/*   std::cout << "layer " << name() << " (netinv,outv):";
+   for (int i=0; i<_lstate.outputv.size(); i++)
+      std::cout << "  " << _lstate.netinv[i] << ", " << _lstate.outputv[i] << "\n";
+   std::cout << "--\n";*/
 }
 
 void BasicLayer::backprop(const std::valarray<double>& _dEdy, LayerState& _state)

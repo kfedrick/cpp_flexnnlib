@@ -72,6 +72,7 @@ void NNBuilderTestFixture::readTestCases(const std::string& _filepath)
    samples.clear();
 
    // Open file and create rabidjson file stream wrapper
+   std::cout << _filepath << "\n";
    std::ifstream in_fstream(_filepath);
    rapidjson::IStreamWrapper in_fswrapper(in_fstream);
 

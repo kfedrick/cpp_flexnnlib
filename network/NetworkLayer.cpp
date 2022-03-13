@@ -14,11 +14,26 @@ NetworkLayer::NetworkLayer(bool _is_output) : BaseNetworkLayer()
 
 NetworkLayer::NetworkLayer(const NetworkLayer& _layer) : BaseNetworkLayer(_layer)
 {
+   //std::cout << "NetworkLayer::NetworkLayer(const NetworkLayer&) ENTRY\n";
+
    layer_state = _layer.layer_state;
    output_layer_flag = _layer.output_layer_flag;
    external_input_fields = _layer.external_input_fields;
-   activation_connections = _layer.activation_connections;
-   backprop_connections = _layer.backprop_connections;
+   //activation_connections = _layer.activation_connections;
+   //backprop_connections = _layer.backprop_connections;
+}
+
+NetworkLayer& NetworkLayer::operator=(const NetworkLayer& _layer)
+{
+   //std::cout << "NetworkLayer::operator=(const NetworkLayer&) ENTRY\n";
+
+   layer_state = _layer.layer_state;
+   output_layer_flag = _layer.output_layer_flag;
+   external_input_fields = _layer.external_input_fields;
+   //activation_connections = _layer.activation_connections;
+   //backprop_connections = _layer.backprop_connections;
+
+   return *this;
 }
 
 NetworkLayer::~NetworkLayer()
@@ -27,11 +42,17 @@ NetworkLayer::~NetworkLayer()
 void NetworkLayer::concat_inputs(const ValarrMap& _externin, std::valarray<double>& _invec)
 {
    size_t virtual_ndx = 0;
+   //std::cout << "NetworkLayer.concat_inputs()\n" << std::flush;
 
    // First append external input fields to virtual input vector
    for (auto& inputrec : external_input_fields)
    {
+      //std::cout << "NetworkLayer.concat_inputs() 0 " << inputrec.field()  << "\n" << std::flush;
+      //std::cout << "NetworkLayer.concat_inputs() map size " << _externin.size()  << "\n" << std::flush;
+      //std::cout << "NetworkLayer.concat_inputs() map first name " << _externin.begin()->first  << "\n" << std::flush;
+
       const std::valarray<double>& xinputv = _externin.at(inputrec.field());
+
       append_virtual_vector(xinputv,virtual_ndx,_invec);
    }
 
@@ -45,6 +66,8 @@ void NetworkLayer::concat_inputs(const ValarrMap& _externin, std::valarray<doubl
 
       append_virtual_vector(layer_outputv,virtual_ndx,_invec);
    }
+
+   //std::cout << "NetworkLayer.concat_inputs() EXIT\n" << std::flush;
 }
 
 const ValarrMap& NetworkLayer::marshal_inputs(const ValarrMap& _externin)
@@ -98,6 +121,16 @@ void NetworkLayer::gather_error(const ValarrMap& _externerr, std::valarray<doubl
 void NetworkLayer::scatter_input_error(const std::valarray<double>& _dEdx)
 {
    unsigned int ierr_ndx = 0;
+   for (auto& inputrec : external_input_fields)
+   {
+      std::valarray<double>& src_errorv = external_input_error_map[inputrec.field()];
+
+      // Copy slice of full error vector to error for this source layer
+      unsigned int src_sz = src_errorv.size();
+      for (unsigned int src_ndx = 0; src_ndx < src_sz; src_ndx++)
+         src_errorv[src_ndx] = _dEdx[ierr_ndx++];
+   }
+
    for (size_t i = 0; i < activation_connections.size(); i++)
    {
       LayerConnRecord& conn = activation_connections[i];

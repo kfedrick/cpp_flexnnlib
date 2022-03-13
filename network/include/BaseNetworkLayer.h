@@ -48,6 +48,7 @@ namespace flexnnet
       // respect to the input to be back-propagated to layers that
       // feed activity to this layer.
       flexnnet::ValarrMap input_error_map;
+      flexnnet::ValarrMap external_input_error_map;
    };
 
 } // end namespace flexnnet

@@ -15,6 +15,9 @@ BaseNetworkLayer::BaseNetworkLayer()
 
 BaseNetworkLayer::BaseNetworkLayer(const BaseNetworkLayer& _layer)
 {
+   external_input_fields = _layer.external_input_fields;
+   input_error_map = _layer.input_error_map;
+   external_input_error_map = _layer.external_input_error_map;
 }
 
 BaseNetworkLayer::~BaseNetworkLayer()
@@ -56,6 +59,7 @@ BaseNetworkLayer::add_external_input_field(const std::string& _field, size_t _sz
 
    // If we got here, add the new connection to the list
    external_input_fields.push_back(ExternalInputRecord(_field, _sz, external_input_fields.size()));
+   external_input_error_map[_field] = std::valarray<double>(_sz);
    set_input_size(calc_input_size());
 }
 

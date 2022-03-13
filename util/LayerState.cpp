@@ -9,7 +9,9 @@ LayerState::LayerState()
 {
 }
 
-LayerState::~LayerState() {}
+LayerState::~LayerState()
+{
+}
 
 
 LayerState::LayerState(const LayerState& _state)

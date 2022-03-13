@@ -27,6 +27,7 @@ namespace flexnnet
    protected:
       NetworkLayer(bool _is_output = false);
       NetworkLayer(const NetworkLayer& _layer);
+      NetworkLayer& operator=(const NetworkLayer& _layer);
 
    public:
       ~NetworkLayer();
@@ -70,6 +71,8 @@ namespace flexnnet
       virtual void adjust_weights(const Array2D<double>& _weights) = 0;
 
       virtual const Array2D<double>& dEdw(void) const;
+
+      virtual const ValarrMap& dEdx(void) const;
 
       void set_weight_initializer(std::function<Array2D<double>(unsigned int _rows, unsigned int _cols)>& _func);
 
@@ -157,6 +160,12 @@ namespace flexnnet
    const Array2D<double>& NetworkLayer::dEdw(void) const
    {
       return layer_state.dE_dw;
+   }
+
+   inline
+   const ValarrMap& NetworkLayer::dEdx(void) const
+   {
+      return external_input_error_map;
    }
 }
 

@@ -13,7 +13,7 @@
 #include <BaseNeuralNet.h>
 #include <NeuralNet.h>
 #include <RawFeature.h>
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <Reinforcement.h>
 
 #include <TanSig.h>
@@ -23,7 +23,7 @@
 #include "TestActionFeature.h"
 #include <RawFeatureSet.h>
 
-using flexnnet::FeatureSet;
+using flexnnet::FeatureSetImpl;
 using flexnnet::RawFeature;
 using flexnnet::RawFeatureSet;
 
@@ -37,79 +37,6 @@ public:
    TearDown()
    {}
 };
-
-TEST_F(BasicACTestFixture, StupidACTest)
-{
-
-   std::cout << "Stupid AC Test\n" << std::flush;
-
-   enum class ActionEnum { Left, Right };
-
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> c_ol_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   c_ol_ptr->add_external_input_field("F0", 3);
-   c_ol_ptr->add_external_input_field("action", 1);
-
-
-   flexnnet::NeuralNetTopology ctopo;
-   ctopo.network_layers[c_ol_ptr->name()] = c_ol_ptr;
-   ctopo.network_output_layers.push_back(c_ol_ptr);
-   ctopo.ordered_layers.push_back(c_ol_ptr);
-
-   flexnnet::BaseNeuralNet basecritic(ctopo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
-   critic.initialize_weights();
-
-   std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> a_ol_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
-   a_ol_ptr->add_external_input_field("F0", 3);
-
-   flexnnet::NeuralNetTopology atopo;
-   atopo.network_layers[a_ol_ptr->name()] = a_ol_ptr;
-   atopo.network_output_layers.push_back(a_ol_ptr);
-   atopo.ordered_layers.push_back(a_ol_ptr);
-
-   flexnnet::BaseNeuralNet baseactor(atopo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, TestAction> actor(baseactor);
-   actor.initialize_weights();
-
-   flexnnet::BaseActorCriticNetwork<RawFeatureSet<3>, TestAction, 1> acnn(actor,critic);
-
-   RawFeatureSet<3> in;
-   in.decode({{0, 1, 2}});
-
-   std::tuple<TestAction, flexnnet::Reinforcement<1>> nnout;
-
-   std::cout << "activate\n" << std::flush;
-   //std::tuple<TestAction, flexnnet::Reinforcement<1>> nnout = acnn.activate(in);
-   nnout = acnn.activate(in);
-   std::cout << "after activate\n" << std::flush;
-
-   //nnout = acnn.value();
-   //std::get<0>(std::get<0>(nnout).get_features()).decode({1});
-
-   std::cout << prettyPrintVector("Reinforcement", std::get<0>(std::get<1>(nnout).get_features()).get_encoding()) << "\n";
-   std::cout << prettyPrintVector("Action encoding", std::get<0>(std::get<0>(nnout).get_features()).get_encoding()) << "\n";
-
-   std::cout << "Decoded Action: ";
-   switch (std::get<0>(std::get<0>(nnout).get_features()).get_action())
-   {
-      case TestActionFeature::ActionEnum::Left:
-         std::cout << "Left\n";
-         break;
-      case TestActionFeature::ActionEnum::Right:
-         std::cout << "Right\n";
-         break;
-      default:
-         std::cout << "neither\n";
-   };
-
-   const flexnnet::NeuralNet<RawFeatureSet<3>, TestAction>& act = acnn.get_actor();
-   flexnnet::LayerWeights iow = act.get_weights("F0");
-
-   std::cout << prettyPrintArray("initial output weights", iow.const_weights_ref);
-
-}
 
 
 TEST_F(BasicACTestFixture, CriticNetConstructor)
@@ -182,7 +109,8 @@ TEST_F(BasicACTestFixture, MultiCriticAccessField)
    std::array<std::string,1> fields = nnout.get_feature_names();
    for (auto a_field : fields)
    {
-      std::cout << a_field << " " << nnout.at("F0") << "\n";
+      //std::cout << a_field << " " << nnout.at("F0") << "\n";
+      std::cout << a_field << " " << std::get<0>(nnout.get_features()).value()[0] << "\n";
    }
 }
 
@@ -212,7 +140,7 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndex)
    std::array<std::string,1> fields = nnout.get_feature_names();
    for (int ndx=0; ndx<fields.size(); ndx++)
    {
-      std::cout << ndx << " " << fields[ndx] << " " << nnout[ndx] << "\n";
+      std::cout << ndx << " " << fields[ndx] << " " << std::get<0>(nnout.get_features()).value()[ndx] << "\n";
    }
 }
 
@@ -244,7 +172,7 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndexAt)
    std::array<std::string,1> fields = nnout.get_feature_names();
    for (int ndx=0; ndx<fields.size(); ndx++)
    {
-      std::cout << ndx << " " << fields[ndx] << " " << nnout[ndx] << "\n";
+      std::cout << ndx << " " << fields[ndx] << " " << std::get<0>(nnout.get_features()).value()[ndx] << "\n";
    }
 }
 template<typename T1, typename T2>

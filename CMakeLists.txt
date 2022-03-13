@@ -8,19 +8,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finstrument-functions")
 include_directories("${PROJECT_SOURCE_DIR}")
 
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-if (result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
-if (result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif ()
+#configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+#execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#        RESULT_VARIABLE result
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+#if (result)
+#    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+#endif ()
+#execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#        RESULT_VARIABLE result
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
+#if (result)
+#    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+#endif ()
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -99,7 +99,10 @@ add_library(flexneuralnet
         trainers/include/DeepRLAlgo.h
         evaluators/include/TDFinalFitnessFunc.h
         evaluators/include/TDCostToGoFitnessFunc.h
+        evaluators/include/ActorCriticFinalFitnessFunc.h
+        evaluators/include/ActorCriticCostToGoFitnessFunc.h
         evaluators/include/TDEvaluator.h
+        evaluators/include/ActorCriticEvaluator.h
         evaluators/include/TDEvaluatorConfig.h
         network/include/NetworkInput.h
         network/include/NetworkOutput.h
@@ -114,8 +117,17 @@ add_library(flexneuralnet
         network/include/ActionOutput.h
         envsimulator/include/State.h
         nnetio/include/Feature.h
-        nnetio/include/FeatureSet.h
-        nnetio/include/FixedSizeFeature.h nnetio/include/FeatureDecorator.h nnetio/include/NNFeatureSet.h nnetio/include/ValueMapFeatureSet.h nnetio/include/RawFeatureIOStream.h nnetio/include/RawFeature.h nnetio/include/FeatureSetIOStream.h nnetio/include/Reinforcement.h nnetio/include/RawFeatureSet.h)
+        nnetio/include/FeatureSetImpl.h
+        nnetio/include/FixedSizeFeature.h
+        nnetio/include/FeatureDecorator.h
+        nnetio/include/NNFeatureSet.h
+        nnetio/include/ValueMapFeatureSet.h
+        nnetio/include/RawFeatureIOStream.h
+        nnetio/include/RawFeature.h
+        nnetio/include/FeatureSetIOStream.h
+        nnetio/include/Reinforcement.h
+        nnetio/include/RawFeatureSet.h
+        trainers/include/ActorCriticDeepRLAlgo.h nnetio/include/FeatureSet.h datasets/include/BaseExemplar.cpp datasets/include/BaseExemplar.h evaluators/include/BaseEvaluator.h evaluators/include/ExemplarEvaluator.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

@@ -15,6 +15,13 @@ BaseNeuralNet::BaseNeuralNet() : NeuralNetTopology()
 BaseNeuralNet::BaseNeuralNet(const flexnnet::NeuralNetTopology& _topology)
    : NeuralNetTopology(_topology)
 {
+   // Initialize dEdx based on layer info
+   for (auto& layer_ptr : network_layers)
+   {
+      const ValarrMap& layer_dEdx = layer_ptr.second->dEdx();
+      for (auto dEdx_entry : layer_dEdx)
+         dEdx[dEdx_entry.first] = dEdx_entry.second;
+   }
 }
 
 BaseNeuralNet::BaseNeuralNet(const BaseNeuralNet& _nnet)
@@ -30,7 +37,13 @@ BaseNeuralNet::~BaseNeuralNet()
 void
 BaseNeuralNet::copy(const BaseNeuralNet& _nnet)
 {
-   // TODO - implement
+   // Initialize dEdx based on layer info
+   for (auto& layer_ptr : network_layers)
+   {
+      const ValarrMap& layer_dEdx = layer_ptr.second->dEdx();
+      for (auto dEdx_entry : layer_dEdx)
+         dEdx[dEdx_entry.first] = dEdx_entry.second;
+   }
 }
 
 void
@@ -42,11 +55,26 @@ BaseNeuralNet::reset(void)
 const flexnnet::ValarrMap&
 BaseNeuralNet::activate(const ValarrMap& _externin)
 {
+
+/*   std::cout << "NN::externin:\n";
+   for (auto entry : _externin)
+   {
+      std::cout << "   " << entry.first << ": ";
+      for (int i = 0; i < entry.second.size(); i++)
+         std::cout << entry.second[i] << ", ";
+      std::cout << "\n";
+   }
+   std::cout << "\n";*/
+
+   //std::cout << "BaseNeuralNet.activate()\n" << std::flush;
+
    /*
     * Activate all network layers
     */
    for (int i = 0; i < ordered_layers.size(); i++)
       const std::valarray<double>& temp = ordered_layers[i]->activate(_externin);
+
+   //std::cout << "BaseNeuralNet.activate() EXIT\n" << std::flush;
 
    return value_map();
 }
@@ -54,11 +82,23 @@ BaseNeuralNet::activate(const ValarrMap& _externin)
 const void
 BaseNeuralNet::backprop(const ValarrMap& _egradient)
 {
+   // Clear error partial derivatives for network inputs
+   for (auto entry : dEdx)
+      dEdx[entry.first] = 0;
+
    /*
     * Backprop through all network layers in reverse activation order
     */
    for (int i = ordered_layers.size() - 1; i >= 0; i--)
-      ordered_layers[i]->backprop(_egradient);
+   {
+      std::shared_ptr<NetworkLayer> layer = ordered_layers[i];
+      layer->backprop(_egradient);
+
+      // Accumulate error derivatives for network inputs
+      const ValarrMap& dEdx_map = layer->dEdx();
+      for (auto entry : dEdx_map)
+         dEdx[entry.first] += dEdx_map.at(entry.first);
+   }
 }
 
 const flexnnet::LayerWeights&

@@ -8,28 +8,37 @@
 #include <ActionOutput.h>
 #include <NetworkOutput.h>
 #include <NetworkLayer.h>
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 #include "TestActionFeature.h"
 
-class TestAction : public flexnnet::FeatureSet<std::tuple<TestActionFeature>>
+class TestAction : public flexnnet::FeatureSetImpl<std::tuple<TestActionFeature>>
 {
 public:
    TestAction();
-   TestAction(const FeatureSet<std::tuple<TestActionFeature>>& _ta);
-   TestAction& operator=(const FeatureSet<std::tuple<TestActionFeature>>& _ta);
+   TestAction(const FeatureSetImpl<std::tuple<TestActionFeature>>& _ta);
+   TestAction& operator=(const FeatureSetImpl<std::tuple<TestActionFeature>>& _ta);
 };
 
-TestAction::TestAction() : FeatureSet<std::tuple<TestActionFeature>>()
+TestAction::TestAction() : FeatureSetImpl<std::tuple<TestActionFeature>>()
 {
 }
 
-TestAction::TestAction(const FeatureSet<std::tuple<TestActionFeature>>& _ta) : FeatureSet<std::tuple<TestActionFeature>>(_ta)
+TestAction::TestAction(const FeatureSetImpl<std::tuple<TestActionFeature>>& _ta) : FeatureSetImpl<std::tuple<TestActionFeature>>(_ta)
 {
+   std::cout << "TestAction::copy constructor\n";
+   std::cout << "value<0>[0] " << std::get<0>(this->get_features()).get_encoding()[0] << "\n";
+
+   *this = _ta;
 }
 
-TestAction& TestAction::operator=(const FeatureSet<std::tuple<TestActionFeature>>& _ta)
+TestAction& TestAction::operator=(const FeatureSetImpl<std::tuple<TestActionFeature>>& _ta)
 {
+   std::cout << "TestAction::operator=\n";
+   std::cout << "value<0>[0] " << std::get<0>(this->get_features()).get_encoding()[0] << "\n";
+
+   *this = _ta;
+   return *this;
 }
 
 

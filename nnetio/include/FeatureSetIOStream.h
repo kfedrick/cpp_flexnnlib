@@ -8,7 +8,7 @@
 #include <cxxabi.h>
 #include "picojson.h"
 
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 
 /*
  * Forward function declarations
@@ -34,7 +34,7 @@ istream_helper(std::istream& _istrm, const std::array<std::string, sizeof...(Fs)
  */
 
 template<typename ...Fs>
-std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::FeatureSet<std::tuple<Fs...>>& _featureset)
+std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::FeatureSetImpl<std::tuple<Fs...>>& _featureset)
 {
    std::array<std::string,sizeof...(Fs)> labels = _featureset.get_feature_names();
    const std::tuple<Fs...>& features = _featureset.get_features();
@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& _ostrm, const flexnnet::FeatureSet<std::t
 }
 
 template<typename ...Fs>
-std::istream& operator>>(std::istream& _istrm, flexnnet::FeatureSet<std::tuple<Fs...>>& _featureset)
+std::istream& operator>>(std::istream& _istrm, flexnnet::FeatureSetImpl<std::tuple<Fs...>>& _featureset)
 {
    std::array<std::string,sizeof...(Fs)> labels = _featureset.get_feature_names();
    std::tuple<Fs...>& features = _featureset.get_features();

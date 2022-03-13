@@ -26,7 +26,7 @@ public:
    virtual bool is_terminal(void) const;
    virtual const flexnnet::RawFeatureSet<12>& reset(void);
 
-   const flexnnet::RawFeatureSet<12>& next(const ActionEnum& _action);
+   const flexnnet::RawFeatureSet<12>& next(const SteeringActionFeature::ActionEnum& _action);
 
    virtual const flexnnet::RawFeatureSet<12>& state() const;
 
@@ -56,8 +56,6 @@ DerbySim::DerbySim()
 
    // Reset size of state vector
    state_vector.resize(ROOM_WIDTH+2);
-
-   //variadic = flexnnet::RawFeatureSet<12>({{"position"}});
 
    std::get<0>(variadic.get_features()).decode(state_vector);
    reinforcement = flexnnet::Reinforcement<1>("position");
@@ -108,14 +106,14 @@ const flexnnet::RawFeatureSet<12>& DerbySim::reset(void)
    return state();
 }
 
-const flexnnet::RawFeatureSet<12>& DerbySim::next(const ActionEnum& _action)
+const flexnnet::RawFeatureSet<12>& DerbySim::next(const SteeringActionFeature::ActionEnum& _action)
 {
    std::cout << "DerbySim::next " << x_pos << "\n" << std::flush;
    y_pos++;
 
-   if (_action == ActionEnum::Left)
+   if (_action == SteeringActionFeature::ActionEnum::Left)
       x_pos--;
-   else if (_action == ActionEnum::Right)
+   else if (_action == SteeringActionFeature::ActionEnum::Right)
       x_pos++;
 
    std::cout << "DerbySim::next x_pos " << x_pos << "\n" << std::flush;

@@ -13,13 +13,24 @@ namespace flexnnet
    class Exemplar : public std::pair<InTyp, TgtTyp>
    {
    public:
-      Exemplar() : std::pair<InTyp,TgtTyp>()
+      Exemplar() : std::pair<InTyp,TgtTyp>(), valid_extern_target(false)
       {
       }
 
-      Exemplar(const InTyp& _in, const TgtTyp& _tgt) : std::pair<InTyp,TgtTyp>(_in,_tgt)
+      Exemplar(const InTyp& _in, const TgtTyp& _tgt, bool _externflg=true) : std::pair<InTyp,TgtTyp>(_in,_tgt)
       {
+         valid_extern_target = _externflg;
       }
+
+      bool valid_target() const
+      {
+         return valid_extern_target;
+      }
+
+   private:
+
+      // Exemplar has a valid external training signal
+      bool valid_extern_target;
    };
 }
 

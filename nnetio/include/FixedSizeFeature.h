@@ -15,6 +15,7 @@ namespace flexnnet
    {
    protected:
       FixedSizeFeature();
+      FixedSizeFeature(const FixedSizeFeature<N>& _f) : Feature(_f) {};
 
    public:
       virtual void decode(const std::valarray<double>& _encoding) override;

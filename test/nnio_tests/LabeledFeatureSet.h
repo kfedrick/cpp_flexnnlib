@@ -5,10 +5,10 @@
 #ifndef _MYFEATURESET_H_
 #define _MYFEATURESET_H_
 
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <FixedSizeFeature.h>
 
-typedef flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> MyFeatureSetType;
+typedef flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> MyFeatureSetType;
 
 class LabeledFeatureSet : public MyFeatureSetType
 {

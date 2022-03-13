@@ -12,6 +12,8 @@
 #include "DataSet.h"
 #include "TrainingRecord.h"
 #include "TrainingReport.h"
+#include <BaseTrainer.h>
+#include <TrainerConfig.h>
 #include "BaseTrainer.h"
 #include "Exemplar.h"
 #include "ExemplarSeries.h"
@@ -33,27 +35,14 @@ namespace flexnnet
       template<class>
       class FitFunc,
       class LRPolicy>
-   class SupervisedTrainingAlgo : public BaseTrainer<InTyp, TgtTyp, NN>, public LRPolicy
+   class SupervisedTrainingAlgo : public BaseTrainer, public TrainerConfig, public LRPolicy
    {
       using DatasetTyp = Dataset<InTyp, TgtTyp, Sample>;
       using SampleTyp = Sample<InTyp, TgtTyp>;
       using ExemplarTyp = Exemplar<InTyp, TgtTyp>;
 
    public:
-      SupervisedTrainingAlgo(NN<InTyp, TgtTyp>& _nnet) : BaseTrainer<InTyp,
-                                                                     TgtTyp,
-                                                                     NN>(_nnet), LRPolicy(_nnet)
-      {
-         const std::map<std::string, std::shared_ptr<NetworkLayer>>
-            & layers = this->nnet.get_layers();
-         for (auto it : layers)
-         {
-            std::string id = it.first;
-
-            // Set to train layer biases by default.
-            TrainerConfig::set_train_biases(id, true);
-         }
-      }
+      SupervisedTrainingAlgo(NN<InTyp, TgtTyp>& _nnet);
 
       /**
        * Train the network the specified number of times using the
@@ -90,13 +79,13 @@ namespace flexnnet
       train_epoch(size_t _epoch, const Dataset<InTyp,TgtTyp,ExemplarSeries>& _trnset);
 
       virtual void
-      train_series(const ExemplarSeries<InTyp,TgtTyp>& _sample);
+      train_series(const ExemplarSeries<InTyp,TgtTyp>& _sample) = 0;
 
       virtual void
       train_exemplar(const Exemplar<InTyp,TgtTyp>& _exemplar);
 
       virtual void
-      calc_weight_updates(const ValarrMap _egradient) override;
+      calc_weight_updates(const ValarrMap _egradient);
 
       double
       update_performance_traces(unsigned int _epoch, double _trnperf, TrainingRecord& _trec);
@@ -107,6 +96,9 @@ namespace flexnnet
    private:
       void
       alloc();
+
+   protected:
+      NN<InTyp,TgtTyp>& nnet;
 
    private:
       FitFunc<TgtTyp> fitnessfunc;
@@ -134,6 +126,40 @@ namespace flexnnet
       template<class>
       class FitFunc,
       class LRPolicy>
+   SupervisedTrainingAlgo<InTyp,
+                          TgtTyp,
+                          Sample,
+                          NN,
+                          Dataset,
+                          Eval,
+                          FitFunc,
+                          LRPolicy>::SupervisedTrainingAlgo(NN<InTyp, TgtTyp>& _nnet) : LRPolicy(_nnet), nnet(_nnet)
+   {
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>
+         & layers = nnet.get_layers();
+      for (auto it : layers)
+      {
+         std::string id = it.first;
+
+         // Set to train layer biases by default.
+         TrainerConfig::set_train_biases(id, true);
+      }
+   }
+
+   template<class InTyp,
+      class TgtTyp,
+      template<class, class>
+      class Sample,
+      template<class, class>
+      class NN,
+      template<class, class, template<class, class> class>
+      class Dataset,
+      template<class, class, template<class, class> class,
+      template<class, class, template<class, class> class> class, template<class> class>
+      class Eval,
+      template<class>
+      class FitFunc,
+      class LRPolicy>
    void
    SupervisedTrainingAlgo<InTyp,
                           TgtTyp,
@@ -144,7 +170,7 @@ namespace flexnnet
                           FitFunc,
                           LRPolicy>::train(const DatasetTyp& _trnset)
    {
-      std::cout << "SupervisedTrainingAlgo.train()\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train()\n" << std::flush;
 
       double trn_perf, trn_stdev;
       double perf;
@@ -165,7 +191,7 @@ namespace flexnnet
          if (runndx > 0)
             this->nnet.initialize_weights();
 
-         this->save_network_weights("initial_weights");
+         save_network_weights(nnet, "initial_weights");
 
          /*
           * Evaluate and save the performance for the initial network
@@ -173,9 +199,11 @@ namespace flexnnet
          std::tie(trn_perf, trn_stdev) = evaluator.evaluate(this->nnet, _trnset);
          perf = update_performance_traces(0, trn_perf, training_record);
 
+         std::cout << "SupervisedTrainingAlgo.train() initial perf : " << perf << "\n" << std::flush;
+
          training_record.best_epoch = 0;
          training_record.best_performance = perf;
-         this->save_network_weights("best_epoch");
+         save_network_weights(nnet, "best_epoch");
 
          // *** train the network
          train_run(_trnset);
@@ -185,11 +213,11 @@ namespace flexnnet
          for (auto& it : layers)
             training_record.network_weights[it.first] = it.second->weights();
 
-         this->save_training_record(training_record);
+         save_training_record(training_record);
 
          // TODO - update aggregate training statistics
       }
-      std::cout << "SupervisedTrainingAlgo.train() EXIT\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train() EXIT\n" << std::flush;
    }
 
    template<class InTyp,
@@ -216,7 +244,7 @@ namespace flexnnet
                           FitFunc,
                           LRPolicy>::train_run(const DatasetTyp& _trnset)
    {
-      //std::cout << "SupervisedTrainingAlgo.train_run()\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train_one_run() ENTRY\n" << std::flush;
 
       double trn_perf, trn_stdev;
       double trn_perf_improvement;
@@ -238,10 +266,10 @@ namespace flexnnet
       size_t epoch = 0;
       for (epoch = 0; epoch < n_epochs; epoch++)
       {
-         //std::cout << "train epoch " << epoch << "\n" << std::flush;
+         std::cout << "SupervisedTrainingAlgo : epoch  " << epoch << "\n" << std::flush;
 
          // Save the network weights in case we need to fail back
-         this->save_network_weights("failback");
+         save_network_weights(nnet, "failback");
 
          // Call function to iterate over training samples and update
          // the network weights.
@@ -291,24 +319,24 @@ namespace flexnnet
             if (perf < TrainerConfig::error_goal())
                training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
 
-            this->save_network_weights("best_epoch");
+            save_network_weights(nnet, "best_epoch");
          }
 
          // If we've reached the target error goal then exit.
-         if (perf < TrainerConfig::error_goal())
+/*         if (perf < TrainerConfig::error_goal())
          {
             training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
             break;
-         }
+         }*/
       }
 
       if (training_record.stop_signal == TrainingStopSignal::UNKNOWN)
          training_record.stop_signal = TrainingStopSignal::MAX_EPOCHS_REACHED;
 
       // Restore the best network weights.
-      this->restore_network_weights("best_epoch");
+      //restore_network_weights(nnet, "best_epoch");
 
-      //std::cout << "SupervisedTrainingAlgo.train_run() EXIT\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train_one_run() EXIT\n" << std::flush;
       return training_record;
    }
 
@@ -354,7 +382,7 @@ namespace flexnnet
          if (TrainerConfig::batch_mode() > 0
              && sample_ndx % TrainerConfig::batch_mode() == 0)
          {
-            this->adjust_network_weights();
+            adjust_network_weights(nnet);
             pending_updates = false;
          }
 
@@ -364,7 +392,7 @@ namespace flexnnet
       // If training in batch mode or we there are updates pending from
       // an undersized mini-batch then update weights now
       if (TrainerConfig::batch_mode() == 0 || pending_updates)
-         this->adjust_network_weights();
+         adjust_network_weights(nnet);
    }
 
 
@@ -410,17 +438,17 @@ namespace flexnnet
          if (TrainerConfig::batch_mode() > 0
              && sample_ndx % TrainerConfig::batch_mode() == 0)
          {
-            this->adjust_network_weights();
+            adjust_network_weights(nnet);
             pending_updates = false;
          }
 
          sample_ndx++;
       }
 
-      // If training in batch mode or we there are updates pending from
-      // an undersized mini-batch then update weights now
+      // If training in batch mode or there are updates pending from
+      // an mini-batch then update weights now
       if (TrainerConfig::batch_mode() == 0 || pending_updates)
-         this->adjust_network_weights();
+         adjust_network_weights(nnet);
 
       //std::cout << "SupervisedTrainingAlgo.train_epoch(ExemplarSeries) EXIT\n" << std::flush;
    }
@@ -461,7 +489,7 @@ namespace flexnnet
       this->calc_weight_updates(gradient);
       LRPolicy::calc_learning_rate_adjustment(0);
    }
-
+/*
    template<class InTyp,
       class TgtTyp,
       template<class, class>
@@ -486,14 +514,14 @@ namespace flexnnet
                           FitFunc,
                           LRPolicy>::train_series(const ExemplarSeries<InTyp,TgtTyp>& _series)
    {
-      //std::cout << "SupervisedTrainerAlgo.train_series()\n" << std::flush;
+      std::cout << "SupervisedTrainerAlgo.train_series()\n" << std::flush;
 
       // TODO - first pass at training series - fix this
       for (auto& exemplar : _series)
       {
          train_exemplar(exemplar);
       }
-   }
+   }*/
 
    template<class InTyp,
       class TgtTyp,
@@ -542,7 +570,7 @@ namespace flexnnet
             for (unsigned int col = 0; col < last_col; col++)
                weight_updates[id].at(row, col) = -lr.at(row, col) * dE_dw.at(row, col);
 
-         this->accumulate_weight_updates(id, weight_updates[id]);
+         accumulate_weight_updates(nnet, id, weight_updates[id]);
       }
    }
 
@@ -570,8 +598,6 @@ namespace flexnnet
                           FitFunc,
                           LRPolicy>::alloc()
    {
-      BaseTrainer<InTyp, TgtTyp, NN>::alloc();
-
       weight_updates.clear();
 
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
@@ -668,7 +694,7 @@ namespace flexnnet
                           LRPolicy>::failback()
    {
       std::cout << "fail-back!!!!\n";
-      this->restore_network_weights("failback");
+      restore_network_weights(nnet, "failback");
       LRPolicy::reduce_learning_rate();
    }
 } // end namespace flexnnet

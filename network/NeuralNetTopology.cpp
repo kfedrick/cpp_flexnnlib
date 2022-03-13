@@ -17,7 +17,9 @@ NeuralNetTopology::NeuralNetTopology(const NeuralNetTopology& _topo)
 }
 
 NeuralNetTopology::~NeuralNetTopology()
-{}
+{
+
+}
 
 void
 NeuralNetTopology::clear(void)
@@ -26,6 +28,14 @@ NeuralNetTopology::clear(void)
    ordered_layers.clear();
    network_output_layers.clear();
 }
+
+NeuralNetTopology& NeuralNetTopology::operator=(const NeuralNetTopology& _topo)
+{
+   clear();
+   copy(_topo);
+   return *this;
+}
+
 
 void
 NeuralNetTopology::copy(const NeuralNetTopology& _topo)
@@ -52,7 +62,6 @@ NeuralNetTopology::copy(const NeuralNetTopology& _topo)
       network_layer->external_input_fields = src_network_layer->external_input_fields;
 
       network_layer->input_error_map = src_network_layer->input_error_map;
-
    }
 
    // Add the network layer copies to network_output_layers

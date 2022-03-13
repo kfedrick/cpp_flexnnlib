@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <CommonTestFixtureFunctions.h>
 
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <FixedSizeFeature.h>
 #include <FeatureDecorator.h>
 #include <NetworkLayerImpl.h>
@@ -41,7 +41,7 @@ TEST_F(FeatureSetTestFixture, Constructor)
 {
    std::cout << "\n--- FeatureSet Constructor Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<RawFeature<3>>> featureset;
+   flexnnet::FeatureSetImpl<std::tuple<RawFeature<3>>> featureset;
 
    std::cout << "feature size " << std::get<0>(featureset.get_features()).size() << "\n";
    std::cout << prettyPrintVector("raw feature", std::get<0>(featureset.get_features()).get_encoding());
@@ -51,7 +51,7 @@ TEST_F(FeatureSetTestFixture, MultiFeatureConstructor)
 {
    std::cout << "\n--- FeatureSet MultiFeatureConstructor Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> featureset;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> featureset;
 
    std::cout << "feature 1 size " << std::get<0>(featureset.get_features()).size() << "\n";
    std::cout << "feature 2 size " << std::get<1>(featureset.get_features()).size() << "\n";
@@ -61,7 +61,7 @@ TEST_F(FeatureSetTestFixture, Decode)
 {
    std::cout << "\n--- FeatureSet Decode Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>>> featureset;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>>> featureset;
    featureset.decode({{3.14159, 2.17, 666}});
 
    std::cout << "feature size " << std::get<0>(featureset.get_features()).size() << "\n";
@@ -72,7 +72,7 @@ TEST_F(FeatureSetTestFixture, MultiFeatureDecode)
 {
    std::cout << "\n--- FeatureSet MultiFeatureDecode Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> featureset;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> featureset;
    featureset.decode({{3.14159, 2.17, 666}, {9.5}});
 
    std::cout << prettyPrintVector("raw feature 1", std::get<0>(featureset.get_features()).get_encoding());
@@ -100,13 +100,13 @@ TEST_F(FeatureSetTestFixture, AssignFSofRawTest)
 {
    std::cout << "\n--- FeatureSet Assign FS of Raw Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> fs;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> fs;
    fs.decode({{3.14159, 2.17, 666}, {9.5}});
 
    std::cout << prettyPrintVector("raw feature 1", std::get<0>(fs.get_features()).get_encoding());
    std::cout << prettyPrintVector("raw feature 2", std::get<1>(fs.get_features()).get_encoding());
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> newfs;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>> newfs;
    newfs = fs;
    EXPECT_EQ(fs.size(), newfs.size()) << "feature set shoud have same size";
    EXPECT_PRED3(vector_double_near, std::get<0>(fs.get_features()).get_encoding(), std::get<0>(newfs.get_features()).get_encoding(), 0.01) << "ruh roh";
@@ -119,7 +119,7 @@ TEST_F(FeatureSetTestFixture, AssignFSofRawTest)
 TEST_F(FeatureSetTestFixture, DecoratorTest)
 {
    std::cout << "\n--- FeatureSet Decorator Test\n" << std::flush;
-   flexnnet::FeatureSet<std::tuple<flexnnet::FeatureDecorator<flexnnet::FixedSizeFeature<3>>>> featureset;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::FeatureDecorator<flexnnet::FixedSizeFeature<3>>>> featureset;
 
    std::get<0>(featureset.get_features()).decode({3.14159, 2.17, 666});
    std::get<0>(featureset.get_features()).doit();
@@ -151,7 +151,7 @@ TEST_F(FeatureSetTestFixture, TestNNFeatureSet)
    std::cout << "\n--- FeatureSet NNFeatureSet Test\n" << std::flush;
 
    // Create NN feature set
-   flexnnet::ValueMapFeatureSet<flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>>> in;
+   flexnnet::ValueMapFeatureSet<flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>>> in;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol_ptr = std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "output", flexnnet::TanSig::DEFAULT_PARAMS, true));
    ol_ptr->add_external_input_field("F0", 3);
@@ -164,8 +164,8 @@ TEST_F(FeatureSetTestFixture, TestNNFeatureSet)
 
    flexnnet::BaseNeuralNet basennet(topo);
 
-   flexnnet::NeuralNet<flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>>,
-                       flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
+   flexnnet::NeuralNet<flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>>,
+                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
 
    in.decode({{3.1419, 2.17, 9.5}, {666}});
    nnet.activate(in);
@@ -190,7 +190,7 @@ TEST_F(FeatureSetTestFixture, DerivedFeatureSet)
    flexnnet::BaseNeuralNet basennet(topo);
 
    flexnnet::NeuralNet<LabeledFeatureSet,
-                       flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
+                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
 
    in.decode({{3.1419, 2.17, 9.5}, {666}});
    nnet.activate(in);
@@ -227,7 +227,7 @@ TEST_F(FeatureSetTestFixture, FeatureSetOStream)
 {
    std::cout << "\n--- FeatureSet ostream Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> fs;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> fs;
    fs.decode({{3.14159,2.17,9.5},{666}});
 
    std::cout << fs << "\n";
@@ -237,7 +237,7 @@ TEST_F(FeatureSetTestFixture, FeatureSetIStream)
 {
    std::cout << "\n--- FeatureSet istream Test\n" << std::flush;
 
-   flexnnet::FeatureSet<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> fs;
+   flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>,flexnnet::RawFeature<1>>> fs;
 
    std::string objjson = "{\n"
                          "  \"F0\":[3.14159,2.17,9.5],\n"

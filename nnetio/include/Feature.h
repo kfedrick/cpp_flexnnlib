@@ -6,6 +6,7 @@
 #define FLEX_NEURALNET_FEATURE_H_
 
 #include <string>
+#include <valarray>
 #include <iostream>
 
 namespace flexnnet
@@ -58,6 +59,7 @@ namespace flexnnet
    void Feature::copy(const Feature& _f)
    {
       encoding = _f.encoding;
+      //std::cout << "copy() encoding.size() : " << encoding.size() << "\n" << std::flush;
    }
 
    inline

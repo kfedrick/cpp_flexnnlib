@@ -114,9 +114,7 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::read(const 
    int layer_sz = layer_def_obj["dimensions"]["layer_size"].GetUint();
    int layer_input_sz = layer_def_obj["dimensions"]["layer_input_size"].GetUint();
 
-   std::cout << "\nCreate layer : " << layer_id.c_str() << " " << layer_sz << "\n" << std::flush;
    layer_ptr = std::shared_ptr<_LayerType>(new _LayerType(layer_sz, layer_id));
-   std::cout << "\nDone create layer\n" << std::flush;
 
    flexnnet::ValarrMap io({{"input", std::valarray<double>(layer_input_sz)}});
    layer_ptr->resize_input(layer_input_sz);
@@ -135,7 +133,6 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::read(const 
    layer_ptr->weights().set(weights);
 
    readTestCases();
-   std::cout << "\nDone reading test cases\n" << std::flush;
 
    in_fstream.close();
 }
@@ -147,8 +144,6 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
    size_t layer_size = layer_ptr->size();
    size_t input_size = layer_ptr->input_size();
 
-   std::cout << "\nLayer input size : " << input_size << "\n" << std::flush;
-
    const rapidjson::Value& test_cases_arr = doc["test_cases"].GetArray();
 
    /*
@@ -156,7 +151,7 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
     */
    for (rapidjson::SizeType i = 0; i < test_cases_arr.Size(); i++)
    {
-      std::cout << "\ntest case  : " << i << "\n" << std::flush;
+      //std::cout << "\ntest case  : " << i << "\n" << std::flush;
 
       // save a reference to the i'th test pair
       const rapidjson::Value& a_tuple_obj = test_cases_arr[i];
@@ -183,8 +178,6 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
       for (rapidjson::SizeType i = 0; i < out_arr.Size(); i++)
          test_sample.target.output[i] = out_arr[i].GetDouble();
 
-      std::cout << "\ntest case  here" << "\n" << std::flush;
-
       // Read dy_dnet
       const rapidjson::Value& dAdN_arr = a_tuple_obj["target"]["dAdN"];
       test_sample.target.dAdN.resize(layer_size, layer_size);
@@ -195,8 +188,6 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
             test_sample.target.dAdN.at(i, j) = myrow[j].GetDouble();
       }
 
-      std::cout << "\ntest case here not" << "\n" << std::flush;
-
       // Read dnet_dw
       const rapidjson::Value& dNdW_arr = a_tuple_obj["target"]["dNdW"];
       test_sample.target.dNdW.resize(layer_size, input_size + 1);
@@ -206,7 +197,6 @@ template<class _LayerType> void LayerActivationTestCase<_LayerType>::readTestCas
          for (rapidjson::SizeType j = 0; j < myrow.Size(); j++)
             test_sample.target.dNdW.at(i, j) = myrow[j].GetDouble();
       }
-      std::cout << "\ntest case here too" << "\n" << std::flush;
 
       // Read dnet_dx
       const rapidjson::Value& dNdI_arr = a_tuple_obj["target"]["dNdI"];

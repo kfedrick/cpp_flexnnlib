@@ -56,14 +56,17 @@ add_test(NAME test_nn_basic_training COMMAND test_main)
 
 add_executable(esimulator_tests esimulator_tests/test_main.cpp
         include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
-        esimulator_tests/DerbySim.h esimulator_tests/SteeringAction.h)
+        esimulator_tests/DerbySim.h esimulator_tests/SteeringAction.h ../nnetio/include/ActionSet.h)
 target_link_libraries(esimulator_tests gtest flexneuralnet)
 add_test(NAME esimulator_tests COMMAND test_main)
 
 add_executable(actorcritic_tests actorcritic_tests/test_main.cpp
         include/CommonTestFixtureFunctions.h CommonTestFixtureFunctions.cpp
         actorcritic_tests/TestAction.h actorcritic_tests/TestActionFeature.h
-        actorcritic_tests/BasicACTests.h actorcritic_tests/ACActivationTests.h)
+        actorcritic_tests/BasicACTests.h actorcritic_tests/ACActivationTests.h
+        actorcritic_tests/ACTrainerTest.h actorcritic_tests/ACTestFixture.h
+        actorcritic_tests/SteeringActionFeature.h
+        actorcritic_tests/DerbySim.h actorcritic_tests/DerbySim0.h actorcritic_tests/BaseDerbySim.h actorcritic_tests/DerbySim2.h)
 target_link_libraries(actorcritic_tests gtest flexneuralnet)
 add_test(NAME actorcritic_tests COMMAND test_main)
 

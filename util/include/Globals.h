@@ -44,7 +44,7 @@ namespace flexnnet
       std::seed_seq seed2{r(), r(), r(), r(), r(), r(), r(), r()};
       rand_engine.seed(seed2);
 
-      std::normal_distribution<T> normal_dist(0.0, 1e-3);
+      std::normal_distribution<T> normal_dist(0.0, 1e-2);
       for (unsigned int row = 0; row < _rows; row++)
          for (unsigned int col = 0; col < _cols; col++)
             arr.at(row,col) = normal_dist(rand_engine);

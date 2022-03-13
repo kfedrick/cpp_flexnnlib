@@ -23,6 +23,8 @@ namespace flexnnet
    {
    public:
       RawFeature() : FixedSizeFeature<N>() {};
+      RawFeature(const RawFeature<N>& _fs) : FixedSizeFeature<N>(_fs) {};
+
       //RawFeature& operator=(const RawFeature& _f);
 
       const std::valarray<double>& value() const;

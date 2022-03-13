@@ -6,14 +6,14 @@
 #define _SIMPLEBINARYCLASSIFIERDATASET_H_
 
 #include <DataSet.h>
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 
 using flexnnet::DataSet;
-using flexnnet::FeatureSet;
+using flexnnet::FeatureSetImpl;
 using flexnnet::RawFeature;
 
-class SimpleBinaryClassifierDataSet : public DataSet<FeatureSet<std::tuple<RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>, Exemplar>
+class SimpleBinaryClassifierDataSet : public DataSet<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar>
 {
 public:
    SimpleBinaryClassifierDataSet();
@@ -59,12 +59,12 @@ inline
 void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned int _class, double _mean, double _stdev)
 {
    double val;
-   FeatureSet<std::tuple<RawFeature<1>>> inmap, tgtmap;
+   FeatureSetImpl<std::tuple<RawFeature<1>>> inmap, tgtmap;
 
    if (_class > 1)
       std::cout << "Error: Binary classifier must have class of [0,1]\n";
 
-   flexnnet::Exemplar<FeatureSet<std::tuple<RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>> exemplar;
+   flexnnet::Exemplar<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
 
    for (size_t i=0; i<_num; i++)
    {
@@ -72,7 +72,7 @@ void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned
       inmap.decode({{ val }});
       tgtmap.decode({{ (_class == 0) ? 1.0 : -1.0 }});
 
-      push_back(Exemplar<FeatureSet<std::tuple<RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
+      push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
    }
 }
 

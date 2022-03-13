@@ -6,10 +6,10 @@
 #define _MOCKNN_H_
 
 #include <NeuralNet.h>
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 
-template<class _InType, class _OutType=flexnnet::FeatureSet<flexnnet::RawFeature<1>>>
+template<class _InType, class _OutType=flexnnet::FeatureSetImpl<flexnnet::RawFeature<1>>>
 class MockNN : public flexnnet::NeuralNet<_InType, _OutType>
 {
 public:
@@ -18,7 +18,7 @@ public:
    activate(const _InType& _nninput);
 
 private:
-   flexnnet::FeatureSet<flexnnet::RawFeature<1>> cached_input;
+   flexnnet::FeatureSetImpl<flexnnet::RawFeature<1>> cached_input;
 };
 
 template<class _InType, class _OutType>

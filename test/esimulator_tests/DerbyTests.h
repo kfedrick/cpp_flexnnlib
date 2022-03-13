@@ -10,15 +10,15 @@
 #include "DerbySim.h"
 #include "SteeringAction.h"
 #include "Reinforcement.h"
+#include "ActionSet.h"
 
 class DerbySimTestFixture : public CommonTestFixtureFunctions, public ::testing::Test
 {
 public:
-   virtual void
-   SetUp()
+   virtual void SetUp()
    {}
-   virtual void
-   TearDown()
+
+   virtual void TearDown()
    {}
 };
 
@@ -55,7 +55,7 @@ TEST_F(DerbySimTestFixture, Left)
 
    std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
-   derbysim.next(ActionEnum::Left);
+   derbysim.next(SteeringActionFeature::ActionEnum::Left);
    const flexnnet::RawFeatureSet<12>& newstate = derbysim.state();
    flexnnet::ValarrMap newvmap = newstate.value_map();
 
@@ -73,7 +73,7 @@ TEST_F(DerbySimTestFixture, Right)
 
    std::cout << this->prettyPrintVector("start state", vmap["F0"]) << "\n";
 
-   derbysim.next(ActionEnum::Right);
+   derbysim.next(SteeringActionFeature::ActionEnum::Right);
    const flexnnet::RawFeatureSet<12>& newstate = derbysim.state();
    flexnnet::ValarrMap newvmap = newstate.value_map();
 
@@ -110,7 +110,7 @@ TEST_F(DerbySimTestFixture, Reinforcement)
    const flexnnet::Reinforcement<1>& r = derbysim.get_reinforcement();
 
    std::cout << "EnvironReinforcement values " << r.size() << "\n" << std::flush;
-   for (int i=0; i<r.size(); i++)
+   for (int i = 0; i < r.size(); i++)
       std::cout << r[i] << "\n";
 }
 
@@ -119,7 +119,7 @@ TEST_F(DerbySimTestFixture, ReinforcementConstructor)
    flexnnet::Reinforcement<2> r;
 
    std::cout << "EnvironReinforcement values " << r.size() << "\n" << std::flush;
-   for (int i=0; i<r.size(); i++)
+   for (int i = 0; i < r.size(); i++)
       std::cout << i << " " << r.get_feature_names()[i] << "\n";
 }
 
@@ -128,6 +128,109 @@ TEST_F(DerbySimTestFixture, SteeringActionConstructor)
    std::cout << "Derby SteeringAction Test\n";
 
    SteeringAction steer;
+}
+
+TEST_F(DerbySimTestFixture, SteeringActionDecoderLeft)
+{
+   std::cout << "Derby SteeringAction Left Test\n";
+
+   SteeringAction steer;
+   steer.decode({{-1}});
+
+   switch (steer.get_action())
+   {
+      case SteeringActionFeature::ActionEnum::Right :
+         std::cout << "Right\n" << std::flush;
+         break;
+      case SteeringActionFeature::ActionEnum::Left :
+         std::cout << "Left\n" << std::flush;
+         break;
+      default:
+         std::cout << "default action\n" << std::flush;
+   }
+}
+
+TEST_F(DerbySimTestFixture, SteeringActionDecoderRight)
+{
+   std::cout << "Derby SteeringAction Decode Right Test\n";
+
+   SteeringAction steer;
+   steer.decode({{1}});
+
+   const SteeringActionFeature::ActionEnum& action = steer.get_action();
+   switch (action)
+   {
+      case SteeringActionFeature::ActionEnum::Right :
+         std::cout << "Right\n" << std::flush;
+         break;
+      case SteeringActionFeature::ActionEnum::Left :
+         std::cout << "Left\n" << std::flush;
+         break;
+      default:
+         std::cout << "default action\n" << std::flush;
+   }
+}
+
+TEST_F(DerbySimTestFixture, ActionSetConstructor)
+{
+   std::cout << "ActionSet Constructor Test\n";
+
+   ActionSet<SteeringActionFeature> act;
+   act.decode({{-1}});
+
+   switch (act.get_action())
+   {
+      case SteeringActionFeature::ActionEnum::Right :
+         std::cout << "Right\n" << std::flush;
+         break;
+      case SteeringActionFeature::ActionEnum::Left :
+         std::cout << "Left\n" << std::flush;
+         break;
+      default:
+         std::cout << "default action\n" << std::flush;
+   }
+}
+
+TEST_F(DerbySimTestFixture, ActionSetRight)
+{
+   std::cout << "ActionSet Left Test\n";
+
+   ActionSet<SteeringActionFeature> act;
+   act.decode({{1}});
+
+   switch (act.get_action())
+   {
+      case SteeringActionFeature::ActionEnum::Right :
+         std::cout << "Right\n" << std::flush;
+         break;
+      case SteeringActionFeature::ActionEnum::Left :
+         std::cout << "Left\n" << std::flush;
+         break;
+      default:
+         std::cout << "default action\n" << std::flush;
+   }
+}
+
+TEST_F(DerbySimTestFixture, ActionSetZero)
+{
+   std::cout << "ActionSet Zero Test\n";
+
+   ActionSet<SteeringActionFeature> act;
+   act.decode({{-0.1}});
+
+   ActionSet<SteeringActionFeature> act2 = act;
+
+   switch (act2.get_action())
+   {
+      case SteeringActionFeature::ActionEnum::Right :
+         std::cout << "Right\n" << std::flush;
+         break;
+      case SteeringActionFeature::ActionEnum::Left :
+         std::cout << "Left\n" << std::flush;
+         break;
+      default:
+         std::cout << "default action\n" << std::flush;
+   }
 }
 
 #endif //_DERBYTESTS_H_

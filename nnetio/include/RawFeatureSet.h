@@ -5,19 +5,22 @@
 #ifndef FLEX_NEURALNET_RAWFEATURESET_H_
 #define FLEX_NEURALNET_RAWFEATURESET_H_
 
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 
 namespace flexnnet
 {
-   template<size_t ...N>
-class RawFeatureSet : public FeatureSet<std::tuple<RawFeature<N>...>>
+   template<size_t ...N> class RawFeatureSet : public FeatureSetImpl<std::tuple<RawFeature<N>...>>
    {
    public:
-      RawFeatureSet() : FeatureSet<std::tuple<RawFeature<N>...>>()
+      RawFeatureSet() : FeatureSetImpl<std::tuple<RawFeature<N>...>>()
       {};
 
-      RawFeatureSet(const std::array<std::string, sizeof...(N)>& _names) : FeatureSet<std::tuple<RawFeature<N>...>>(_names)
+      RawFeatureSet(const RawFeatureSet& _fs) : FeatureSetImpl<std::tuple<RawFeature<N>...>>(_fs)
+      {};
+
+      RawFeatureSet(const std::array<std::string, sizeof...(N)>& _names) : FeatureSetImpl<std::tuple<
+         RawFeature<N>...>>(_names)
       {};
    };
 

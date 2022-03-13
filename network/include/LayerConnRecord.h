@@ -23,6 +23,7 @@ namespace flexnnet
 
    public:
       LayerConnRecord();
+      LayerConnRecord(const LayerConnRecord& _crec);
       LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type);
       ~LayerConnRecord();
 
@@ -48,9 +49,16 @@ namespace flexnnet
    {}
 
    inline
-   LayerConnRecord::LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type)
-      : from_layer(_from_layer), connection_type(_type)
+   LayerConnRecord::LayerConnRecord(const LayerConnRecord& _crec) : connection_type(_crec.connection_type)
    {
+      from_layer = _crec.from_layer;
+   }
+
+   inline
+   LayerConnRecord::LayerConnRecord(const std::shared_ptr<NetworkLayer>& _from_layer, ConnectionType _type)
+      : connection_type(_type)
+   {
+      from_layer = _from_layer;
    }
 
    inline

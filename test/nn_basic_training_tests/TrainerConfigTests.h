@@ -21,28 +21,28 @@
 #include <SupervisedTrainingAlgo.h>
 #include <ConstantLearningRate.h>
 #include "MockNN.h"
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 
-using flexnnet::FeatureSet;
+using flexnnet::FeatureSetImpl;
 using flexnnet::RawFeature;
 
 TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 {
    std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
-   flexnnet::DataSet<FeatureSet<RawFeature<1>>, FeatureSet<RawFeature<1>>, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<FeatureSet<RawFeature<1>>> rmse_fit;
+   flexnnet::DataSet<FeatureSetImpl<RawFeature<1>>, FeatureSetImpl<RawFeature<1>>, Exemplar> dataset;
+   flexnnet::RMSEFitnessFunc<FeatureSetImpl<RawFeature<1>>> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<FeatureSet<RawFeature<1>>> nnet(basenet);
-   flexnnet::Evaluator<FeatureSet<RawFeature<1>>,
-                       FeatureSet<RawFeature<1>>,
+   MockNN<FeatureSetImpl<RawFeature<1>>> nnet(basenet);
+   flexnnet::Evaluator<FeatureSetImpl<RawFeature<1>>,
+                       FeatureSetImpl<RawFeature<1>>,
                        MockNN,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SupervisedTrainingAlgo<FeatureSet<RawFeature<1>>,
-                                    FeatureSet<RawFeature<1>>,
+   flexnnet::SupervisedTrainingAlgo<FeatureSetImpl<RawFeature<1>>,
+                                    FeatureSetImpl<RawFeature<1>>,
                                     Exemplar,
                                     MockNN,
                                     flexnnet::DataSet,
@@ -57,18 +57,18 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
 {
    std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
-   flexnnet::DataSet<FeatureSet<RawFeature<1>>, FeatureSet<RawFeature<1>>, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<FeatureSet<RawFeature<1>>> rmse_fit;
+   flexnnet::DataSet<FeatureSetImpl<RawFeature<1>>, FeatureSetImpl<RawFeature<1>>, Exemplar> dataset;
+   flexnnet::RMSEFitnessFunc<FeatureSetImpl<RawFeature<1>>> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<FeatureSet<RawFeature<1>>> nnet(basenet);
-   flexnnet::Evaluator<FeatureSet<RawFeature<1>>,
-                       FeatureSet<RawFeature<1>>,
+   MockNN<FeatureSetImpl<RawFeature<1>>> nnet(basenet);
+   flexnnet::Evaluator<FeatureSetImpl<RawFeature<1>>,
+                       FeatureSetImpl<RawFeature<1>>,
                        MockNN,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
 
-   flexnnet::SupervisedTrainingAlgo<FeatureSet<RawFeature<1>>,
-                                    FeatureSet<RawFeature<1>>,
+   flexnnet::SupervisedTrainingAlgo<FeatureSetImpl<RawFeature<1>>,
+                                    FeatureSetImpl<RawFeature<1>>,
                                     Exemplar,
                                     MockNN,
                                     flexnnet::DataSet,

@@ -23,6 +23,7 @@ namespace flexnnet
    public:
       NeuralNetTopology();
       NeuralNetTopology(const NeuralNetTopology& _topo);
+      NeuralNetTopology& operator=(const NeuralNetTopology& _topo);
       virtual ~NeuralNetTopology();
 
       void clear(void);

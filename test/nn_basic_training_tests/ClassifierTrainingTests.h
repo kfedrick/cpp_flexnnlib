@@ -75,7 +75,7 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<RawFeature<1>>> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<RawFeature<1>>> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    ol_ptr->add_external_input_field("F0", 1);
@@ -98,9 +98,9 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -110,8 +110,8 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -212,7 +212,7 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<TanSig>> hl_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(7, "hidden", TanSig::DEFAULT_PARAMS, false));
@@ -244,9 +244,9 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -256,8 +256,8 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -392,7 +392,7 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<LogSig>> hl_ptr = std::make_shared<NetworkLayerImpl<LogSig>>(NetworkLayerImpl<LogSig>(5, "hidden", LogSig::DEFAULT_PARAMS, false));
@@ -424,9 +424,9 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -436,8 +436,8 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -527,7 +527,7 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
       std::cout << it->best_performance << " " << it->best_epoch << "\n";
 
 
-   flexnnet::FeatureSet<std::tuple<RawFeature<1>>> nnout;
+   flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>> nnout;
 
 /*
 
@@ -581,7 +581,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "F0", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<PureLin>> hl_ptr = std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(3, "hidden", PureLin::DEFAULT_PARAMS, false));
@@ -613,9 +613,9 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Define templatized neural network
     */
-   NeuralNet<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>, flexnnet::FeatureSet<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-   flexnnet::Evaluator<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                       flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   flexnnet::Evaluator<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                       flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                        NeuralNet,
                        flexnnet::DataSet,
                        flexnnet::RMSEFitnessFunc> eval;
@@ -625,8 +625,8 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    /*
     * Define and configure trainer
     */
-   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
-                                    flexnnet::FeatureSet<std::tuple<RawFeature<1>>>,
+   flexnnet::SupervisedTrainingAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
                                     NeuralNet,
                                     flexnnet::DataSet,
@@ -713,7 +713,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    for (auto it = trecs.begin(); it != trecs.end(); it++)
       std::cout << it->best_performance << " " << it->best_epoch << "\n";
 
-   flexnnet::FeatureSet<std::tuple<RawFeature<1>>> nnout;
+   flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>> nnout;
 
 /*
 

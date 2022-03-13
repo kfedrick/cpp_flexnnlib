@@ -58,6 +58,8 @@ namespace flexnnet
              Dataset,
              FitnessFunc>::evaluate(NNTyp& _nnet, const DatasetTyp& _tstset)
    {
+      std::cout << "Evaluator::evaluate()\n";
+
       // Vector to hold performance results for each sampling
       size_t scount = sampling_count();
       std::valarray<double> perf(scount);
@@ -122,6 +124,7 @@ namespace flexnnet
              Dataset,
              FitnessFunc>::evaluate_exemplar(size_t _s_index, NNTyp& _nnet, const _ExemplarTyp& _exemplar)
    {
+      std::cout << "Evaluator::evaluate_exemplar()\n";
       const OutTyp& nnout = _nnet.activate(_exemplar.first);
       FitnessFunc<OutTyp>::calc_error_gradient(_exemplar.second, nnout);
    }

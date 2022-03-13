@@ -14,7 +14,7 @@
 #include "DataSetStream.h"
 #include "Exemplar.h"
 #include "ExemplarSeries.h"
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 #include <RawFeatureIOStream.h>
 #include <FeatureSetIOStream.h>
@@ -23,7 +23,7 @@ using flexnnet::CartesianCoord;
 using flexnnet::DataSet;
 using flexnnet::Exemplar;
 using flexnnet::ExemplarSeries;
-using flexnnet::FeatureSet;
+using flexnnet::FeatureSetImpl;
 using flexnnet::RawFeature;
 
 
@@ -202,10 +202,10 @@ TEST_F(DataSetTestFixture, FSetOStream)
 {
    std::cout << "Test Dataset FeatureSet output Stream\n" << std::flush;
 
-   DataSet<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+   DataSet<FeatureSetImpl<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
 
-   std::vector<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>> in_fs(3);
-   std::vector<FeatureSet<std::tuple<RawFeature<1>>>> tgt_fs(3);
+   std::vector<FeatureSetImpl<std::tuple<RawFeature<3>, RawFeature<1>>>> in_fs(3);
+   std::vector<FeatureSetImpl<std::tuple<RawFeature<1>>>> tgt_fs(3);
 
    in_fs[0].decode({{3.1419, 2.17, 9.5},{-0.125}});
    tgt_fs[0].decode({{666}});
@@ -215,7 +215,7 @@ TEST_F(DataSetTestFixture, FSetOStream)
    tgt_fs[2].decode({{2.7}});
 
    for (int ndx=0; ndx<in_fs.size(); ndx++)
-      dataset.push_back(Exemplar<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>>(in_fs[ndx], tgt_fs[ndx]));
+      dataset.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(in_fs[ndx], tgt_fs[ndx]));
 
    std::cout << dataset;
 }
@@ -270,7 +270,7 @@ TEST_F(DataSetTestFixture, FSetIStream)
    std::string infname = "fstest1.json";
    std::string fname = "testfs_write.txt";
 
-   DataSet<FeatureSet<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSet<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+   DataSet<FeatureSetImpl<std::tuple<RawFeature<3>, RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
 
    // Open file for writing
    std::ifstream if_strm(infname);

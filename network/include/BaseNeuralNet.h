@@ -77,6 +77,13 @@ namespace flexnnet
 
       const std::map<std::string, std::shared_ptr<NetworkLayer>>& get_layers(void) const;
 
+      /**
+       * Return dEdx map for all inputs
+       *
+       * @return
+       */
+      const ValarrMap& get_dEdx(void) const;
+
    protected:
       std::vector<std::shared_ptr<NetworkLayer>>& get_ordered_layers(void);
 
@@ -90,6 +97,8 @@ namespace flexnnet
       bool recurrent_network_flag;
 
       mutable ValarrMap output_val_map;
+
+      mutable ValarrMap dEdx;
    };
 
    inline
@@ -120,6 +129,20 @@ namespace flexnnet
          output_val_map[it->name()] = it->value();
 
       return output_val_map;
+   }
+
+   inline
+   const ValarrMap& BaseNeuralNet::get_dEdx(void) const
+   {
+      // Initialize dEdx based on layer info
+      for (auto& layer_ptr : network_layers)
+      {
+         const ValarrMap& layer_dEdx = layer_ptr.second->dEdx();
+         for (auto dEdx_entry : layer_dEdx)
+            dEdx[dEdx_entry.first] = dEdx_entry.second;
+      }
+
+      return dEdx;
    }
 }
 

@@ -11,7 +11,8 @@
 #include "DataSet.h"
 #include "CartesianCoord.h"
 #include "RMSEFitnessFunc.h"
-#include "Evaluator.h"
+//#include "Evaluator.h"
+#include "ExemplarEvaluator.h"
 #include "DataSetStream.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
@@ -23,7 +24,8 @@ using flexnnet::RawFeatureSet;
 using flexnnet::NeuralNetTopology;
 using flexnnet::BaseNeuralNet;
 using flexnnet::NeuralNet;
-using flexnnet::Evaluator;
+//using flexnnet::Evaluator;
+using flexnnet::ExemplarEvaluator;
 using flexnnet::RMSEFitnessFunc;
 using flexnnet::CartesianCoord;
 using flexnnet::Exemplar;
@@ -51,26 +53,26 @@ TEST(TestEvaluator, Constructor)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 }
 
 TEST(TestEvaluator, OrderedSingleSampling)
 {
    std::cout << "***** Test Evaluator Normalized Ordering\n" << std::flush;
 
-   RawFeatureSet<3> a({"a"});
+   RawFeatureSet<3> a({"F0"});
    a.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> b({"a"});
+   RawFeatureSet<3> b({"F0"});
    b.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> c({"a"});
+   RawFeatureSet<3> c({"F0"});
    c.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> d({"a"});
+   RawFeatureSet<3> d({"F0"});
    d.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> e({"a"});
+   RawFeatureSet<3> e({"F0"});
    e.decode({{-1, 0, 0.5}});
 
-   RawFeatureSet<1> o({"output"});
-   c.decode({{0.5}});
+   RawFeatureSet<1> o({"F0"});
+   o.decode({{0.5}});
 
    DataSet<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> dataset;
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(a, o));
@@ -81,7 +83,7 @@ TEST(TestEvaluator, OrderedSingleSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
    eval.set_subsample_fraction(0.25);
@@ -92,18 +94,18 @@ TEST(TestEvaluator, RandomizedSingleSampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering\n" << std::flush;
 
-   RawFeatureSet<3> a({"a"});
+   RawFeatureSet<3> a({"F0"});
    a.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> b({"a"});
+   RawFeatureSet<3> b({"F0"});
    b.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> c({"a"});
+   RawFeatureSet<3> c({"F0"});
    c.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> d({"a"});
+   RawFeatureSet<3> d({"F0"});
    d.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> e({"a"});
+   RawFeatureSet<3> e({"F0"});
    e.decode({{-1, 0, 0.5}});
 
-   RawFeatureSet<1> o({"output"});
+   RawFeatureSet<1> o({"F0"});
    c.decode({{0.5}});
 
    DataSet<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> dataset;
@@ -115,7 +117,7 @@ TEST(TestEvaluator, RandomizedSingleSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(1);
@@ -127,18 +129,18 @@ TEST(TestEvaluator, Randomized2Sampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering 2 Samplings\n" << std::flush;
 
-   RawFeatureSet<3> a({"a"});
+   RawFeatureSet<3> a({"F0"});
    a.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> b({"a"});
+   RawFeatureSet<3> b({"F0"});
    b.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> c({"a"});
+   RawFeatureSet<3> c({"F0"});
    c.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> d({"a"});
+   RawFeatureSet<3> d({"F0"});
    d.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> e({"a"});
+   RawFeatureSet<3> e({"F0"});
    e.decode({{-1, 0, 0.5}});
 
-   RawFeatureSet<1> o({"output"});
+   RawFeatureSet<1> o({"F0"});
    c.decode({{0.5}});
 
    DataSet<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> dataset;
@@ -150,7 +152,7 @@ TEST(TestEvaluator, Randomized2Sampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(2);
@@ -162,18 +164,18 @@ TEST(TestEvaluator, Randomized3SubSampling)
 {
    std::cout << "***** Test Evaluator Randomized Ordering 3 Sub-Samplings\n" << std::flush;
 
-   RawFeatureSet<3> a({"a"});
+   RawFeatureSet<3> a({"F0"});
    a.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> b({"a"});
+   RawFeatureSet<3> b({"F0"});
    b.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> c({"a"});
+   RawFeatureSet<3> c({"F0"});
    c.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> d({"a"});
+   RawFeatureSet<3> d({"F0"});
    d.decode({{-1, 0, 0.5}});
-   RawFeatureSet<3> e({"a"});
+   RawFeatureSet<3> e({"F0"});
    e.decode({{-1, 0, 0.5}});
 
-   RawFeatureSet<1> o({"output"});
+   RawFeatureSet<1> o({"F0"});
    c.decode({{0.5}});
 
    DataSet<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> dataset;
@@ -185,7 +187,7 @@ TEST(TestEvaluator, Randomized3SubSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
 
    eval.randomize_order(true);
    eval.set_sampling_count(3);
@@ -368,7 +370,7 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
    RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
    BaseNeuralNet basenet;
    MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1);
    eval.set_subsample_fraction(1.0);
@@ -416,7 +418,7 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
    BaseNeuralNet basenet;
    MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   Evaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
+   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
 
    eval.set_sampling_count(1000);
    eval.randomize_order(true);

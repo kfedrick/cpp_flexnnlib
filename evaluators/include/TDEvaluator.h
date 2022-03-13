@@ -5,11 +5,13 @@
 #ifndef FLEX_NEURALNET_SERIESEVALUATOR_H_
 #define FLEX_NEURALNET_SERIESEVALUATOR_H_
 
+#include <iostream>
 #include <flexnnet.h>
 #include <Exemplar.h>
 #include <ExemplarSeries.h>
 #include <BasicEvalConfig.h>
 #include "Reinforcement.h"
+#include <BaseEvaluator.h>
 
 namespace flexnnet
 {
@@ -17,16 +19,17 @@ namespace flexnnet
       template<class, class> class NN,
       template<class, class, template<class, class> class> class _DataSet,
       template<class> class FitnessFunc>
-   class TDEvaluator : public BasicEvalConfig, public FitnessFunc<OutTyp>
+   //class TDEvaluator : public BasicEvalConfig, public FitnessFunc<OutTyp>
+   class TDEvaluator : public BaseEvaluator<InTyp, OutTyp, ExemplarSeries, NN, _DataSet, FitnessFunc>
    {
       using NNTyp = NN<InTyp, OutTyp>;
       using ExemplarTyp = Exemplar<InTyp, OutTyp>;
       using ExemplarSeriesTyp = ExemplarSeries<InTyp, OutTyp>;
-      using DatasetTyp = _DataSet<InTyp, OutTyp, ExemplarSeries>;
+      //using DatasetTyp = _DataSet<InTyp, OutTyp, ExemplarSeries>;
 
    public:
       TDEvaluator();
-
+/*
       EvalResults
       evaluate(NNTyp& _nnet, const DatasetTyp& _tstset);
 
@@ -35,7 +38,10 @@ namespace flexnnet
       evaluate_subsampling(size_t _s_index, NNTyp& _nnet, const DatasetTyp& _tstset);
 
       void
-      evaluate_series(size_t _s_index, NNTyp& _nnet, const ExemplarSeriesTyp& _series);
+      evaluate_series(size_t _s_index, NNTyp& _nnet, const ExemplarSeriesTyp& _series);*/
+
+      void
+      evaluate_sample(size_t _s_index, NNTyp& _nnet, const ExemplarSeriesTyp& _series);
    };
 
    template<class InTyp, class OutTyp, template<class, class> class NN,
@@ -45,10 +51,11 @@ namespace flexnnet
                OutTyp,
                NN,
                Dataset,
-               FitnessFunc>::TDEvaluator() : FitnessFunc<OutTyp>()
+               FitnessFunc>::TDEvaluator()
    {
    }
 
+/*
 
    template<class InTyp, class OutTyp, template<class, class> class NN,
       template<class, class, template<class, class> class> class Dataset,
@@ -60,6 +67,8 @@ namespace flexnnet
                Dataset,
                FitnessFunc>::evaluate(NNTyp& _nnet, const DatasetTyp& _tstset)
    {
+      //std::cout << "TDEvaluator.evaluate()\n";
+
       // Vector to hold performance results for each sampling
       size_t scount = sampling_count();
       std::valarray<double> perf(scount);
@@ -71,6 +80,7 @@ namespace flexnnet
          if (!randomize_order())
             _tstset.normalize_order();
 
+         //perf[sample_ndx] = 0;
          perf[sample_ndx] = evaluate_subsampling(sample_ndx, _nnet, _tstset);
       }
 
@@ -82,6 +92,8 @@ namespace flexnnet
 
       double svar = (scount > 30) ? stdev / (scount - 1) : stdev / scount;
       stdev = sqrt(svar);
+
+      //std::cout << "TDEvaluator.evaluate() EXIT\n";
 
       return EvalResults(sample_mean, stdev);
    }
@@ -114,6 +126,7 @@ namespace flexnnet
 
       return FitnessFunc<OutTyp>::calc_fitness();
    }
+*/
 
    template<class InTyp, class OutTyp, template<class, class> class NN,
       template<class, class, template<class, class> class> class Dataset,
@@ -123,8 +136,9 @@ namespace flexnnet
                OutTyp,
                NN,
                Dataset,
-               FitnessFunc>::evaluate_series(size_t _s_index, NNTyp& _nnet, const ExemplarSeriesTyp& _series)
+               FitnessFunc>::evaluate_sample(size_t _s_index, NNTyp& _nnet, const ExemplarSeriesTyp& _series)
    {
+      //std::cout << "TDEvaluator.evaluate_series()\n";
       std::valarray<double> Re0, Re1;
 
       const ExemplarTyp& exemplar = _series[0];
@@ -133,24 +147,43 @@ namespace flexnnet
       int series_len = _series.size();
       for (int ndx=1; ndx < series_len-1; ndx++)
       {
-         const OutTyp nnout0 = _nnet.vectorize_features();
+         //const OutTyp nnout0 = _nnet.vectorize_features();
+         const OutTyp nnout0 = _nnet.value();
 
          const ExemplarTyp& exemplar = _series[ndx];
          const OutTyp& nnout1 = _nnet.activate(exemplar.first);
 
+         // For cost-to-go
          OutTyp tgt = FitnessFunc<OutTyp>::calc_target(exemplar.second, nnout1);
          FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);
+
+         // For final cost
+         //if (exemplar.valid_target())
+         //   FitnessFunc<OutTyp>::calc_error_gradient(exemplar.second, nnout0);
+         //else
+         //   FitnessFunc<OutTyp>::calc_error_gradient(nnout1, nnout0);
       }
       const ExemplarTyp& last_exemplar = _series[series_len-1];
-      const OutTyp nnout0 = _nnet.vectorize_features();
+      const OutTyp nnout0 = _nnet.value();
 
-      OutTyp zeronnout;
+      // Assign last examplar to zeronnout just to get the feature names
+      OutTyp zeronnout = last_exemplar.second;
       ValarrMap vm({{"output",{0}}});
-      zeronnout.activate(vm);
+      std::valarray<double> va = {0};
+      zeronnout[0].decode(va);
 
+      // For final cost
+      //OutTyp tgt = FitnessFunc<OutTyp>::calc_target(last_exemplar.second, zeronnout);
+      //FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);
+
+      // For cost-to-go
       OutTyp tgt = FitnessFunc<OutTyp>::calc_target(last_exemplar.second, zeronnout);
       FitnessFunc<OutTyp>::calc_error_gradient(tgt, nnout0);
+
+      //std::cout << "TDEvaluator.evaluate_series() EXIT\n";
    }
+
+
 }
 
 #endif //FLEX_NEURALNET_SERIESEVALUATOR_H_

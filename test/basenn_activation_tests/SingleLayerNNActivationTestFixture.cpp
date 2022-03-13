@@ -31,7 +31,7 @@ SingleLayerNNActivationTestFixture<T>::read_activation_samples(std::string _file
    size_t input_sz = doc["input_size"].GetInt();
 
    // Iterate through test input/output pairs
-   const rapidjson::Value& test_cases_arr = doc["test_cases"].GetArray();
+   const rapidjson::Value& test_cases_arr = doc["activation_test_cases"].GetArray();
    for (rapidjson::SizeType i = 0; i < test_cases_arr.Size(); i++)
    {
       static std::valarray<double> inputv(input_sz);
@@ -85,7 +85,7 @@ SingleLayerNNActivationTestFixture<T>::read_derivatives_samples(std::string _fil
    size_t input_sz = doc["input_size"].GetInt();
 
    // Iterate through test input/output pairs
-   const rapidjson::Value& test_cases_arr = doc["test_cases"].GetArray();
+   const rapidjson::Value& test_cases_arr = doc["activation_test_cases"].GetArray();
    for (rapidjson::SizeType i = 0; i < test_cases_arr.Size(); i++)
    {
       static std::valarray<double> inputv(input_sz);

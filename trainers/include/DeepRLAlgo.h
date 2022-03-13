@@ -69,7 +69,7 @@ namespace flexnnet
       train_final_cost(const std::valarray<double>& _V, const std::valarray<double>& _Re1, const std::valarray<double>& _Re0);
 
       void
-      calc_weight_updates(const FeatureVector& _tdgradient);
+      calc_weight_updates(const ValarrMap& _tdgradient);
 
       void
       zero_eligibility_traces();
@@ -152,7 +152,6 @@ namespace flexnnet
          train_series_cost_to_go(_series);
 
       //std::cout << "DeepRLAlgo.train_series() EXIT\n" << std::flush;
-
    }
 
    template<class InTyp,
@@ -200,20 +199,26 @@ namespace flexnnet
       for (int ndx=1; ndx < series_len; ndx++)
       {
          // Save vectorize estimate
-         //Re0 = this->nnet.vectorize().vectorize();
-         TgtTyp nnout0 = this->nnet.vectorize_features();
+         TgtTyp nnout0 = this->nnet.value();
 
          // Activate the network for the next exemplar
          const ExemplarTyp& exemplar = _series[ndx];
          const TgtTyp& nnout1 = this->nnet.activate(exemplar.first);
 
-         // Train the network using the target and vectorize estimates
-         const std::valarray<double>& targetv = exemplar.second.vectorize_features();
-         //train_final_cost(targetv, nnout1.vectorize(), Re0);
-
+         // TODO - fix the calc_target or fix the way we detect when
+         //    we should use the external signal vs the previous estimate.
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
-         FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
-         calc_weight_updates(td_gradient);
+         //ValarrMap td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
+         if (exemplar.valid_target())
+         {
+            ValarrMap td_gradient = evaluator.calc_error_gradient(exemplar.second, nnout0);
+            calc_weight_updates(td_gradient);
+         }
+         else
+         {
+            ValarrMap td_gradient = evaluator.calc_error_gradient(nnout1, nnout0);
+            calc_weight_updates(td_gradient);
+         }
 
          // Update the eligibility traces
          this->nnet.backprop(ones);
@@ -249,7 +254,7 @@ namespace flexnnet
       std::valarray<double> Re0;
       const std::valarray<double> zero_Re(0.0, this->nnet.size());
 
-      // Create "error" of 1 to allow calculating gradients wrt Y
+      // Create "error" of -1 to allow calculating gradients wrt Y
       ValarrMap ones = this->nnet.value_map();
       for (auto& it : ones)
          it.second = -1.0;
@@ -269,61 +274,54 @@ namespace flexnnet
        * to the terminal state.
        */
       int series_len = _series.size();
+
       for (int ndx=1; ndx < series_len-1; ndx++)
+      // try training terminal state
+      //for (int ndx=1; ndx < series_len; ndx++)
       {
          // Save vectorize estimate from step t-1
-         Re0 = this->nnet.vectorize_features().vectorize_features();
-         TgtTyp nnout0 = this->nnet.vectorize_features();
+         Re0 = this->nnet.value().vectorize();
+         TgtTyp nnout0 = this->nnet.value();
 
          // Activate the network for exemplar at time t
          const ExemplarTyp& exemplar = _series[ndx];
          const TgtTyp& nnout1 = this->nnet.activate(exemplar.first);
 
          // Train the network using the target and vectorize estimates
-         const std::valarray<double>& targetv = exemplar.second.vectorize_features();
+         //const std::valarray<double>& targetv = exemplar.second.vectorizeee();
 
          TgtTyp tgt = evaluator.calc_target(exemplar.second, nnout1);
-         FeatureVector td_gradient = evaluator.calc_error_gradient(tgt, nnout0);
-         calc_weight_updates(td_gradient);
+         ValarrMap td_gradientset = evaluator.calc_error_gradient(tgt, nnout0);
+
+         calc_weight_updates(td_gradientset);
 
          // Update the eligibility traces
          this->nnet.backprop(ones);
          update_eligibility_traces();
       }
+      const ExemplarTyp& last_exemplar = _series[series_len-1];
+
+      // Assign last examplar to zeronnout just to get the feature names
+      TgtTyp zeronnout = last_exemplar.second;
+      ValarrMap vm({{"output",{0}}});
+      std::valarray<double> va = {0};
+      zeronnout[0].decode(va);
 
       // Train the network on the terminal state.
-      const std::valarray<double>& targetv = _series[series_len - 1].second.vectorize_features();
-      TgtTyp nnout0 = this->nnet.vectorize_features();
-      FeatureVector td_gradient = evaluator.calc_error_gradient(_series[series_len - 1].second, nnout0);
-      calc_weight_updates(td_gradient);
+      //const std::valarray<double>& targetv = _series[series_len - 1].second.vectorizeee();
+      TgtTyp nnout0 = this->nnet.value();
+
+      TgtTyp tgt = evaluator.calc_target(last_exemplar.second, zeronnout);
+      // second training on terminal state
+      //TgtTyp tgt = evaluator.calc_target(last_exemplar.second, nnout0);
+      ValarrMap td_gradientset = evaluator.calc_error_gradient(tgt, nnout0);
+
+      calc_weight_updates(td_gradientset);
 
       //std::cout << "DeepRLAlgo.train_series_cost_to_go() EXIT\n" << std::flush;
 
    }
 
-/*   template<class InTyp,
-      class TgtTyp,
-      template<class, class>
-      class NN,
-      template<class, class, template<class, class> class>
-      class Dataset,
-      template<class>
-      class FitFunc,
-      class LRPolicy>
-   void
-   DeepRLAlgo<InTyp,
-              TgtTyp,
-              NN,
-              Dataset,
-              FitFunc,
-              LRPolicy>::train_cost_to_go(const std::valarray<double>& _V, const std::valarray<double>& _Re1, const std::valarray<double>& _Re0)
-   {
-      //std::cout << "calc td error " << _V[0] << " " << _Re0[0] << " " << _Re1[0] << "\n" << std::flush;
-      double td_error = _V[0] + get_gamma() * _Re1[0] - _Re0[0];
-      FeatureVector tdgradient;
-      tdgradient["output"] = {td_error};
-      calc_weight_updates(tdgradient);
-   }
 
    template<class InTyp,
       class TgtTyp,
@@ -335,44 +333,10 @@ namespace flexnnet
       class FitFunc,
       class LRPolicy>
    void
-   DeepRLAlgo<InTyp,
-              TgtTyp,
-              NN,
-              Dataset,
-              FitFunc,
-              LRPolicy>::train_final_cost(const std::valarray<double>& _V, const std::valarray<double>& _Re1, const std::valarray<double>& _Re0)
-   {
-      //std::cout << "DeepRLAlgo.train_final_cost() " << _Re0[0] << " " << _Re1[0] << "\n" << std::flush;
-      //if (_V.size() > 0)
-      //   std::cout << "DeepRLAlgo.train_final_cost() V=" << _V[0] << "\n" << std::flush;
-
-      double td_error;
-
-      // If there is a external reinforcement specified vectorize, use it. Otherwise
-      // use the current network estimate as the target vectorize function.
-      if (_V.size() > 0)
-         td_error = _V[0] - _Re0[0];
-      else
-         td_error = _Re1[0] - _Re0[0];
-
-
-      //calc_weight_updates(td_error);
-   }*/
-
-   template<class InTyp,
-      class TgtTyp,
-      template<class, class>
-      class NN,
-      template<class, class, template<class, class> class>
-      class Dataset,
-      template<class>
-      class FitFunc,
-      class LRPolicy>
-   void
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(const FeatureVector& _tdgradient)
+   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(const ValarrMap& _tdgradient)
    {
       //std::cout << "calc_weight_updates(" << _tderr << ")\n" << std::flush;
-      double _tderr = _tdgradient.value()[0];
+      double _tderr = _tdgradient.begin()->second[0];
 
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
          & layers = this->nnet.get_layers();
@@ -393,7 +357,7 @@ namespace flexnnet
             for (unsigned int col = 0; col < last_col; col++)
                weight_updates[id].at(row, col) = -lr.at(row, col) * _tderr * etrace_dEdw.at(row, col);
 
-         this->accumulate_weight_updates(id, weight_updates[id]);
+         this->accumulate_weight_updates(this->nnet, id, weight_updates[id]);
       }
    }
 

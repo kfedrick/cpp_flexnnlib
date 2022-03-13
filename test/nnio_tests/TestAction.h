@@ -8,27 +8,27 @@
 #include <ActionOutput.h>
 #include <NetworkOutput.h>
 #include <NetworkLayer.h>
-#include <FeatureSet.h>
+#include <FeatureSetImpl.h>
 #include <RawFeature.h>
 #include "TestActionFeature.h"
 
-class TestAction : public flexnnet::FeatureSet<TestActionFeature>
+class TestAction : public flexnnet::FeatureSetImpl<TestActionFeature>
 {
 public:
    TestAction();
-   TestAction(const FeatureSet<TestActionFeature>& _ta);
-   TestAction& operator=(const FeatureSet<TestActionFeature>& _ta);
+   TestAction(const FeatureSetImpl<TestActionFeature>& _ta);
+   TestAction& operator=(const FeatureSetImpl<TestActionFeature>& _ta);
 };
 
-TestAction::TestAction() : FeatureSet<TestActionFeature>()
+TestAction::TestAction() : FeatureSetImpl<TestActionFeature>()
 {
 }
 
-TestAction::TestAction(const FeatureSet<TestActionFeature>& _ta) : FeatureSet<TestActionFeature>(_ta)
+TestAction::TestAction(const FeatureSetImpl<TestActionFeature>& _ta) : FeatureSetImpl<TestActionFeature>(_ta)
 {
 }
 
-TestAction& TestAction::operator=(const FeatureSet<TestActionFeature>& _ta)
+TestAction& TestAction::operator=(const FeatureSetImpl<TestActionFeature>& _ta)
 {
 }
 

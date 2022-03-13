@@ -15,12 +15,13 @@ namespace flexnnet
    public:
       Reinforcement();
       Reinforcement(const std::string& _name);
+      Reinforcement(const Reinforcement& _r);
 
       void fill(double _val);
       virtual void set(size_t _ndx, double _val);
 
-      virtual const double& operator[](size_t _ndx) const;
-      virtual const double& at(const std::string& _field) const;
+      virtual const Feature& operator[](size_t _ndx) const;
+      virtual const Feature& at(const std::string& _field) const;
    };
 
    template<size_t N>
@@ -37,16 +38,24 @@ namespace flexnnet
 
    template<size_t N>
    inline
-   const double& Reinforcement<N>::operator[](size_t _ndx) const
+   Reinforcement<N>::Reinforcement(const Reinforcement& _r) : RawFeatureSet<N>(_r)
    {
-      return std::get<0>(this->get_features()).get_encoding()[_ndx];
+
+   }
+
+   template<size_t N>
+   inline
+   const Feature& Reinforcement<N>::operator[](size_t _ndx) const
+   {
+      return std::get<0>(this->get_features());
+      //return std::get<0>(this->get_features()).get_encoding()[_ndx];
    }
 
    template<size_t N>
    inline
    void Reinforcement<N>::fill(double _val)
    {
-      std::valarray<double> v(N,_val);
+      std::valarray<double> v(_val,N);
       std::get<0>(this->get_features()).decode(v);
    }
 
@@ -69,10 +78,12 @@ namespace flexnnet
 
    template<size_t N>
    inline
-   const double& Reinforcement<N>::at(const std::string& _field) const
+   const Feature& Reinforcement<N>::at(const std::string& _field) const
    {
       //return (*this)[0].get_encoding()[this->get_feature_index(_field)];
-      return std::get<0>(this->get_features()).value()[this->get_feature_index(_field)];
+      //return std::get<0>(this->get_features()).value()[this->get_feature_index(_field)];
+      return std::get<0>(this->get_features());
+
    }
 
 }

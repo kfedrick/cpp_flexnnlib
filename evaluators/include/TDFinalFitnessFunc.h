@@ -27,8 +27,11 @@ namespace flexnnet
       const ValarrMap&
       calc_error_gradient(const OutTyp& _target, const OutTyp& _nnout);
 
+      const ValarrMap&
+      calc_error_gradient(const OutTyp& _target, const OutTyp& _V_est, const OutTyp _prev_V_est);
+
       OutTyp
-      calc_target(const OutTyp _Vt, const OutTyp _EVt) const;
+      calc_target(const OutTyp& _Vt, const OutTyp& _EVt) const;
 
    private:
       double sse, series_sse;
@@ -37,6 +40,7 @@ namespace flexnnet
    };
 
    template<class OutTyp>
+   inline
    void
    TDFinalFitnessFunc<OutTyp>::clear(void)
    {
@@ -47,6 +51,7 @@ namespace flexnnet
    }
 
    template<class OutTyp>
+   inline
    void
    TDFinalFitnessFunc<OutTyp>::new_series(void)
    {
@@ -61,6 +66,8 @@ namespace flexnnet
    const ValarrMap&
    TDFinalFitnessFunc<OutTyp>::calc_error_gradient(const OutTyp& _tgt, const OutTyp& _nnout)
    {
+      //std::cout << "TDFinalFitnessFunc<OutTyp>::calc_error_gradient : ENTRY\n";
+
       std::valarray<double> sqrdiff;
 
       const ValarrMap& tgt_vamap = _tgt.value_map();
@@ -70,7 +77,38 @@ namespace flexnnet
       for (const auto& tgt : tgt_vamap)
       {
          const std::string id = tgt.first;
+
          td_gradient[id] = tgt.second - nnout_vamap.at(id);
+         sse += td_gradient[id].sum();
+      }
+      TDFinalFitnessFunc::series_sse += sse;
+      series_len++;
+
+      //std::cout << "TDFinalFitnessFunc<OutTyp>::calc_error_gradient : RETURN\n";
+      return td_gradient;
+   }
+
+   template<class OutTyp>
+   inline
+   const ValarrMap&
+   TDFinalFitnessFunc<OutTyp>::calc_error_gradient(const OutTyp& _externR, const OutTyp& _V_est, const OutTyp _prev_V_est)
+   {
+      std::valarray<double> sqrdiff;
+
+      const ValarrMap& externR_vamap = _externR.value_map();
+      const ValarrMap& V_est_vamap = _V_est.value_map();
+      const ValarrMap& prev_V_est_vamap = _prev_V_est.value_map();
+
+      double sse = 0;
+      for (const auto& externR : externR_vamap)
+      {
+         const std::string id = externR.first;
+
+         if (externR.second.size() > 0)
+            td_gradient[id] = externR.second - prev_V_est_vamap.at(id);
+         else
+            td_gradient[id] = V_est_vamap.at(id) - prev_V_est_vamap.at(id);
+
          sse += td_gradient[id].sum();
       }
       TDFinalFitnessFunc::series_sse += sse;
@@ -80,6 +118,7 @@ namespace flexnnet
    }
 
    template<class OutTyp>
+   inline
    double
    TDFinalFitnessFunc<OutTyp>::calc_fitness()
    {
@@ -87,25 +126,34 @@ namespace flexnnet
    }
 
    template<class OutTyp>
+   inline
    OutTyp
-   TDFinalFitnessFunc<OutTyp>::calc_target(const OutTyp _Vt, const OutTyp _EVt) const
+   TDFinalFitnessFunc<OutTyp>::calc_target(const OutTyp& _Vt, const OutTyp& _EVt) const
    {
+      //std::cout << "TDFinalFitnessFunc<OutTyp>::calc_target : ENTRY\n";
+
       ValarrMap tgt_vamap;
 
       const ValarrMap& Vt_vamap = _Vt.value_map();
       const ValarrMap& EVt_vamap = _EVt.value_map();
 
+      int i = 0;
       for (const auto& EVt : EVt_vamap)
       {
-         const std::string id = EVt.first;
+         i++;
 
+         const std::string id = EVt.first;
          if (Vt_vamap.at(id).size() > 0)
             tgt_vamap[id] = Vt_vamap.at(id);
          else
             tgt_vamap[id] = EVt.second;
       }
 
-      return OutTyp(tgt_vamap);
+      OutTyp out = _Vt;
+      out[0].decode(tgt_vamap.at("output"));
+
+      //std::cout << "TDFinalFitnessFunc<OutTyp>::calc_target : about to EXIT\n";
+      return out;
    }
 }
 

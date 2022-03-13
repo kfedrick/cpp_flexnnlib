@@ -28,7 +28,7 @@ private:
 
 TestActionFeature::TestActionFeature() : RawFeature<1>()
 {
-
+   action = ActionEnum::Right;
 }
 
 TestActionFeature::TestActionFeature(flexnnet::RawFeature<1> _feature) : RawFeature<1>()
