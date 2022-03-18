@@ -6,7 +6,6 @@
 #define FLEX_NEURALNET_ACFINALFITNESSFUNC_H_
 
 #include "flexnnet.h"
-#include "BaseFitnessFunc.h"
 
 namespace flexnnet
 {

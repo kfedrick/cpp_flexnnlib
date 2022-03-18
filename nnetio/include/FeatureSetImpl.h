@@ -124,7 +124,7 @@ namespace flexnnet
       Fs features;
       std::vector<Feature*> feature_ptrs;
       std::map<std::string, size_t> feature_indices;
-      std::vector<std::string> feature_names_vec;
+      mutable std::vector<std::string> feature_names_vec;
 
       // TODO - change base NN activate() so I can remove this
       mutable ValarrMap vmap;
@@ -219,6 +219,8 @@ namespace flexnnet
    inline
    const std::vector<std::string>& FeatureSetImpl<Fs>::get_feature_namesv() const
    {
+      feature_names_vec.clear();
+      feature_names_vec.push_back(feature_names[0]);
       return feature_names_vec;
    }
 

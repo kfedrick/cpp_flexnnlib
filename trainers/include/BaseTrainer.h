@@ -8,6 +8,8 @@
 #include <vector>
 #include <map>
 #include <flexnnet.h>
+#include <BaseNeuralNet.h>
+#include <TrainingReport.h>
 
 namespace flexnnet
 {
@@ -19,7 +21,7 @@ namespace flexnnet
          std::map<std::string, NetworkWeights> layer_weights;
 
          // Cumulative NN weight updates prior to application
-         std::map<std::string, Array2D<double>> cumulative_weight_updates;
+         std::map<std::string, Array2D < double>> cumulative_weight_updates;
       };
 
       using NetworkWeights = std::map<std::string, LayerWeights>;
@@ -39,18 +41,7 @@ namespace flexnnet
 
       const TrainingReport& get_training_report(void) const;
 
-      /**
-       * Calculate the neural network weight updates given the specified
-       * output error gradient.
-       *
-       * Precondition:
-       *    The network layers retain the state information
-       *    for the input/target training exemplar used to generate
-       *    the error gradient.
-       *
-       * @param _egradient
-       */
-      virtual void calc_weight_updates(const ValarrMap _egradient) = 0;
+
 
    protected:
 
@@ -74,7 +65,8 @@ namespace flexnnet
 
       void adjust_network_weights(BaseNeuralNet& _nnet);
 
-      void accumulate_weight_updates(const BaseNeuralNet& _nnet, const std::string& _id, const Array2D<double>& _deltaw);
+      void accumulate_weight_updates(
+         const BaseNeuralNet& _nnet, const std::string& _id, const Array2D<double>& _deltaw);
 
    private:
       CachedValues& get_cache(const BaseNeuralNet& _nnet);
@@ -97,37 +89,33 @@ namespace flexnnet
       copy(_nnet);
    }
 
-   BaseTrainer& BaseTrainer::operator=(const BaseTrainer& _nnet)
+   inline BaseTrainer& BaseTrainer::operator=(const BaseTrainer& _nnet)
    {
       copy(_nnet);
       return *this;
    }
 
-   inline
-   const TrainingReport& BaseTrainer::get_training_report(void) const
+   inline const TrainingReport& BaseTrainer::get_training_report(void) const
    {
       return training_report;
    }
 
-   inline
-   void BaseTrainer::save_training_record(const TrainingRecord& _trec)
+   inline void BaseTrainer::save_training_record(const TrainingRecord& _trec)
    {
       training_report.add_record(_trec);
    }
 
-   inline
-   void BaseTrainer::copy(const BaseTrainer& _tnnet)
+   inline void BaseTrainer::copy(const BaseTrainer& _tnnet)
    {
       cached_nn_values = _tnnet.cached_nn_values;
    }
 
-   inline
-   BaseTrainer::CachedValues& BaseTrainer::alloc(const BaseNeuralNet& _nnet)
+   inline BaseTrainer::CachedValues& BaseTrainer::alloc(const BaseNeuralNet& _nnet)
    {
       CachedValues& cache = cached_nn_values[&_nnet] = CachedValues();
 
       const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
-      for (auto it : layers)
+      for (auto it: layers)
       {
          std::string id = it.first;
          const LayerWeights& w = it.second->weights();
@@ -142,8 +130,7 @@ namespace flexnnet
       return cache;
    }
 
-   inline
-   BaseTrainer::CachedValues& BaseTrainer::get_cache(const BaseNeuralNet& _nnet)
+   inline BaseTrainer::CachedValues& BaseTrainer::get_cache(const BaseNeuralNet& _nnet)
    {
       std::map<const BaseNeuralNet*, CachedValues>::iterator entry = cached_nn_values.find(&_nnet);
 
@@ -154,42 +141,39 @@ namespace flexnnet
       return cached_nn_values[&_nnet];
    }
 
-   inline
-   void BaseTrainer::save_network_weights(const BaseNeuralNet& _nnet, const std::string& _id)
+   inline void BaseTrainer::save_network_weights(const BaseNeuralNet& _nnet, const std::string& _id)
    {
       CachedValues& cache = get_cache(_nnet);
 
       NetworkWeights network_weights = cache.layer_weights[_id];
       const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
 
-      for (auto& it : layers)
+      for (auto& it: layers)
          network_weights[it.first] = it.second->weights();
    }
 
-   inline
-   void BaseTrainer::restore_network_weights(BaseNeuralNet& _nnet, const std::string& _id)
+   inline void BaseTrainer::restore_network_weights(BaseNeuralNet& _nnet, const std::string& _id)
    {
       CachedValues& cache = get_cache(_nnet);
 
       NetworkWeights network_weights = cache.layer_weights[_id];
-      for (auto& it : network_weights)
+      for (auto& it: network_weights)
          _nnet.set_weights(it.first, it.second);
    }
 
-   inline
-   void BaseTrainer::adjust_network_weights(BaseNeuralNet& _nnet)
+   inline void BaseTrainer::adjust_network_weights(BaseNeuralNet& _nnet)
    {
       CachedValues& cache = get_cache(_nnet);
 
-      for (auto& it : cache.cumulative_weight_updates)
+      for (auto& it: cache.cumulative_weight_updates)
       {
          _nnet.adjust_weights(it.first, it.second);
          it.second = 0;
       }
    }
 
-   inline
-   void BaseTrainer::accumulate_weight_updates(const BaseNeuralNet& _nnet, const std::string& _id, const Array2D<double>& _deltaw)
+   inline void BaseTrainer::accumulate_weight_updates(
+      const BaseNeuralNet& _nnet, const std::string& _id, const Array2D<double>& _deltaw)
    {
       CachedValues& cache = get_cache(_nnet);
 

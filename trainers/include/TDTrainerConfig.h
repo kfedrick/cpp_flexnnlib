@@ -9,20 +9,13 @@
 
 namespace flexnnet
 {
-
    class TDTrainerConfig
    {
    public:
-      enum TD_TRAINING_MODE { FINAL_COST, COST_TO_GO };
       static constexpr double DEFAULT_GAMMA = 0.2;
       static constexpr double DEFAULT_LAMBDA = 0.4;
 
    public:
-      /**
-       *
-       * @param _mode
-       */
-      void set_td_mode(TD_TRAINING_MODE _mode);
 
       /**
        * Set the vectorize of the cumulative temporal-difference reinforcement
@@ -40,16 +33,11 @@ namespace flexnnet
        */
       void set_lambda(double _val);
 
-      constexpr TD_TRAINING_MODE get_td_mode();
-
       constexpr double get_gamma();
 
       constexpr double get_lambda();
 
    private:
-
-      TD_TRAINING_MODE td_mode{COST_TO_GO};
-
       // td_discount is the discount parameter for cumulative temporal-difference
       // learning error and their variants. It controls how fast older reinforcement
       // signals are discounted, with: 0 <= td_discount <= 1.0
@@ -61,12 +49,6 @@ namespace flexnnet
    };
 
    inline
-   constexpr TDTrainerConfig::TD_TRAINING_MODE TDTrainerConfig::get_td_mode()
-   {
-      return td_mode;
-   }
-
-   inline
    constexpr double TDTrainerConfig::get_gamma()
    {
       return gamma;
@@ -76,12 +58,6 @@ namespace flexnnet
    constexpr double TDTrainerConfig::get_lambda()
    {
       return lambda;
-   }
-
-   inline
-   void TDTrainerConfig::set_td_mode(TD_TRAINING_MODE _mode)
-   {
-      td_mode = _mode;
    }
 
    inline

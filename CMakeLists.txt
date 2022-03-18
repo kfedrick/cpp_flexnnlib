@@ -63,15 +63,11 @@ add_library(flexneuralnet
         trainers/include/TDTrainerConfig.h
         datasets/include/DataSet.h
         trainers/include/TrainingRecord.h
-        evaluators/include/Evaluator.h
-        evaluators/include/TDEvaluator.h
-        evaluators/include/RMSEFitnessFunc.h
         datasets/include/CartesianCoord.h datasets/CartesianCoord.cpp
         util/include/JSONStream.h util/JSONStream.cpp
         util/include/Globals.h util/Globals.cpp
         datasets/stream/CartesianCoordStream.cpp
         datasets/stream/include/DataSetStream.h
-        evaluators/include/BaseFitnessFunc.h evaluators/BaseFitnessFunc.cpp
         trainers/include/DeltaBarDeltaLearningRate.h
         trainers/include/TrainingReport.h
         util/include/URandArray2DInitializer.h
@@ -91,19 +87,15 @@ add_library(flexneuralnet
         network/include/BaseNeuralNet.h
         network/include/NeuralNet.h
         trainers/include/BaseTrainer.h
-        trainers/include/SupervisedTrainingAlgo.h
+        trainers/include/BaseTrainingAlgo.h
         trainers/include/LearningRatePolicy.h
         trainers/include/ConstantLearningRate.h
         datasets/include/Exemplar.h
         datasets/include/ExemplarSeries.h
         trainers/include/DeepRLAlgo.h
-        evaluators/include/TDFinalFitnessFunc.h
-        evaluators/include/TDCostToGoFitnessFunc.h
         evaluators/include/ActorCriticFinalFitnessFunc.h
         evaluators/include/ActorCriticCostToGoFitnessFunc.h
-        evaluators/include/TDEvaluator.h
         evaluators/include/ActorCriticEvaluator.h
-        evaluators/include/TDEvaluatorConfig.h
         network/include/NetworkInput.h
         network/include/NetworkOutput.h
         envsimulator/include/ActionView.h
@@ -127,7 +119,12 @@ add_library(flexneuralnet
         nnetio/include/FeatureSetIOStream.h
         nnetio/include/Reinforcement.h
         nnetio/include/RawFeatureSet.h
-        trainers/include/ActorCriticDeepRLAlgo.h nnetio/include/FeatureSet.h datasets/include/BaseExemplar.cpp datasets/include/BaseExemplar.h evaluators/include/BaseEvaluator.h evaluators/include/ExemplarEvaluator.h)
+        trainers/include/ActorCriticDeepRLAlgo.h
+        nnetio/include/FeatureSet.h
+        datasets/include/BaseExemplar.cpp
+        datasets/include/BaseExemplar.h
+        evaluators/include/Evaluator.h
+        evaluators/include/LossFunction.h evaluators/include/RMSELossFunc.h trainers/include/DeepRLFinalCostAlgo.h trainers/include/DeepRLCostToGoAlgo.h evaluators/include/TDFinalCostLossFunc.h evaluators/include/TDCostToGoLossFunc.h trainers/include/FFBackpropAlgo.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

@@ -10,9 +10,7 @@
 #include "NeuralNet.h"
 #include "DataSet.h"
 #include "CartesianCoord.h"
-#include "RMSEFitnessFunc.h"
-//#include "Evaluator.h"
-#include "ExemplarEvaluator.h"
+#include "RMSELossFunc.h"
 #include "DataSetStream.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
@@ -24,11 +22,9 @@ using flexnnet::RawFeatureSet;
 using flexnnet::NeuralNetTopology;
 using flexnnet::BaseNeuralNet;
 using flexnnet::NeuralNet;
-//using flexnnet::Evaluator;
-using flexnnet::ExemplarEvaluator;
-using flexnnet::RMSEFitnessFunc;
 using flexnnet::CartesianCoord;
 using flexnnet::Exemplar;
+using flexnnet::RMSELossFunc;
 
 TEST(TestEvaluator, Constructor)
 {
@@ -53,7 +49,7 @@ TEST(TestEvaluator, Constructor)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
 }
 
 TEST(TestEvaluator, OrderedSingleSampling)
@@ -83,11 +79,9 @@ TEST(TestEvaluator, OrderedSingleSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
 
-   eval.set_sampling_count(1);
-   eval.set_subsample_fraction(0.25);
-   eval.evaluate(nnet, dataset);
+   lossfunc.calc_fitness(nnet, dataset, 0.25);
 }
 
 TEST(TestEvaluator, RandomizedSingleSampling)
@@ -117,12 +111,9 @@ TEST(TestEvaluator, RandomizedSingleSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
 
-   eval.randomize_order(true);
-   eval.set_sampling_count(1);
-   eval.set_subsample_fraction(0.33);
-   eval.evaluate(nnet, dataset);
+   lossfunc.calc_fitness(nnet, dataset, 0.33);
 }
 
 TEST(TestEvaluator, Randomized2Sampling)
@@ -152,12 +143,10 @@ TEST(TestEvaluator, Randomized2Sampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
 
-   eval.randomize_order(true);
-   eval.set_sampling_count(2);
-   eval.set_subsample_fraction(0.5);
-   eval.evaluate(nnet, dataset);
+   //eval.set_sampling_count(2);
+   lossfunc.calc_fitness(nnet, dataset, 0.5);
 }
 
 TEST(TestEvaluator, Randomized3SubSampling)
@@ -187,19 +176,17 @@ TEST(TestEvaluator, Randomized3SubSampling)
 
    BaseNeuralNet basenet;
    NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
 
-   eval.randomize_order(true);
-   eval.set_sampling_count(3);
-   eval.set_subsample_fraction(0.9);
-   eval.evaluate(nnet, dataset);
+   //eval.set_sampling_count(3);
+   lossfunc.calc_fitness(nnet, dataset, 0.9);
 }
 
 TEST(TestEvaluator, BasicRMSFitNo0Egradient)
 {
    std::cout << "***** Test RMSE Fitness function with no gradient\n" << std::flush;
 
-   RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
 
    RawFeatureSet<3> tst({"output"});
    RawFeatureSet<3> tgt({"output"});
@@ -209,8 +196,8 @@ TEST(TestEvaluator, BasicRMSFitNo0Egradient)
    tst.decode({{-1, 0, 0.5}});
    tgt.decode({{-1, 0, 0.5}});
 
-   rmse_fit.clear();
-   egradient = rmse_fit.calc_error_gradient(tgt, tst);
+   double err;
+   err = lossfunc.calc_dEde(tgt, tst, egradient);
 
    std::cout
       << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient.at("output")).c_str()
@@ -220,15 +207,15 @@ TEST(TestEvaluator, BasicRMSFitNo0Egradient)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient["output"],
                 egradient["output"], 0.000000001) << "ruh roh";
 
-   double fitval = rmse_fit.calc_fitness();
-   EXPECT_EQ(fitval, 0) << "Fitness = " << fitval << ": expected 0";
+   //double fitval = lossfunc.calc_fitness();
+   //EXPECT_EQ(fitval, 0) << "Fitness = " << fitval << ": expected 0";
 }
 
 TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
 {
    std::cout << "***** Test RMSE Fitness function with small error gradient\n" << std::flush;
 
-   RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
 
    RawFeatureSet<3> tst({"output"});
    RawFeatureSet<3> tgt({"output"});
@@ -238,9 +225,8 @@ TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
    tst.decode({{-1, 0, 0.5}});
    tgt.decode({{-1.03, 0.1, 0.59}});
 
-
-   rmse_fit.clear();
-   egradient = rmse_fit.calc_error_gradient(tgt, tst);
+   double err;
+   err = lossfunc.calc_dEde(tgt, tst, egradient);
 
    std::cout
       << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient.at("output"), 9)
@@ -253,16 +239,16 @@ TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient["output"],
                 egradient["output"], 0.000000001) << "ruh roh";
 
-   double fitval = rmse_fit.calc_fitness();
-   std::cout << "RMSE = " << std::setprecision(9) << fitval << "\n" << std::flush;
-   EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
+   //double fitval = lossfunc.calc_fitness();
+   //std::cout << "RMSE = " << std::setprecision(9) << fitval << "\n" << std::flush;
+   //EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSFitMultiField)
 {
    std::cout << "***** Test RMSE Fitness function with multiple outputs fields\n" << std::flush;
 
-   RMSEFitnessFunc<RawFeatureSet<1, 1, 1>> rmse_fit;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1,1,1>, NeuralNet, DataSet> lossfunc;
 
    RawFeatureSet<1, 1, 1> tst({"output1", "output2", "output3"});
    RawFeatureSet<1, 1, 1> tgt({"output1", "output2", "output3"});
@@ -272,8 +258,8 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
    tst.decode({{-1}, {0}, {0.5}});
    tgt.decode({{-1.03}, {0.1}, {0.59}});
 
-   rmse_fit.clear();
-   egradient = rmse_fit.calc_error_gradient(tgt, tst);
+   double err;
+   err = lossfunc.calc_dEde(tgt, tst, egradient);
 
    std::cout
       << CommonTestFixtureFunctions::prettyPrintVector("egradient", egradient["output1"], 9).c_str()
@@ -293,15 +279,15 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient["output3"],
                 egradient["output3"], 0.000000001) << "ruh roh";
 
-   double fitval = rmse_fit.calc_fitness();
-   EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
+   //double fitval = lossfunc.calc_fitness();
+   //EXPECT_NEAR(fitval, 0.097467943448, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSFitMultiSample)
 {
    std::cout << "***** Test RMSE Fitness function with multiple samples\n" << std::flush;
 
-   RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
 
    RawFeatureSet<3> tst1({"output"});
    RawFeatureSet<3> tgt1({"output"});
@@ -317,9 +303,8 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
    tst2.decode({{-0.3, -1.3, 0.875}});
    tgt2.decode({{-0.63, -0.1, 0.59}});
 
-
-   rmse_fit.clear();
-   egradient1 = rmse_fit.calc_error_gradient(tgt1, tst1);
+   double err1, err2;
+   err1 = lossfunc.calc_dEde(tgt1, tst1, egradient1);
    std::cout
       << CommonTestFixtureFunctions::prettyPrintVector("egradient1", egradient1.at("output"), 9)
          .c_str() << "\n";
@@ -328,11 +313,11 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient1["output"],
                 egradient1["output"], 0.000000001) << "ruh roh";
 
-   double fitval1 = rmse_fit.calc_fitness();
-   std::cout << "RMSE1 = " << std::setprecision(9) << fitval1 << "\n" << std::flush;
-   EXPECT_NEAR(fitval1, 0.097467943448, 0.000000001);
+   //double fitval1 = lossfunc.calc_fitness();
+   //std::cout << "RMSE1 = " << std::setprecision(9) << fitval1 << "\n" << std::flush;
+   //EXPECT_NEAR(fitval1, 0.097467943448, 0.000000001);
 
-   egradient2 = rmse_fit.calc_error_gradient(tgt2, tst2);
+   err2 = lossfunc.calc_dEde(tgt2, tst2, egradient2);
    std::cout
       << CommonTestFixtureFunctions::prettyPrintVector("egradient2", egradient2.at("output"), 9)
          .c_str() << "\n";
@@ -340,9 +325,9 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
    EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, tgt_egradient2["output"],
                 egradient2["output"], 0.000000001) << "ruh roh";
 
-   double fitval2 = rmse_fit.calc_fitness();
-   std::cout << "RMSE2 = " << std::setprecision(9) << fitval2 << "\n" << std::flush;
-   EXPECT_NEAR(fitval2, 0.6420913097, 0.000000001);
+   //double fitval2 = lossfunc.calc_fitness();
+   //std::cout << "RMSE2 = " << std::setprecision(9) << fitval2 << "\n" << std::flush;
+   //EXPECT_NEAR(fitval2, 0.6420913097, 0.000000001);
 }
 
 TEST(TestEvaluator, BasicRMSEEvaluatorTest)
@@ -367,21 +352,27 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst1, tgt1));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst2, tgt2));
 
-   RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
+
    BaseNeuralNet basenet;
    MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet> lossfunc;
 
-   eval.set_sampling_count(1);
-   eval.set_subsample_fraction(1.0);
+   //eval.set_subsample_fraction(1.0);
 
    double rmse, errstd;
-   std::tie(rmse, errstd) =
-      eval.evaluate(reinterpret_cast<MockNN<RawFeatureSet<3>, RawFeatureSet<3>>&>(nnet), dataset);
+   //std::tie(rmse, errstd) =
+   //   eval.evaluate(reinterpret_cast<MockNN<RawFeatureSet<3>, RawFeatureSet<3>>&>(nnet), dataset);
+   //std::tie(rmse, errstd) = lossfunc.calc_fitness_standard_error(nnet, dataset);
+   rmse = lossfunc.calc_fitness(nnet, dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
+
+   //double rmse_loss = rmse_loss_func.calc_fitness(nnet, dataset, 1.0);
+   //std::cout << "rmse loss function value = " << rmse_loss << "\n" << std::flush;
+
+
    EXPECT_NEAR(rmse, 0.64209131, 0.000000001) << "Bad mean fitness score.\n";
-   EXPECT_NEAR(errstd, 0, 0.000000001) << "Bad fitness score standard dev.\n";
+   //EXPECT_NEAR(errstd, 0, 0.000000001) << "Bad fitness score standard dev.\n";
 }
 
 TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
@@ -415,23 +406,20 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst2, tgt2));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst3, tgt3));
 
-   RMSEFitnessFunc<RawFeatureSet<3>> rmse_fit;
    BaseNeuralNet basenet;
    MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   ExemplarEvaluator<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet, RMSEFitnessFunc> eval;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet> lossfunc;
 
-   eval.set_sampling_count(1000);
-   eval.randomize_order(true);
-   eval.set_subsample_fraction(0.67);
+   lossfunc.set_subsample_count(1000);
 
    double rmse, errstd;
-   std::tie(rmse, errstd) =
-      eval.evaluate(reinterpret_cast<MockNN<RawFeatureSet<3>, RawFeatureSet<3>>&>(nnet), dataset);
+   std::tie(rmse,errstd) = lossfunc.calc_fitness_standard_error(nnet, dataset, 0.67);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
    EXPECT_NEAR(rmse, 0.573, 0.01) << "Bad mean fitness score.\n";
-   EXPECT_NEAR(errstd, 0.16, 0.01) << "Bad fitness score standard dev.\n";
+   //EXPECT_NEAR(errstd, 0.16, 0.01) << "Bad fitness score standard dev.\n";
 }
+
 
 int main(int argc, char** argv)
 {

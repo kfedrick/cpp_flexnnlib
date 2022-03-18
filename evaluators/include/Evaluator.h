@@ -1,9 +1,10 @@
 //
-// Created by kfedrick on 3/3/21.
+// Created by kfedrick on 3/12/22.
 //
 
 #ifndef FLEX_NEURALNET_EVALUATOR_H_
 #define FLEX_NEURALNET_EVALUATOR_H_
+
 
 #include <flexnnet.h>
 #include <Exemplar.h>
@@ -12,15 +13,15 @@
 
 namespace flexnnet
 {
-   template<class InTyp, class OutTyp,
+   template<class InTyp, class OutTyp, template<class, class>
+      class SampleTyp,
       template<class, class> class NN,
       template<class, class, template<class, class> class> class DataSet,
       template<class> class FitnessFunc>
    class Evaluator : public BasicEvalConfig, public FitnessFunc<OutTyp>
    {
       using NNTyp = NN<InTyp, OutTyp>;
-      using _ExemplarTyp = Exemplar<InTyp,OutTyp>;
-      using DatasetTyp = DataSet<InTyp, OutTyp, Exemplar>;
+      using DatasetTyp = DataSet<InTyp, OutTyp, SampleTyp>;
 
    public:
       Evaluator();
@@ -32,15 +33,17 @@ namespace flexnnet
       double
       evaluate_subsampling(size_t _s_index, NNTyp& _nnet, const DatasetTyp& _tstset);
 
-      void
-      evaluate_exemplar(size_t _s_index, NNTyp& _nnet, const _ExemplarTyp& _exemplar);
+      virtual void
+      evaluate_sample(size_t _s_index, NNTyp& _nnet, const SampleTyp<InTyp, OutTyp>& _sample) = 0;
    };
 
-   template<class InTyp, class OutTyp, template<class, class> class NN,
+   template<class InTyp, class OutTyp, template<class, class>
+      class SampleTyp, template<class, class> class NN,
       template<class, class, template<class, class> class> class Dataset,
       template<class> class FitnessFunc>
    Evaluator<InTyp,
              OutTyp,
+             SampleTyp,
              NN,
              Dataset,
              FitnessFunc>::Evaluator() : FitnessFunc<OutTyp>()
@@ -48,22 +51,24 @@ namespace flexnnet
    }
 
 
-   template<class InTyp, class OutTyp, template<class, class> class NN,
+   template<class InTyp, class OutTyp, template<class, class>
+      class SampleTyp, template<class, class> class NN,
       template<class, class, template<class, class> class> class Dataset,
       template<class> class FitnessFunc>
    std::tuple<double, double>
    Evaluator<InTyp,
              OutTyp,
+             SampleTyp,
              NN,
              Dataset,
              FitnessFunc>::evaluate(NNTyp& _nnet, const DatasetTyp& _tstset)
    {
-      std::cout << "Evaluator::evaluate()\n";
+      //std::cout << "Evaluator::evaluate()\n";
 
       // Vector to hold performance results for each sampling
       size_t scount = sampling_count();
       std::valarray<double> perf(scount);
-      FitnessFunc<OutTyp>::clear();
+      FitnessFunc<OutTyp>::reset();
 
       // Iterate through all exemplars in the training set_weights
       for (size_t sample_ndx = 0; sample_ndx < scount; sample_ndx++)
@@ -86,49 +91,38 @@ namespace flexnnet
       return EvalResults(sample_mean, stdev);
    }
 
-   template<class InTyp, class OutTyp, template<class, class> class NN,
+   template<class InTyp, class OutTyp, template<class, class>
+      class SampleTyp, template<class, class> class NN,
       template<class, class, template<class, class> class> class Dataset,
       template<class> class FitnessFunc>
    double
    Evaluator<InTyp,
              OutTyp,
+             SampleTyp,
              NN,
              Dataset,
              FitnessFunc>::evaluate_subsampling(size_t _sample_ndx, NNTyp& _nnet, const DatasetTyp& _tstset)
    {
-      FitnessFunc<OutTyp>::clear();
+      FitnessFunc<OutTyp>::reset();
 
       if (randomize_order())
          _tstset.randomize_order();
 
       size_t subsample_sz = subsample_fraction() * _tstset.size();
       size_t sample_no = 0;
-      for (const _ExemplarTyp& it : _tstset)
+      for (const SampleTyp<InTyp,OutTyp>& it : _tstset)
       {
          if (sample_no >= subsample_sz)
             break;
 
-         evaluate_exemplar(sample_no++, _nnet, it);
+         evaluate_sample(sample_no++, _nnet, it);
+         FitnessFunc<OutTyp>::new_series();
+
       }
 
       return FitnessFunc<OutTyp>::calc_fitness();
    }
-
-   template<class InTyp, class OutTyp, template<class, class> class NN,
-      template<class, class, template<class, class> class> class Dataset,
-      template<class> class FitnessFunc>
-   void
-   Evaluator<InTyp,
-             OutTyp,
-             NN,
-             Dataset,
-             FitnessFunc>::evaluate_exemplar(size_t _s_index, NNTyp& _nnet, const _ExemplarTyp& _exemplar)
-   {
-      std::cout << "Evaluator::evaluate_exemplar()\n";
-      const OutTyp& nnout = _nnet.activate(_exemplar.first);
-      FitnessFunc<OutTyp>::calc_error_gradient(_exemplar.second, nnout);
-   }
-
 }
 
-#endif //FLEX_NEURALNET_EVALUATOR_H_
+
+#endif // FLEX_NEURALNET_EVALUATOR_H_

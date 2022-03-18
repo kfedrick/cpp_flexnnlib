@@ -32,7 +32,7 @@ template<typename T> std::vector<typename FanoutNNActivationTestFixture<T>::Test
 
 
    // Iterate through test input/output pairs
-   const rapidjson::Value& test_cases_arr = doc["activation_test_cases"].GetArray();
+   const rapidjson::Value& test_cases_arr = doc["test_cases"].GetArray();
    for (rapidjson::SizeType i = 0; i < test_cases_arr.Size(); i++)
    {
       // save a reference to the i'th test pair

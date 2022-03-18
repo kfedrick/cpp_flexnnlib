@@ -10,15 +10,14 @@
 #include "SupervisedTrainerTestFixture.h"
 
 #include "flexnnet.h"
-#include "Evaluator.h"
 #include "NeuralNetTopology.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
-#include "RMSEFitnessFunc.h"
+#include "RMSELossFunc.h"
 #include "Evaluator.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
-#include <SupervisedTrainingAlgo.h>
+#include <FFBackpropAlgo.h>
 #include <ConstantLearningRate.h>
 #include "MockNN.h"
 #include <FeatureSetImpl.h>
@@ -31,23 +30,18 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
 {
    std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
-   flexnnet::DataSet<FeatureSetImpl<RawFeature<1>>, FeatureSetImpl<RawFeature<1>>, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<FeatureSetImpl<RawFeature<1>>> rmse_fit;
+   flexnnet::DataSet<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, NeuralNet, flexnnet::DataSet> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<FeatureSetImpl<RawFeature<1>>> nnet(basenet);
-   flexnnet::Evaluator<FeatureSetImpl<RawFeature<1>>,
-                       FeatureSetImpl<RawFeature<1>>,
-                       MockNN,
-                       flexnnet::DataSet,
-                       flexnnet::RMSEFitnessFunc> eval;
+   MockNN<FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(basenet);
 
-   flexnnet::SupervisedTrainingAlgo<FeatureSetImpl<RawFeature<1>>,
-                                    FeatureSetImpl<RawFeature<1>>,
+
+   flexnnet::FFBackpropAlgo<FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    MockNN,
+                                    NeuralNet,
                                     flexnnet::DataSet,
-                                    flexnnet::Evaluator,
-                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::RMSELossFunc,
                                     flexnnet::ConstantLearningRate> trainer(nnet);
 
    EXPECT_NO_THROW("Unexpected exception thrown.");
@@ -57,23 +51,17 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
 {
    std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
-   flexnnet::DataSet<FeatureSetImpl<RawFeature<1>>, FeatureSetImpl<RawFeature<1>>, Exemplar> dataset;
-   flexnnet::RMSEFitnessFunc<FeatureSetImpl<RawFeature<1>>> rmse_fit;
+   flexnnet::DataSet<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
+   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, NeuralNet, flexnnet::DataSet> rmse_fit;
    flexnnet::BaseNeuralNet basenet;
-   MockNN<FeatureSetImpl<RawFeature<1>>> nnet(basenet);
-   flexnnet::Evaluator<FeatureSetImpl<RawFeature<1>>,
-                       FeatureSetImpl<RawFeature<1>>,
-                       MockNN,
-                       flexnnet::DataSet,
-                       flexnnet::RMSEFitnessFunc> eval;
+   MockNN<FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(basenet);
 
-   flexnnet::SupervisedTrainingAlgo<FeatureSetImpl<RawFeature<1>>,
-                                    FeatureSetImpl<RawFeature<1>>,
+   flexnnet::FFBackpropAlgo<FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                    FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    MockNN,
+                                    NeuralNet,
                                     flexnnet::DataSet,
-                                    flexnnet::Evaluator,
-                                    flexnnet::RMSEFitnessFunc,
+                                    flexnnet::RMSELossFunc,
                                     flexnnet::ConstantLearningRate> trainer(nnet);
 
    size_t BATCH = 5;

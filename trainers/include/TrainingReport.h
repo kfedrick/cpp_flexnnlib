@@ -74,6 +74,7 @@ namespace flexnnet
       }
    }
 
+   inline
    int TrainingReport::total_training_runs(void) const
    {
       return training_runs;
