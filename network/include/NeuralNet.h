@@ -16,7 +16,7 @@ namespace flexnnet
    class NeuralNet : public BaseNeuralNet
    {
    public:
-      NeuralNet(const BaseNeuralNet& _nnet);
+      NeuralNet(const NeuralNetTopology& _topology);
       NeuralNet(const NeuralNet<InTyp,OutTyp>& _nnet);
       virtual ~NeuralNet();
 
@@ -48,16 +48,9 @@ namespace flexnnet
 
    template<class InTyp, class OutTyp>
    NeuralNet<InTyp,
-             OutTyp>::NeuralNet(const BaseNeuralNet& _nnet)
-      : BaseNeuralNet(_nnet)
+             OutTyp>::NeuralNet(const NeuralNetTopology& _topology) : BaseNeuralNet(_topology)
    {
-      //std::cout << "NeuralNet::NeuralNet(const BaseNeuralNet&)\n";
-
-      //network_output = OutTyp(network_output_layers);
-
-      //std::cout << "NN<>:contructor layer id " << network_output_layers[0]->name() << "\n";
-      network_output = flexnnet::NNFeatureSet<OutTyp>(network_output_layers);
-      //std::cout << "NN<>.constructor nnout.name() " << network_output.value_map().begin()->first << "\n";
+      network_output = flexnnet::NNFeatureSet<OutTyp>(network_output_layers, _topology.get_output_layer_names<OutTyp::SIZE>());
    }
 
    template<class InTyp, class OutTyp>
@@ -68,7 +61,6 @@ namespace flexnnet
 
       network_output = flexnnet::NNFeatureSet<OutTyp>(network_output_layers);
       //std::cout << "NN<>.copy constructor nnout.name() " << _nnet.network_output.value_map().begin()->first << "\n";
-
    }
 
    template<class InTyp, class OutTyp>

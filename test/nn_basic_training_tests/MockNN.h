@@ -13,7 +13,7 @@ template<class _InType, class _OutType=flexnnet::FeatureSetImpl<std::tuple<flexn
 class MockNN : public flexnnet::NeuralNet<_InType, _OutType>
 {
 public:
-   MockNN(const flexnnet::BaseNeuralNet& _nnet);
+   MockNN(const flexnnet::NeuralNetTopology& _topo);
    const flexnnet::NNFeatureSet<_OutType>&
    activate(const _InType& _nninput);
 
@@ -22,7 +22,7 @@ private:
 };
 
 template<class _InType, class _OutType>
-MockNN<_InType, _OutType>::MockNN(const flexnnet::BaseNeuralNet& _nnet) : flexnnet::NeuralNet<_InType, _OutType>(_nnet)
+MockNN<_InType, _OutType>::MockNN(const flexnnet::NeuralNetTopology& _topo) : flexnnet::NeuralNet<_InType, _OutType>(_topo)
 {
 }
 
@@ -32,9 +32,10 @@ MockNN<_InType, _OutType>::activate(const _InType& _nninput)
 {
    std::cout << "activate ordered layer count = 0 for Mock" << "\n";
 
-   //cached_input = _nninput;
-   //return cached_input;
-   return this->value();
+   cached_input = _nninput;
+   return cached_input;
+   //return this->value();
+   //return _nninput;
 }
 
 #endif //_MOCKNN_H_

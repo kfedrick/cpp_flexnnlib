@@ -13,7 +13,10 @@ using flexnnet::FeatureSetImpl;
 using flexnnet::Exemplar;
 using flexnnet::ExemplarSeries;
 
-template<size_t N> class BoundedRandomWalkDataSet : public DataSet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, ExemplarSeries>
+template<size_t N>
+class BoundedRandomWalkDataSet : public DataSet<FeatureSetImpl<std::tuple<RawFeature<9 + 2>>>,
+                                                FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                                                ExemplarSeries>
 {
 public:
    BoundedRandomWalkDataSet();
@@ -38,9 +41,7 @@ private:
    mutable std::mt19937_64 rand_engine;
 };
 
-
-template<size_t N>
-BoundedRandomWalkDataSet<N>::BoundedRandomWalkDataSet()
+template<size_t N> BoundedRandomWalkDataSet<N>::BoundedRandomWalkDataSet()
 {
    std::random_device r;
    std::seed_seq seed2{r(), r(), r(), r(), r(), r(), r(), r()};
@@ -51,23 +52,24 @@ template<size_t N>
 void BoundedRandomWalkDataSet<N>::generate_final_cost_samples(unsigned int _num, double _rprop)
 {
    double val;
-   FeatureSetImpl<std::tuple<RawFeature<N+2>>> inmap;
 
-   std::array<std::string, 1> tgtnames = { "output" };
-   FeatureSetImpl<std::tuple<RawFeature<1>>> tgtmap (tgtnames);
+   FeatureSetImpl<std::tuple<RawFeature<N + 2>>> inmap({"input"});
+   FeatureSetImpl<std::tuple<RawFeature<1>>> tgtmap({"output"});
 
-   std::valarray<double> invec(N+2);
+   std::valarray<double> invec(N + 2);
    std::valarray<double> tgtvec = {0.0};
 
-   flexnnet::Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
-   flexnnet::ExemplarSeries<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> series;
+   flexnnet::Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                      FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
+   flexnnet::ExemplarSeries<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                            FeatureSetImpl<std::tuple<RawFeature<1>>>> series;
 
    std::uniform_int_distribution<int> binary_dist(1, 10000);
    std::uniform_int_distribution<int> uniform_dist(1, N);
    //std::uniform_int_distribution<int> uniform_dist(4, 6);
 
    //clear();
-   for (size_t i=0; i<_num; i++)
+   for (size_t i = 0; i < _num; i++)
    {
       series.clear();
 
@@ -80,45 +82,48 @@ void BoundedRandomWalkDataSet<N>::generate_final_cost_samples(unsigned int _num,
       {
          std::get<0>(inmap.get_features()).decode(invec);
          std::get<0>(tgtmap.get_features()).decode(tgtvec);
-         series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap, false));
+         series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                                   FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap,
+                                                                              false));
 
-         position_ndx += (binary_dist(rand_engine)<=5000) ? -1 : 1;
+         position_ndx += (binary_dist(rand_engine) <= 5000) ? -1 : 1;
          invec = -1.0;
          invec[position_ndx] = 1.0;
 
-      } while (0 < position_ndx && position_ndx < N+1);
+      }
+      while (0 < position_ndx && position_ndx < N + 1);
 
       tgtvec[0] = {(position_ndx == 0) ? -1.0 : 1.0};
 
       std::get<0>(inmap.get_features()).decode(invec);
       std::get<0>(tgtmap.get_features()).decode(tgtvec);
-      series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
+      series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                                FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
 
       push_back(series);
    }
 }
 
-
 template<size_t N>
 void BoundedRandomWalkDataSet<N>::generate_cost_to_go_samples(unsigned int _num, double _rprop)
 {
    double val;
-   FeatureSetImpl<std::tuple<RawFeature<N+2>>> inmap;
+   FeatureSetImpl<std::tuple<RawFeature<N + 2>>> inmap({"input"});
+   FeatureSetImpl<std::tuple<RawFeature<1>>> tgtmap({"output"});
 
-   std::array<std::string, 1> tgtnames = { "output" };
-   FeatureSetImpl<std::tuple<RawFeature<1>>> tgtmap (tgtnames);
-
-   std::valarray<double> invec(N+2);
+   std::valarray<double> invec(N + 2);
    std::valarray<double> tgtvec = {1.0};
 
-   flexnnet::Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
-   flexnnet::ExemplarSeries<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> series;
+   flexnnet::Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                      FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
+   flexnnet::ExemplarSeries<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                            FeatureSetImpl<std::tuple<RawFeature<1>>>> series;
 
    std::uniform_int_distribution<int> binary_dist(1, 10000);
    std::uniform_int_distribution<int> uniform_dist(1, N);
 
    //clear();
-   for (size_t i=0; i<_num; i++)
+   for (size_t i = 0; i < _num; i++)
    {
       series.clear();
 
@@ -133,18 +138,21 @@ void BoundedRandomWalkDataSet<N>::generate_cost_to_go_samples(unsigned int _num,
       {
          std::get<0>(inmap.get_features()).decode(invec);
          std::get<0>(tgtmap.get_features()).decode(tgtvec);
-         series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
+         series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                                   FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
 
-         position_ndx += (binary_dist(rand_engine)<5000) ? -1 : 1;
+         position_ndx += (binary_dist(rand_engine) < 5000) ? -1 : 1;
          invec = -1.0;
          invec[position_ndx] = 1.0;
-      } while (0 < position_ndx && position_ndx < N+1);
+      }
+      while (0 < position_ndx && position_ndx < N + 1);
 
       tgtvec = {0.0};
 
       std::get<0>(inmap.get_features()).decode(invec);
       std::get<0>(tgtmap.get_features()).decode(tgtvec);
-      series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
+      series.push_back(Exemplar<FeatureSetImpl<std::tuple<RawFeature<N + 2>>>,
+                                FeatureSetImpl<std::tuple<RawFeature<1>>>>(inmap, tgtmap));
 
       push_back(series);
    }

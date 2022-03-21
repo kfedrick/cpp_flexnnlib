@@ -273,7 +273,7 @@ namespace flexnnet
       set_feature_ptr<I>(std::get<I>(raw_features));
       feature_indices[_feature.first] = I;
 
-      // recursive call to alloc
+      // recursive call to alloc_working_memory
       alloc<I + 1, R...>(_rem...);
    }
 

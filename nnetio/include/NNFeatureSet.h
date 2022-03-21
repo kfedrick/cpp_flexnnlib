@@ -18,7 +18,7 @@ namespace flexnnet
    {
    public:
       NNFeatureSet();
-      NNFeatureSet(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers);
+      NNFeatureSet(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers, const std::array<std::string, 1>& _lnames);
       virtual void activate() override;
 
       NNFeatureSet& operator=(const Fs _fs);
@@ -30,7 +30,7 @@ namespace flexnnet
    }
 
    template<typename Fs>
-   NNFeatureSet<Fs>::NNFeatureSet(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers) : NetworkOutput(_olayers)
+   NNFeatureSet<Fs>::NNFeatureSet(const std::vector<std::shared_ptr<NetworkLayer>>& _olayers, const std::array<std::string, 1>& _lnames) : Fs(_lnames), NetworkOutput(_olayers)
    {
       int i = 0;
       for (auto& it : _olayers)

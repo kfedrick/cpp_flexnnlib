@@ -10,17 +10,13 @@
 
 namespace flexnnet
 {
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class SampleTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class DataSet> class LossFunction
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp> class LossFunction
    {
-      using NNTyp = NN<InTyp, TgtTyp>;
+      using NNTyp = NeuralNet<InTyp, TgtTyp>;
       using DatasetTyp = DataSet<InTyp, TgtTyp, SampleTyp>;
 
    public:
-      static constexpr unsigned int DEFAULT_SUBSAMPLE_COUNT = 10;
+      static constexpr unsigned int DEFAULT_SUBSAMPLE_COUNT = 1;
       static constexpr double DEFAULT_FITNESS_SUBSAMPLE_SZ = 0;
       static constexpr double DEFAULT_SE_SUBSAMPLE_FRACTION = 1.0;
 
@@ -78,21 +74,14 @@ namespace flexnnet
 
    };
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class SampleTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class DataSet> LossFunction<InTyp, TgtTyp, SampleTyp, NN, DataSet>::LossFunction()
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
+   LossFunction<InTyp, TgtTyp, SampleTyp>::LossFunction()
    {
       performance_cache.resize(1);
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class SampleTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class DataSet>
-   void LossFunction<InTyp, TgtTyp, SampleTyp, NN, DataSet>::set_subsample_count(unsigned int _sz)
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
+   void LossFunction<InTyp, TgtTyp, SampleTyp>::set_subsample_count(unsigned int _sz)
    {
       if (_sz == 0)
          throw std::invalid_argument("invalid subsample size : 0 (zero)");
@@ -100,25 +89,14 @@ namespace flexnnet
       performance_cache.resize(_sz);
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class SampleTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class DataSet>
-   unsigned int LossFunction<InTyp, TgtTyp, SampleTyp, NN, DataSet>::get_subsample_count()
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
+   unsigned int LossFunction<InTyp, TgtTyp, SampleTyp>::get_subsample_count()
    {
       return performance_cache.size();
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class SampleTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class DataSet> std::tuple<double, double> LossFunction<InTyp,
-                                                             TgtTyp,
-                                                             SampleTyp,
-                                                             NN,
-                                                             DataSet>::calc_fitness_standard_error(
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
+   std::tuple<double, double> LossFunction<InTyp, TgtTyp, SampleTyp>::calc_fitness_standard_error(
       NNTyp& _nnet, const DatasetTyp& _tstset, double _subsample_fraction)
    {
       /*
@@ -129,14 +107,15 @@ namespace flexnnet
       {
          static std::stringstream sout;
          sout << "Error : LossFunction::calc_fitness_standard_error - "
-              << "Invalid sub-sample fraction specified : \"" << _subsample_fraction << "\" : must be 0 to 1.0\n";
+              << "Invalid sub-sample fraction specified : \"" << _subsample_fraction
+              << "\" : must be 0 to 1.0\n";
          throw std::invalid_argument(sout.str());
       }
 
       unsigned int num_subsamples = get_subsample_count();
 
       unsigned int subsample_sz;
-      subsample_sz = (_subsample_fraction>0) ? _subsample_fraction * _tstset.size() : 1;
+      subsample_sz = (_subsample_fraction > 0) ? _subsample_fraction * _tstset.size() : 1;
       if (subsample_sz == 0)
          subsample_sz = 1;
 

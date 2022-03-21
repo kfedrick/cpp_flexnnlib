@@ -60,52 +60,33 @@ TEST_F (SupervisedTrainerTestFixture, DeepRLAlgoConstructor)
 {
    DataSet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, ExemplarSeries> trnset;
 
-   TDFinalCostLossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, NeuralNet, DataSet> td_fit;
+   FeatureSetImpl<std::tuple<RawFeature<1>>> in_fs({"input"});
+   FeatureSetImpl<std::tuple<RawFeature<1>>> tgt_fs({"output"});
+
+   TDFinalCostLossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, ExemplarSeries> td_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
       std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
    ol_ptr->add_external_input_field("input", 1);
 
-
    NeuralNetTopology topo;
    topo.network_layers[ol_ptr->name()] = ol_ptr;
    topo.network_output_layers.push_back(ol_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   BaseNeuralNet newbasennet(topo);
-   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
+   NeuralNet<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(topo);
 
    flexnnet::DeepRLFinalCostAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                         flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
-                        NeuralNet,
-                        flexnnet::DataSet,
+                        ExemplarSeries,
                         flexnnet::TDFinalCostLossFunc,
-                        flexnnet::ConstantLearningRate> trainer(newnnet);
+                        flexnnet::ConstantLearningRate> trainer();
 }
 
 
 TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 {
-   TDFinalCostLossFunc<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, NeuralNet, DataSet> td_fit;
-
-   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
-      std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
-   ol_ptr->add_external_input_field("F0", 9+2);
-
-   NeuralNetTopology topo;
-   topo.network_layers[ol_ptr->name()] = ol_ptr;
-   topo.network_output_layers.push_back(ol_ptr);
-   topo.ordered_layers.push_back(ol_ptr);
-
-   BaseNeuralNet newbasennet(topo);
-   NeuralNet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-
-   flexnnet::DeepRLFinalCostAlgo<FeatureSetImpl<std::tuple<RawFeature<9+2>>>,
-                        FeatureSetImpl<std::tuple<RawFeature<1>>>,
-                        NeuralNet,
-                        DataSet,
-                        flexnnet::TDFinalCostLossFunc,
-                        flexnnet::ConstantLearningRate> trainer(newnnet);
+   TDFinalCostLossFunc<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, ExemplarSeries> td_fit;
 
    BoundedRandomWalkDataSet<9> trnset;
 
@@ -113,24 +94,43 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
    Exemplar<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> exemplar;
 
    //trnset.generate_final_cost_samples(1000, 7);
-   trnset.generate_final_cost_samples(20, 9);
+   trnset.generate_final_cost_samples(200, 9);
+
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
+      std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("input", 9+2);
+
+   NeuralNetTopology topo;
+   topo.network_layers[ol_ptr->name()] = ol_ptr;
+   topo.network_output_layers.push_back(ol_ptr);
+   topo.ordered_layers.push_back(ol_ptr);
+
+   NeuralNet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(topo);
+
+   flexnnet::DeepRLFinalCostAlgo<FeatureSetImpl<std::tuple<RawFeature<9+2>>>,
+                        FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                        ExemplarSeries,
+                        flexnnet::TDFinalCostLossFunc,
+                        flexnnet::ConstantLearningRate> trainer;
+
+
 
    std::cout << "# of series = " << trnset.size() << "\n" << std::flush;
 
    trainer.set_training_runs(1);
    trainer.set_lambda(0.3);
-   trainer.set_max_epochs(25);
-   //trainer.set_learning_rate(0.0001);
+   trainer.set_max_epochs(150);
+   trainer.learning_rate_policy().set_init_learning_rate(0.0005);
    trainer.set_batch_mode(3);
 
-   newnnet.initialize_weights();
+   nnet.initialize_weights();
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = nnet.get_weights("output");
 
-   trainer.train(trnset);
+   trainer.train(nnet, trnset);
    std::cout << "DeepRLTests.BounderRandomWalkTest DONE\n" << std::flush;
 
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   flexnnet::LayerWeights tow = nnet.get_weights("output");
 
    std::cout << prettyPrintArray("initial output weights", iow.const_weights_ref);
 
@@ -159,7 +159,7 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 
    int count = 0;
    std::valarray<double> invec(9+2);
-   FeatureSetImpl<std::tuple<RawFeature<9+2>>> infeature;
+   FeatureSetImpl<std::tuple<RawFeature<9+2>>> infeature({"input"});
 
    for (int pos=1; pos<=9; pos++)
    {
@@ -172,7 +172,7 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
       std::valarray<double> ifv = if0.get_encoding();
       std::cout << prettyPrintVector("inputv", ifv);
 
-      FeatureSetImpl<std::tuple<RawFeature<1>>> nnout = newnnet.activate(infeature);
+      FeatureSetImpl<std::tuple<RawFeature<1>>> nnout = nnet.activate(infeature);
       RawFeature<1> of0 = std::get<0>(nnout.get_features());
       std::valarray<double> ofv = of0.get_encoding();
 
@@ -182,26 +182,7 @@ TEST_F (SupervisedTrainerTestFixture, BounderRandomWalkTest)
 
 TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
 {
-   TDFinalCostLossFunc<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, NeuralNet, DataSet> td_fit;
-
-   std::shared_ptr<NetworkLayerImpl<PureLin>> ol_ptr =
-      std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(1, "output", PureLin::DEFAULT_PARAMS, true));
-   ol_ptr->add_external_input_field("F0", 9+2);
-
-   NeuralNetTopology topo;
-   topo.network_layers[ol_ptr->name()] = ol_ptr;
-   topo.network_output_layers.push_back(ol_ptr);
-   topo.ordered_layers.push_back(ol_ptr);
-
-   BaseNeuralNet newbasennet(topo);
-   NeuralNet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> newnnet(newbasennet);
-
-   flexnnet::DeepRLCostToGoAlgo<FeatureSetImpl<std::tuple<RawFeature<9+2>>>,
-                        FeatureSetImpl<std::tuple<RawFeature<1>>>,
-                        NeuralNet,
-                        DataSet,
-                        flexnnet::TDCostToGoLossFunc,
-                        flexnnet::ConstantLearningRate> trainer(newnnet);
+   TDFinalCostLossFunc<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, ExemplarSeries> td_fit;
 
    BoundedRandomWalkDataSet<9> trnset;
 
@@ -210,6 +191,25 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
 
    trnset.generate_cost_to_go_samples(100, 9);
 
+   std::shared_ptr<NetworkLayerImpl<PureLin>> ol_ptr =
+      std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(1, "output", PureLin::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("input", 9+2);
+
+   NeuralNetTopology topo;
+   topo.network_layers[ol_ptr->name()] = ol_ptr;
+   topo.network_output_layers.push_back(ol_ptr);
+   topo.ordered_layers.push_back(ol_ptr);
+
+   NeuralNet<FeatureSetImpl<std::tuple<RawFeature<9+2>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(topo);
+
+   flexnnet::DeepRLCostToGoAlgo<FeatureSetImpl<std::tuple<RawFeature<9+2>>>,
+                        FeatureSetImpl<std::tuple<RawFeature<1>>>,
+                        ExemplarSeries,
+                        flexnnet::TDCostToGoLossFunc,
+                        flexnnet::ConstantLearningRate> trainer;
+
+
+
    std::cout << "# of series = " << trnset.size() << "\n" << std::flush;
 
    trainer.set_training_runs(1);
@@ -217,14 +217,14 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
    trainer.set_max_epochs(50);
    trainer.set_gamma(0.98);
    trainer.set_lambda(0.3);
-   trainer.set_learning_rate(0.0001);
+   trainer.learning_rate_policy().set_init_learning_rate(0.0001);
 
-   newnnet.initialize_weights();
+   nnet.initialize_weights();
 
-   flexnnet::LayerWeights iow = newnnet.get_weights("output");
+   flexnnet::LayerWeights iow = nnet.get_weights("output");
 
-   trainer.train(trnset);
-   flexnnet::LayerWeights tow = newnnet.get_weights("output");
+   trainer.train(nnet, trnset);
+   flexnnet::LayerWeights tow = nnet.get_weights("output");
 
    std::cout << prettyPrintArray("initial output weights", iow.const_weights_ref);
 
@@ -253,7 +253,7 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
 
    int count = 0;
    std::valarray<double> invec(9+2);
-   FeatureSetImpl<std::tuple<RawFeature<9+2>>> infeature;
+   FeatureSetImpl<std::tuple<RawFeature<9+2>>> infeature({"input"});
 
    for (int pos=1; pos<=9; pos++)
    {
@@ -266,7 +266,7 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
       std::valarray<double> ifv = if0.get_encoding();
       std::cout << prettyPrintVector("inputv", ifv);
 
-      FeatureSetImpl<std::tuple<RawFeature<1>>> nnout = newnnet.activate(infeature);
+      FeatureSetImpl<std::tuple<RawFeature<1>>> nnout = nnet.activate(infeature);
       RawFeature<1> of0 = std::get<0>(nnout.get_features());
       std::valarray<double> ofv = of0.get_encoding();
 
@@ -282,7 +282,7 @@ TEST_F (SupervisedTrainerTestFixture, C2GBoundedRandomWalkTest)
       for (auto& x : aseries2)
       {
          std::cout << prettyPrintVector("inputv", x.first.at("input"));
-         FeatureSet<std::tuple<RawFeature<3>>> nnout = newnnet.activate(x.first);
+         FeatureSet<std::tuple<RawFeature<3>>> nnout = nnet.activate(x.first);
          std::cout << prettyPrintVector("nnout", nnout.at("output"));
       }
       std::cout << "\n************************************\n";

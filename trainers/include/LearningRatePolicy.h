@@ -37,13 +37,20 @@ namespace flexnnet
       LearningRatePolicy(const LearningRatePolicy& _nnLRPolicy);
       virtual ~LearningRatePolicy();
 
+      void
+      initialize(const BaseNeuralNet& _nnet);
+
       const Array2D<double>&
       get_learning_rates(const std::string& _layerID) const;
+
       const std::map<std::string, Array2D<double> >&
       get_learning_rates() const;
 
       virtual void
-      set_learning_rate(double _rate);
+      set_init_learning_rate(double _rate);
+
+      virtual void
+      init_learning_rate();
 
       virtual void
       set_learning_rate(const std::string& _layerID, double _rate);
@@ -52,10 +59,10 @@ namespace flexnnet
       operator=(const LearningRatePolicy& _nnLRPolicy);
 
       virtual void
-      reset();
+      clear_learning_rate_adjustments();
 
       virtual void
-      calc_learning_rate_adjustment(unsigned int _timeStep = 1);
+      calc_learning_rate_adjustment(const BaseNeuralNet& _nnet, unsigned int _timeStep = 1);
 
       virtual void
       apply_learning_rate_adjustments();
@@ -72,25 +79,26 @@ namespace flexnnet
       alloc_storage(const BaseNeuralNet& _nnet);
 
    protected:
-      const BaseNeuralNet& basennet;
       std::map<std::string, Array2D<double>> layer_weight_learning_rates_map;
 
-
+   private:
+      double initial_learning_rate;
    };
 
-   inline LearningRatePolicy::LearningRatePolicy() : basennet(BaseNeuralNet())
+   inline LearningRatePolicy::LearningRatePolicy()
    {
+      initial_learning_rate = DEFAULT_LEARNING_RATE;
    }
 
    inline LearningRatePolicy::LearningRatePolicy(const
-                                                 BaseNeuralNet& _nnet) : basennet(_nnet)
+                                                 BaseNeuralNet& _nnet)
    {
       alloc_storage(_nnet);
    }
 
    inline
    LearningRatePolicy::LearningRatePolicy(
-      const LearningRatePolicy& _nnLRPolicy) : basennet(_nnLRPolicy.basennet)
+      const LearningRatePolicy& _nnLRPolicy)
    {
       copy(_nnLRPolicy);
    }
@@ -101,8 +109,17 @@ namespace flexnnet
 
    inline
    void
+   LearningRatePolicy::initialize(const BaseNeuralNet& _nnet)
+   {
+      alloc_storage(_nnet);
+   }
+
+   inline
+   void
    LearningRatePolicy::alloc_storage(const BaseNeuralNet& _nnet)
    {
+      layer_weight_learning_rates_map.clear();
+
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
          & network_layers = _nnet.get_layers();
       for (auto it = network_layers.begin(); it != network_layers.end(); it++)
@@ -111,9 +128,8 @@ namespace flexnnet
          const NetworkLayer& layer = *it->second;
 
          const LayerWeights& layer_weights = layer.weights();
-         //const Array2D<double>& layer_weights = layer.weights();
          Array2D<double>::Dimensions dim = layer_weights.size();
-         layer_weight_learning_rates_map[id].resize(dim.rows, dim.cols, 0.0);
+         layer_weight_learning_rates_map[id].resize(dim.rows, dim.cols, initial_learning_rate);
       }
    }
 
@@ -127,14 +143,22 @@ namespace flexnnet
 
    inline
    void
-   LearningRatePolicy::set_learning_rate(double _rate)
+   LearningRatePolicy::set_init_learning_rate(double _rate)
    {
       if (_rate < 0.0)
          throw std::invalid_argument("Error : learning rate cannot be negative");
+      initial_learning_rate = _rate;
 
+      init_learning_rate();
+   }
+
+   inline
+   void
+   LearningRatePolicy::init_learning_rate()
+   {
       for (auto it = layer_weight_learning_rates_map.begin();
            it != layer_weight_learning_rates_map.end(); it++)
-         it->second = _rate;
+         it->second = initial_learning_rate;
    }
 
    inline
@@ -152,6 +176,7 @@ namespace flexnnet
 
       layer_weight_learning_rates_map[_layerID] = _rate;
    }
+
 
    inline const std::map<std::string, Array2D<double> >&
    LearningRatePolicy::get_learning_rates() const
@@ -175,14 +200,14 @@ namespace flexnnet
 
    inline
    void
-   LearningRatePolicy::reset()
+   LearningRatePolicy::clear_learning_rate_adjustments()
    {
       // Base class implements a fixed, non-adaptive policy. Do nothing.
    }
 
    inline
    void
-   LearningRatePolicy::calc_learning_rate_adjustment(
+   LearningRatePolicy::calc_learning_rate_adjustment(const BaseNeuralNet& _nnet,
       unsigned int _timeStep)
    {
       // Base class implements a fixed, non-adaptive policy. Do nothing.
@@ -199,6 +224,14 @@ namespace flexnnet
    void
    LearningRatePolicy::reduce_learning_rate(double _reductionFactor)
    {
+      if (_reductionFactor <= 0 || 1 <= _reductionFactor)
+      {
+         std::ostringstream err_str;
+         err_str << "Error (LearningRatePolicy::reduce_learning_rate() - invalid reduction factor ("
+                 << _reductionFactor << ") specified.";
+         throw std::invalid_argument(err_str.str());
+      }
+
       for (auto it = layer_weight_learning_rates_map.begin();
            it != layer_weight_learning_rates_map.end(); it++)
          it->second *= _reductionFactor;

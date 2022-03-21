@@ -26,32 +26,26 @@ namespace flexnnet
     * @tparam FitFunc - Fitness function class name
     * @tparam LRPolicy - Learning rate policy class name
     */
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy> class DeepRLAlgo : public BaseTrainingAlgo<InTyp,
-                                                                       TgtTyp,
-                                                                       ExemplarSeries,
-                                                                       NN,
-                                                                       Dataset,
-                                                                       FitFunc,
-                                                                       LRPolicy>,
-                                         public TDTrainerConfig
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample,
+      template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   class DeepRLAlgo : public BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>,
+                      public TDTrainerConfig
    {
-      using DatasetTyp = Dataset<InTyp, TgtTyp, ExemplarSeries>;
+      using NNTyp = NeuralNet<InTyp, TgtTyp>;
+      using DatasetTyp = DataSet<InTyp, TgtTyp, Sample>;
+      using SampleTyp = Sample<InTyp, TgtTyp>;
       using ExemplarSeriesTyp = ExemplarSeries<InTyp, TgtTyp>;
       using ExemplarTyp = Exemplar<InTyp, TgtTyp>;
 
    public:
-      DeepRLAlgo(NN<InTyp, TgtTyp>& _nnet);
+      DeepRLAlgo();
 
       void set_gamma(double _val);
 
    protected:
-      virtual void train_sample(const ExemplarSeries<InTyp, TgtTyp>& _sample) = 0;
+      virtual void train_sample(NNTyp& _nnet, const SampleTyp& _sample) = 0;
 
       /**
        * Calculate the neural network weight updates given the specified
@@ -64,16 +58,13 @@ namespace flexnnet
        *
        * @param _egradient
        */
-      void
-      calc_weight_updates(const NN<InTyp,TgtTyp>& _nnet, const ValarrMap& _tdgradient);
+      void calc_weight_updates(const NNTyp& _nnet, const ValarrMap& _tdgradient);
 
-      void
-      zero_eligibility_traces(const BaseNeuralNet& _nnet);
+      void zero_eligibility_traces(const NNTyp& _nnet);
 
-      void
-      update_eligibility_traces(const BaseNeuralNet& _nnet);
+      void update_eligibility_traces(const NNTyp& _nnet);
 
-      void alloc(const BaseNeuralNet& _nnet);
+      void alloc_working_memory(const NNTyp& _nnet) override;
 
    protected:
       // Cached layer states
@@ -85,46 +76,28 @@ namespace flexnnet
 
    };
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::set_gamma(double _val)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   void DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::set_gamma(double _val)
    {
       //evaluator.set_gamma(_val);
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::DeepRLAlgo(NN<InTyp, TgtTyp>& _nnet)
-      : BaseTrainingAlgo<InTyp,
-                               TgtTyp,
-                               ExemplarSeries,
-                               NN,
-                               Dataset,
-                               FitFunc,
-                               LRPolicy>(_nnet)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::DeepRLAlgo()
+      : BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>()
    {
-      alloc(_nnet);
+      //alloc_working_memory(_nnet);
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(
-      const NN<InTyp,TgtTyp>& _nnet, const ValarrMap& _tdgradient)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   void DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::calc_weight_updates(
+      const NNTyp& _nnet, const ValarrMap& _tdgradient)
    {
       //std::cout << "calc_weight_updates(" << _tderr << ")\n" << std::flush;
       double _tderr = _tdgradient.begin()->second[0];
@@ -133,7 +106,7 @@ namespace flexnnet
       for (auto& it: layers)
       {
          std::string id = it.first;
-         Array2D<double> lr = LRPolicy::get_learning_rates(id);
+         Array2D<double> lr = this->learning_rate_policy_obj.get_learning_rates(id);
 
          const Array2D<double> etrace_dEdw = this->eligibility_trace.at(id);
 
@@ -151,61 +124,47 @@ namespace flexnnet
       }
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::zero_eligibility_traces(const BaseNeuralNet& _nnet)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   void DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::zero_eligibility_traces(const NNTyp& _nnet)
    {
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
          & network_layers = _nnet.get_layers();
-      for (auto& layer : network_layers)
+      for (auto& layer: network_layers)
          eligibility_trace[layer.first] = 0;
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::update_eligibility_traces(const BaseNeuralNet& _nnet)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   void DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::update_eligibility_traces(const NNTyp& _nnet)
    {
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
          & network_layers = _nnet.get_layers();
-      for (auto& layer : network_layers)
+      for (auto& layer: network_layers)
          eligibility_trace[layer.first] =
             layer.second->dEdw() + get_lambda() * eligibility_trace[layer.first];
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void
-   DeepRLAlgo<InTyp, TgtTyp, NN, Dataset, FitFunc, LRPolicy>::alloc(const BaseNeuralNet& _nnet)
+   template<class InTyp, class TgtTyp, template<class, class>
+      class Sample, template<class, class, template<class, class> class>
+      class FitFunc, class LRPolicy>
+   void DeepRLAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::alloc_working_memory(const NNTyp& _nnet)
    {
-      std::cout << "BaseDeepRLAlgo::alloc() ENTRY\n" << std::flush;
+      std::cout << "BaseDeepRLAlgo::alloc_working_memory() ENTRY\n" << std::flush;
+
+      eligibility_trace.clear();
 
       const std::map<std::string, std::shared_ptr<NetworkLayer>>
          & network_layers = _nnet.get_layers();
-      for (auto& layer : network_layers)
+      for (auto& layer: network_layers)
          eligibility_trace[layer.first].set(layer.second->dEdw());
 
       weight_updates.clear();
 
-      const std::map<std::string, std::shared_ptr<NetworkLayer>>
-         & layers = _nnet.get_layers();
-      for (auto it : layers)
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
+      for (auto it: layers)
       {
          std::string id = it.first;
          const LayerWeights& w = it.second->weights();

@@ -21,22 +21,20 @@
 
 namespace flexnnet
 {
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   class BaseTrainingAlgo : public BaseTrainer, public TrainerConfig, public LRPolicy
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   class BaseTrainingAlgo : public BaseTrainer, public TrainerConfig
    {
-      using DatasetTyp = Dataset<InTyp, TgtTyp, Sample>;
+      using NNTyp = NeuralNet<InTyp, TgtTyp>;
+      using DatasetTyp = DataSet<InTyp, TgtTyp, Sample>;
       using SampleTyp = Sample<InTyp, TgtTyp>;
       using ExemplarTyp = Exemplar<InTyp, TgtTyp>;
 
    public:
-      BaseTrainingAlgo(NN<InTyp, TgtTyp>& _nnet);
+      BaseTrainingAlgo();
+
+      LRPolicy& learning_rate_policy();
+      const LRPolicy& learning_rate_policy() const;
 
       /**
        * Train the network the specified number of times using the
@@ -46,7 +44,7 @@ namespace flexnnet
        *
        * @param _trnset
        */
-      void train(const DatasetTyp& _trnset);
+      void train(NNTyp& _nnet, const DatasetTyp& _trnset);
 
    protected:
       /**
@@ -55,7 +53,7 @@ namespace flexnnet
        *
        * @param _trnset
        */
-      TrainingRecord train_run(const DatasetTyp& _trnset);
+      TrainingRecord train_run(NNTyp& _nnet, const DatasetTyp& _trnset);
 
       /**
        * Train the network using all samples in the specified training
@@ -64,26 +62,22 @@ namespace flexnnet
        * @param _epoch
        * @param _trnset
        */
-      void train_epoch(size_t _epoch, const DatasetTyp& _trnset);
+      void train_epoch(size_t _epoch, NNTyp& _nnet, const DatasetTyp& _trnset);
 
-      virtual void train_sample(const SampleTyp& _sample) = 0;
+      virtual void train_sample(NNTyp& _nnet, const SampleTyp& _sample) = 0;
 
-      double update_performance_traces(unsigned int _epoch, double _trnperf, TrainingRecord& _trec);
+      double update_performance_traces(unsigned int _epoch, double _trnperf, NNTyp& _nnet, TrainingRecord& _trec);
 
-      void failback();
-
-   private:
-      void alloc();
+      void failback(NNTyp& _nnet);
 
    protected:
-      NN<InTyp, TgtTyp>& nnet;
+      virtual void alloc_working_memory(const NNTyp& _nnet) = 0;
 
    protected:
-      FitFunc<InTyp, TgtTyp, NN, Dataset> fitnessfunc;
+      LRPolicy learning_rate_policy_obj;
+      FitFunc<InTyp, TgtTyp, Sample> fitnessfunc;
 
    private:
-      //Eval<InTyp, TgtTyp, NN, Dataset, FitFunc> evaluator;
-
       DatasetTyp validation_dataset;
       DatasetTyp test_dataset;
 
@@ -92,20 +86,55 @@ namespace flexnnet
       TrainingRecord training_record;
    };
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::BaseTrainingAlgo(
-      NN<InTyp, TgtTyp>& _nnet) :
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::BaseTrainingAlgo() : TrainerConfig() // :
 
-      LRPolicy(_nnet), nnet(_nnet)
+      // LRPolicy(_nnet)//, nnet(_nnet)
    {
-      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = nnet.get_layers();
+/*      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = nnet.get_layers();
+      for (auto it: layers)
+      {
+         std::string id = it.first;
+
+         // Set to train layer biases by default.
+         TrainerConfig::set_train_biases(id, true);
+      }*/
+   }
+
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   LRPolicy& BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::learning_rate_policy()
+   {
+      return learning_rate_policy_obj;
+   }
+
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   const LRPolicy& BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::learning_rate_policy() const
+   {
+      return learning_rate_policy_obj;
+   }
+
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::train(NNTyp& _nnet,
+      const DatasetTyp& _trnset)
+   {
+      //std::cout << "SupervisedTrainingAlgo.train()\n" << std::flush;
+
+      // TODO - validate neural network and data set are compatible.
+
+      // Allocate training algo working memory for this neural network.
+      this->alloc_working_memory(_nnet);
+
+      // Initialize the learning rate policy working memory for this neural network.
+      learning_rate_policy_obj.initialize(_nnet);
+
+      // Initialize the train biases flag for this neural network.
+      // TODO - this doesn't work right. The user cannot set the
+      //    flags for individual layers prior to calling train OR after.
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
       for (auto it: layers)
       {
          std::string id = it.first;
@@ -113,86 +142,47 @@ namespace flexnnet
          // Set to train layer biases by default.
          TrainerConfig::set_train_biases(id, true);
       }
-   }
-
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::train(
-      const DatasetTyp& _trnset)
-   {
-      //std::cout << "SupervisedTrainingAlgo.train()\n" << std::flush;
 
       double trn_perf, trn_stdev;
       double perf;
-
-      alloc();
 
       size_t no_runs = TrainerConfig::training_runs();
 
       // If no randomization of training order is set then
       // make certain training set order is normalized now.
-      if (!this->
-
-         randomize_training_order()
-
-         )
-         _trnset.
-
-            normalize_order();
+      if (!this->randomize_training_order())
+         _trnset.normalize_order();
 
       for (size_t runndx = 0; runndx < no_runs; runndx++)
       {
-         training_record.
-
-            clear();
+         training_record.clear();
 
          if (runndx > 0)
-            this->nnet.
+            _nnet.initialize_weights();
 
-               initialize_weights();
-
-         save_network_weights(nnet, "initial_weights");
+         save_network_weights(_nnet, "initial_weights");
 
          // *** train the network
-         train_run(_trnset);
+         train_run(_nnet, _trnset);
 
          const std::map<std::string, std::shared_ptr<NetworkLayer>>
-            & layers = this->nnet.get_layers();
+            & layers = _nnet.get_layers();
          for (auto& it: layers)
-            training_record.network_weights[it.first] = it.second->
-
-               weights();
+            training_record.network_weights[it.first] = it.second->weights();
 
          save_training_record(training_record);
 
          // TODO - update aggregate training statistics
       }
-//std::cout << "SupervisedTrainingAlgo.train() EXIT\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train() EXIT\n" << std::flush;
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy> TrainingRecord BaseTrainingAlgo<InTyp,
-                                                      TgtTyp,
-                                                      Sample,
-                                                      NN,
-                                                      Dataset,
-                                                      FitFunc,
-                                                      LRPolicy>::train_run(
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   TrainingRecord BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::train_run(NNTyp& _nnet,
       const DatasetTyp& _trnset)
    {
-//std::cout << "BaseTrainingAlgo.train_one_run() ENTRY\n" << std::flush;
+      //std::cout << "BaseTrainingAlgo.train_one_run() ENTRY\n" << std::flush;
 
       double trn_perf, trn_stdev;
       double trn_perf_improvement;
@@ -200,87 +190,76 @@ namespace flexnnet
 
       unsigned int failback_count = 0;
 
-      LRPolicy::reset();
+      learning_rate_policy_obj.clear_learning_rate_adjustments();
+      learning_rate_policy_obj.init_learning_rate();
 
-// Previous performance vectorize - used for failback testing
+      // Previous performance vectorize - used for failback testing
       double prev_trn_perf = std::numeric_limits<double>::max();
       double failback_limit = TrainerConfig::error_increase_limit();
 
-// Init best performance assuming we are trying to minimize error
+      // Init best performance assuming we are trying to minimize error
       training_record.stop_signal = TrainingStopSignal::UNKNOWN;
 
-/*
- * Evaluate and save the performance for the initial network
- */
-      trn_perf = fitnessfunc.calc_fitness(this->nnet, _trnset);
-      perf = update_performance_traces(0, trn_perf, training_record);
-
-      std::cout << "BaseTrainingAlgo.train() initial perf : " << perf << "\n" << std::flush;
+      /*
+       * Evaluate and save the performance for the initial network
+       */
+      trn_perf = fitnessfunc.calc_fitness(_nnet, _trnset);
+      perf = update_performance_traces(0, trn_perf, _nnet, training_record);
 
       training_record.best_epoch = 0;
       training_record.best_performance = perf;
-      save_network_weights(nnet, "best_epoch");
+      save_network_weights(_nnet, "best_epoch");
 
-// Iterate through training epochs
+      // Iterate through training epochs
       size_t n_epochs = TrainerConfig::max_epochs();
       size_t epoch = 0;
       for (epoch = 0; epoch < n_epochs; epoch++)
       {
          //std::cout << "BaseTrainingAlgo : epoch  " << epoch << "\n" << std::flush;
 
-// Save the network weights in case we need to fail back
-         save_network_weights(nnet, "failback");
+         // Save the network weights in case we need to fail back
+         save_network_weights(_nnet, "failback");
 
-// Call function to iterate over training samples and update
-// the network weights.
-         train_epoch(epoch, _trnset);
+         // Call function to iterate over training samples and update
+         // the network weights.
+         train_epoch(epoch, _nnet, _trnset);
 
-// Evaluate the performance of the updated network
-         trn_perf = fitnessfunc.calc_fitness(this->nnet, _trnset);
+         // Evaluate the performance of the updated network
+         trn_perf = fitnessfunc.calc_fitness(_nnet, _trnset);
 
-/*
- * If the performance on the training set worsens by an
- * amount greater than the fail-back limit then (1) restore
- * the previous weights, (2) lower the learning rates and
- * retry the epoch.
- */
+         /*
+          * If the performance on the training set worsens by an
+          * amount greater than the fail-back limit then (1) restore
+          * the previous weights, (2) lower the learning rates and
+          * retry the epoch.
+          */
          trn_perf_improvement = (prev_trn_perf > 0) ? (trn_perf - prev_trn_perf) / prev_trn_perf :
                                 (trn_perf - 1e-9) / 1e-9;
          if (trn_perf_improvement > failback_limit)
          {
-            failback();
-
+            failback(_nnet);
             epoch--;
 
             failback_count++;
-            if (failback_count > this->
-
-               max_failbacks()
-
-               )
+            if (failback_count > this->max_failbacks())
             {
                training_record.stop_signal = TrainingStopSignal::MAX_FAILBACK_REACHED;
-               return training_record;
+               break;
             }
             continue;
          }
          else
          {
             failback_count = 0;
-
-            LRPolicy::apply_learning_rate_adjustments();
-
+            learning_rate_policy_obj.apply_learning_rate_adjustments();
          }
 
-// Update performance history in training record
-         if (epoch < 10 || epoch %
-
-                           TrainerConfig::report_frequency()
-
+         // Update performance history in training record
+         if (epoch < 10 || epoch % TrainerConfig::report_frequency()
                            == 0 || epoch == n_epochs - 1)
-            perf = update_performance_traces(epoch + 1, trn_perf, training_record);
+            perf = update_performance_traces(epoch + 1, trn_perf, _nnet, training_record);
 
-// Call function to save network weights for the best epoch.
+         // Call function to save network weights for the best epoch.
          if (perf < training_record.best_performance)
          {
             training_record.best_epoch = epoch + 1;
@@ -288,11 +267,12 @@ namespace flexnnet
             if (perf < TrainerConfig::error_goal())
                training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
 
-            save_network_weights(nnet, "best_epoch");
+            save_network_weights(_nnet, "best_epoch");
          }
 
-// If we've reached the target error goal then exit.
-/*         if (perf < TrainerConfig::error_goal())
+         // If we've reached the target error goal then exit.
+         /*
+         if (perf < TrainerConfig::error_goal())
          {
             training_record.stop_signal = TrainingStopSignal::CRITERIA_MET;
             break;
@@ -302,70 +282,46 @@ namespace flexnnet
       if (training_record.stop_signal == TrainingStopSignal::UNKNOWN)
          training_record.stop_signal = TrainingStopSignal::MAX_EPOCHS_REACHED;
 
-// Restore the best network weights.
-//restore_network_weights(nnet, "best_epoch");
+      // Restore the best network weights.
+      //restore_network_weights(nnet, "best_epoch");
 
-//std::cout << "SupervisedTrainingAlgo.train_one_run() EXIT\n" << std::flush;
+      //std::cout << "SupervisedTrainingAlgo.train_one_run() EXIT\n" << std::flush;
       return training_record;
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::train_epoch(
-      size_t _epoch, const DatasetTyp& _trnset)
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::train_epoch(
+      size_t _epoch, NNTyp& _nnet, const DatasetTyp& _trnset)
    {
-//std::cout << "BaseTrainingAlgo.train_epoch(Exemplar)\n" << std::flush;
+      //std::cout << "BaseTrainingAlgo.train_epoch(Exemplar)\n" << std::flush;
 
       bool pending_updates = false;
 
-      if (this->
+      if (this->randomize_training_order())
+         _trnset.randomize_order();
 
-         randomize_training_order()
-
-         )
-         _trnset.
-
-            randomize_order();
-
-// Iterate through all samples in the training set_weights
+      // Iterate through all samples in the training set_weights
       size_t sample_ndx = 0;
       for (auto& sample: _trnset)
       {
-         train_sample(sample);
+         train_sample(_nnet, sample);
          pending_updates = true;
 
-// If training in online or mini-batch mode, update now.
-         if (
-
-            TrainerConfig::batch_mode()
-
-            > 0 && sample_ndx %
-
-                   TrainerConfig::batch_mode()
-
-                   == 0)
+         // If training in online or mini-batch mode, update now.
+         if (TrainerConfig::batch_mode() > 0 && sample_ndx % TrainerConfig::batch_mode() == 0)
          {
-            adjust_network_weights(nnet);
+            adjust_network_weights(_nnet);
             pending_updates = false;
          }
 
          sample_ndx++;
       }
 
-// If training in batch mode or we there are updates pending from
-// an undersized mini-batch then update weights now
-      if (
-
-         TrainerConfig::batch_mode()
-
-         == 0 || pending_updates)
-         adjust_network_weights(nnet);
+      // If training in batch mode or we there are updates pending from
+      // an undersized mini-batch then update weights now
+      if (TrainerConfig::batch_mode() == 0 || pending_updates)
+         adjust_network_weights(_nnet);
    }
 
 
@@ -465,15 +421,10 @@ namespace flexnnet
    }
 */
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::alloc()
+/*
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::alloc_working_memory()
    {
 /*      weight_updates.clear();
 
@@ -487,87 +438,56 @@ namespace flexnnet
 
          weight_updates[id] = {};
          weight_updates[id].resize(dim.rows, dim.cols);
-      }*/
+      }
    }
+   */
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy> double BaseTrainingAlgo<InTyp,
-                                              TgtTyp,
-                                              Sample,
-                                              NN,
-                                              Dataset,
-                                              FitFunc,
-                                              LRPolicy>::update_performance_traces(
-      unsigned int _epoch, double _trnperf, TrainingRecord& _trec)
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   double BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::update_performance_traces(
+      unsigned int _epoch, double _trnperf, NNTyp& _nnet, TrainingRecord& _trec)
    {
       double vld_perf, tst_perf;
       double vld_stdev, tst_stdev;
 
       double perf = _trnperf;
 
-// Save the training set performance for this epoch
-      _trec.training_set_trace.push_back({.
-      epoch = _epoch, .
-      performance = _trnperf});
+      // Save the training set performance for this epoch
+      _trec.training_set_trace.push_back({.epoch = _epoch, .performance = _trnperf});
 
-// Record the performance on the validation set for this epoch
-      if (validation_dataset.
-
-         size()
-
-          > 0)
+      // Record the performance on the validation set for this epoch
+      if (validation_dataset.size() > 0)
       {
          //std::tie(vld_perf, vld_stdev) = fitnessfunc.calc_fitness(this->nnet, validation_dataset);
-         vld_perf = fitnessfunc.calc_fitness(this->nnet, validation_dataset);
+         vld_perf = fitnessfunc.calc_fitness(_nnet, validation_dataset);
 
-// If validation set exist use it as the overall performance measure
-// in order to determine best weights using early stopping.
+         // If validation set exist use it as the overall performance measure
+         // in order to determine best weights using early stopping.
          perf = vld_perf;
 
-         _trec.validation_set_trace.push_back({.
-         epoch = _epoch, .
-         performance = vld_perf});
+         _trec.validation_set_trace.push_back({.epoch = _epoch, .performance = vld_perf});
       }
 
-// Record the performance on the test set for this epoch
-      if (test_dataset.
-
-         size()
-
-          > 0)
+      // Record the performance on the test set for this epoch
+      if (test_dataset.size() > 0)
       {
          //std::tie(tst_perf, tst_stdev) = evaluator.evaluate(this->nnet, test_dataset);
-         tst_perf = fitnessfunc.calc_fitness(this->nnet, test_dataset);
-         _trec.test_set_trace.push_back({.
-         epoch = _epoch, .
-         performance = tst_perf});
+         tst_perf = fitnessfunc.calc_fitness(_nnet, test_dataset);
+         _trec.test_set_trace.push_back({.epoch = _epoch, .performance = tst_perf});
       }
 
       return perf;
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::failback()
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::failback(NNTyp& _nnet)
    {
       std::cout << "fail-back!!!!\n";
-      restore_network_weights(nnet, "failback");
-      LRPolicy::reduce_learning_rate();
+      restore_network_weights(_nnet, "failback");
+      learning_rate_policy_obj.reduce_learning_rate();
    }
 
 } // end namespace flexnnet
-
 
 #endif //FLEX_NEURALNET_SUPERVISEDTRAININGALGO_H_

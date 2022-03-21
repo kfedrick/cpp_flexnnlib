@@ -128,7 +128,7 @@ namespace flexnnet
       Reinforcement<N> zero_V_est("R");
       zero_V_est.decode({{0.0}});
 
-      const State& state = _env.reset();
+      const State& state = _env.clear_learning_rate_adjustments();
       const std::tuple<Action, Reinforcement<N>>& nnout = _nnet.activate(state);
       V_est = std::get<1>(nnout);
 

@@ -16,6 +16,8 @@
 #include <CommonTestFixtureFunctions.h>
 #include "MockNN.h"
 #include <RawFeatureSet.h>
+#include <NetworkLayerImpl.h>
+#include <TanSig.h>
 
 using flexnnet::DataSet;
 using flexnnet::RawFeatureSet;
@@ -25,6 +27,8 @@ using flexnnet::NeuralNet;
 using flexnnet::CartesianCoord;
 using flexnnet::Exemplar;
 using flexnnet::RMSELossFunc;
+using flexnnet::NetworkLayerImpl;
+using flexnnet::TanSig;
 
 TEST(TestEvaluator, Constructor)
 {
@@ -47,9 +51,9 @@ TEST(TestEvaluator, Constructor)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(b, o));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(c, o));
 
-   BaseNeuralNet basenet;
-   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> lossfunc;
 }
 
 TEST(TestEvaluator, OrderedSingleSampling)
@@ -77,9 +81,9 @@ TEST(TestEvaluator, OrderedSingleSampling)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(d, o));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(e, o));
 
-   BaseNeuralNet basenet;
-   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> lossfunc;
 
    lossfunc.calc_fitness(nnet, dataset, 0.25);
 }
@@ -109,9 +113,9 @@ TEST(TestEvaluator, RandomizedSingleSampling)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(d, o));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(e, o));
 
-   BaseNeuralNet basenet;
-   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> lossfunc;
 
    lossfunc.calc_fitness(nnet, dataset, 0.33);
 }
@@ -141,9 +145,9 @@ TEST(TestEvaluator, Randomized2Sampling)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(d, o));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(e, o));
 
-   BaseNeuralNet basenet;
-   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> lossfunc;
 
    //eval.set_sampling_count(2);
    lossfunc.calc_fitness(nnet, dataset, 0.5);
@@ -174,9 +178,9 @@ TEST(TestEvaluator, Randomized3SubSampling)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(d, o));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<1>>(e, o));
 
-   BaseNeuralNet basenet;
-   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, NeuralNet, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   NeuralNet<RawFeatureSet<3>, RawFeatureSet<1>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1>, Exemplar> lossfunc;
 
    //eval.set_sampling_count(3);
    lossfunc.calc_fitness(nnet, dataset, 0.9);
@@ -186,7 +190,7 @@ TEST(TestEvaluator, BasicRMSFitNo0Egradient)
 {
    std::cout << "***** Test RMSE Fitness function with no gradient\n" << std::flush;
 
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, Exemplar> lossfunc;
 
    RawFeatureSet<3> tst({"output"});
    RawFeatureSet<3> tgt({"output"});
@@ -215,7 +219,7 @@ TEST(TestEvaluator, BasicRMSFitNoSmallEgradient)
 {
    std::cout << "***** Test RMSE Fitness function with small error gradient\n" << std::flush;
 
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, Exemplar> lossfunc;
 
    RawFeatureSet<3> tst({"output"});
    RawFeatureSet<3> tgt({"output"});
@@ -248,7 +252,7 @@ TEST(TestEvaluator, BasicRMSFitMultiField)
 {
    std::cout << "***** Test RMSE Fitness function with multiple outputs fields\n" << std::flush;
 
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1,1,1>, NeuralNet, DataSet> lossfunc;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<1,1,1>, Exemplar> lossfunc;
 
    RawFeatureSet<1, 1, 1> tst({"output1", "output2", "output3"});
    RawFeatureSet<1, 1, 1> tgt({"output1", "output2", "output3"});
@@ -287,7 +291,7 @@ TEST(TestEvaluator, BasicRMSFitMultiSample)
 {
    std::cout << "***** Test RMSE Fitness function with multiple samples\n" << std::flush;
 
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, NeuralNet, DataSet> lossfunc;
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, Exemplar> lossfunc;
 
    RawFeatureSet<3> tst1({"output"});
    RawFeatureSet<3> tgt1({"output"});
@@ -353,17 +357,17 @@ TEST(TestEvaluator, BasicRMSEEvaluatorTest)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst2, tgt2));
 
 
-   BaseNeuralNet basenet;
-   MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet> lossfunc;
+   NeuralNetTopology topo;
+   MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, Exemplar> lossfunc;
 
-   //eval.set_subsample_fraction(1.0);
+   lossfunc.set_subsample_count(3);
 
    double rmse, errstd;
    //std::tie(rmse, errstd) =
    //   eval.evaluate(reinterpret_cast<MockNN<RawFeatureSet<3>, RawFeatureSet<3>>&>(nnet), dataset);
-   //std::tie(rmse, errstd) = lossfunc.calc_fitness_standard_error(nnet, dataset);
-   rmse = lossfunc.calc_fitness(nnet, dataset);
+   std::tie(rmse, errstd) = lossfunc.calc_fitness_standard_error(nnet, dataset, 1.0);
+   //rmse = lossfunc.calc_fitness(nnet, dataset);
 
    std::cout << rmse << ", " << errstd << "\n" << std::flush;
 
@@ -379,15 +383,15 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
 {
    std::cout << "***** Test RMSFitness Evaluator with subsampling\n" << std::flush;
 
-   RawFeatureSet<3> tst1({"output"});
+   RawFeatureSet<3> tst1({"input"});
    RawFeatureSet<3> tgt1({"output"});
    flexnnet::ValarrMap egradient1;
    flexnnet::ValarrMap tgt_egradient1({{"output",{0.0003, 0.00333333333, 0.0027}}});
-   RawFeatureSet<3> tst2({"output"});
+   RawFeatureSet<3> tst2({"input"});
    RawFeatureSet<3> tgt2({"output"});
    flexnnet::ValarrMap egradient2;
    flexnnet::ValarrMap tgt_egradient2({{"output",{0.0363, 0.48, 0.027075}}});
-   RawFeatureSet<3> tst3({"output"});
+   RawFeatureSet<3> tst3({"input"});
    RawFeatureSet<3> tgt3({"output"});
    flexnnet::ValarrMap egradient3;
    flexnnet::ValarrMap tgt_egradient3({{"output",{0.0363, 0.48, 0.027075}}});
@@ -406,9 +410,16 @@ TEST(TestEvaluator, SubsampledRMSEEvaluatorTest)
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst2, tgt2));
    dataset.push_back(Exemplar<RawFeatureSet<3>, RawFeatureSet<3>>(tst3, tgt3));
 
-   BaseNeuralNet basenet;
-   MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(basenet);
-   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, MockNN, DataSet> lossfunc;
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(3, "output", TanSig::DEFAULT_PARAMS, true));
+   ol_ptr->add_external_input_field("input", 3);
+
+   NeuralNetTopology topo;
+   topo.network_layers[ol_ptr->name()] = ol_ptr;
+   topo.network_output_layers.push_back(ol_ptr);
+   topo.ordered_layers.push_back(ol_ptr);
+
+   MockNN<RawFeatureSet<3>, RawFeatureSet<3>> nnet(topo);
+   RMSELossFunc<RawFeatureSet<3>, RawFeatureSet<3>, Exemplar> lossfunc;
 
    lossfunc.set_subsample_count(1000);
 

@@ -20,7 +20,7 @@ namespace flexnnet
          // Cached layer weights (e.g. used to back out weight changes)
          std::map<std::string, NetworkWeights> layer_weights;
 
-         // Cumulative NN weight updates prior to application
+         // Cumulative weight updates for specified named layers in NN
          std::map<std::string, Array2D < double>> cumulative_weight_updates;
       };
 

@@ -5,8 +5,8 @@
 #include "gtest/gtest.h"
 
 #include "SupervisedTrainerTestFixture.h"
-#include "TrainerConfigTests.h"
-//#include "ClassifierTrainingTests.h"
+//#include "TrainerConfigTests.h"
+#include "ClassifierTrainingTests.h"
 //#include "DeepRLTests.h"
 
 int main(int argc, char** argv)

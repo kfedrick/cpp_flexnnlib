@@ -19,31 +19,21 @@ namespace flexnnet
  * @tparam FitFunc - Fitness function class name
  * @tparam LRPolicy - Learning rate policy class name
  */
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy> class FFBackpropAlgo : public BaseTrainingAlgo<InTyp,
-                                                                     TgtTyp,
-                                                                     Sample,
-                                                                     NN,
-                                                                     Dataset,
-                                                                     FitFunc,
-                                                                     LRPolicy>
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   class FFBackpropAlgo : public BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>
    {
-      using DatasetTyp = Dataset<InTyp, TgtTyp, ExemplarSeries>;
-      using ExemplarSeriesTyp = ExemplarSeries<InTyp, TgtTyp>;
+      using NNTyp = NeuralNet<InTyp, TgtTyp>;
+      using DatasetTyp = DataSet<InTyp, TgtTyp, Sample>;
       using SampleTyp = Sample<InTyp, TgtTyp>;
+      using ExemplarSeriesTyp = ExemplarSeries<InTyp, TgtTyp>;
       using ExemplarTyp = Exemplar<InTyp, TgtTyp>;
 
    public:
-      FFBackpropAlgo(NN<InTyp, TgtTyp>& _nnet);
+      FFBackpropAlgo();
 
    protected:
-      void train_sample(const SampleTyp& _sample);
+      void train_sample(NNTyp& _nnet, const ExemplarTyp& _sample);
 
       /**
        * Calculate the neural network weight updates given the specified
@@ -56,55 +46,31 @@ namespace flexnnet
        *
        * @param _egradient
        */
-      void calc_weight_updates(const NN<InTyp, TgtTyp>& _nnet, const ValarrMap& _egradient);
+      void calc_weight_updates(NNTyp& _nnet, const ValarrMap& _egradient);
+
+      void alloc_working_memory(const NNTyp& _nnet) override;
 
    protected:
       std::map<std::string, Array2D<double>> weight_updates;
 
    };
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   FFBackpropAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::FFBackpropAlgo(
-      NN<InTyp, TgtTyp>& _nnet)
-      : BaseTrainingAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>(_nnet)
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   FFBackpropAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::FFBackpropAlgo()
+      : BaseTrainingAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>()
    {
 
-      weight_updates.clear();
-
-      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
-      for (auto it: layers)
-      {
-         std::string id = it.first;
-         const LayerWeights& w = it.second->weights();
-
-         Array2D<double>::Dimensions dim = w.const_weights_ref.size();
-
-         weight_updates[id] = {};
-         weight_updates[id].resize(dim.rows, dim.cols);
-      }
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void FFBackpropAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::train_sample(
-      const SampleTyp& _exemplar)
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void FFBackpropAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::train_sample(
+      NNTyp& _nnet, const ExemplarTyp& _exemplar)
    {
       //std::cout << "FFBackpropAlgo.train_sample()\n" << std::flush;
 
-      const NNFeatureSet<TgtTyp>& nn_out = this->nnet.activate(_exemplar.first);
+      const NNFeatureSet<TgtTyp>& nn_out = _nnet.activate(_exemplar.first);
 
       //const std::map<std::string, std::valarray<double>>& nnoutv_map = nn_out.value_map();
       const std::map<std::string, std::valarray<double>>
@@ -112,28 +78,22 @@ namespace flexnnet
 
       ValarrMap gradient;
       this->fitnessfunc.calc_dEde(_exemplar.second, nn_out, gradient);
-      this->calc_weight_updates(this->nnet, gradient);
-      LRPolicy::calc_learning_rate_adjustment(0);
+      this->calc_weight_updates(_nnet, gradient);
+      this->learning_rate_policy_obj.calc_learning_rate_adjustment(_nnet, 0);
    }
 
-   template<class InTyp,
-      class TgtTyp, template<class, class>
-      class Sample, template<class, class>
-      class NN, template<class, class, template<class, class> class>
-      class Dataset, template<class, class, template<class, class> class,
-      template<class, class, template<class, class> class> class>
-      class FitFunc,
-      class LRPolicy>
-   void FFBackpropAlgo<InTyp, TgtTyp, Sample, NN, Dataset, FitFunc, LRPolicy>::calc_weight_updates(
-      const NN<InTyp, TgtTyp>& _nnet, const ValarrMap& _egradient)
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void FFBackpropAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::calc_weight_updates(
+      NNTyp& _nnet, const ValarrMap& _egradient)
    {
-      this->nnet.backprop(_egradient);
+      _nnet.backprop(_egradient);
 
-      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = this->nnet.get_layers();
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
       for (auto it: layers)
       {
          std::string id = it.first;
-         Array2D<double> lr = LRPolicy::get_learning_rates(id);
+         Array2D<double> lr = this->learning_rate_policy_obj.get_learning_rates(id);
 
          const Array2D<double> dE_dw = it.second->dEdw();
 
@@ -147,9 +107,30 @@ namespace flexnnet
             for (unsigned int col = 0; col < last_col; col++)
                this->weight_updates[id].at(row, col) = -lr.at(row, col) * dE_dw.at(row, col);
 
-         this->accumulate_weight_updates(this->nnet, id, this->weight_updates[id]);
+         this->accumulate_weight_updates(_nnet, id, this->weight_updates[id]);
+      }
+   }
+
+   template<class InTyp, class TgtTyp, template<class, class> class Sample,
+      template<class, class, template<class, class> class> class FitFunc, class LRPolicy>
+   void FFBackpropAlgo<InTyp, TgtTyp, Sample, FitFunc, LRPolicy>::alloc_working_memory(
+      const NNTyp& _nnet)
+   {
+      std::cout << "FFBackpropAlgo::alloc_working_memory() ENTRY\n" << std::flush;
+
+      weight_updates.clear();
+
+      const std::map<std::string, std::shared_ptr<NetworkLayer>>& layers = _nnet.get_layers();
+      for (auto it: layers)
+      {
+         std::string id = it.first;
+         const LayerWeights& w = it.second->weights();
+
+         Array2D<double>::Dimensions dim = w.const_weights_ref.size();
+
+         weight_updates[id] = {};
+         weight_updates[id].resize(dim.rows, dim.cols);
       }
    }
 }
-
 #endif // FLEX_NEURALNET_FFBACKPROPALGO_H_

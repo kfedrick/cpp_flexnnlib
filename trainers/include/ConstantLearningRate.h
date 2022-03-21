@@ -35,8 +35,11 @@ public:
    ConstantLearningRate& operator=(
          const ConstantLearningRate& _nnLRPolicy);
 
+   void
+   reduce_learning_rate(double _reductionFactor = LearningRatePolicy::DEFAULT_REDUCTION_FACT);
+
 private:
-   double DEFAULT_LEARNING_RATE{0.001};
+   double DEFAULT_LEARNING_RATE{0.01};
 };
 
 inline ConstantLearningRate::ConstantLearningRate() :
@@ -48,7 +51,7 @@ inline ConstantLearningRate::ConstantLearningRate(
    BaseNeuralNet& _nnet) :
    LearningRatePolicy(_nnet)
 {
-   set_learning_rate(DEFAULT_LEARNING_RATE);
+   set_init_learning_rate(DEFAULT_LEARNING_RATE);
 }
 
 inline ConstantLearningRate::ConstantLearningRate(
@@ -68,6 +71,25 @@ inline ConstantLearningRate& ConstantLearningRate::operator=(
    copy(_nnLRPolicy);
    return *this;
 }
+
+   inline
+   void
+   ConstantLearningRate::reduce_learning_rate(double _reductionFactor)
+   {
+      std::cout << "Reduce learning rate\n";
+      // NO OP in ConstantLearningRate policy
+      if (_reductionFactor <= 0 || 1 <= _reductionFactor)
+      {
+         std::ostringstream err_str;
+         err_str << "Error (LearningRatePolicy::reduce_learning_rate() - invalid reduction factor ("
+                 << _reductionFactor << ") specified.";
+         throw std::invalid_argument(err_str.str());
+      }
+
+      for (auto it = layer_weight_learning_rates_map.begin();
+           it != layer_weight_learning_rates_map.end(); it++)
+         it->second *= _reductionFactor;
+   }
 
 } /* namespace flexnnet */
 

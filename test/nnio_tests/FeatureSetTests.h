@@ -162,10 +162,8 @@ TEST_F(FeatureSetTestFixture, TestNNFeatureSet)
    topo.network_output_layers.push_back(ol_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   flexnnet::BaseNeuralNet basennet(topo);
-
    flexnnet::NeuralNet<flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<3>, flexnnet::RawFeature<1>>>,
-                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
+                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(topo);
 
    in.decode({{3.1419, 2.17, 9.5}, {666}});
    nnet.activate(in);
@@ -187,10 +185,8 @@ TEST_F(FeatureSetTestFixture, DerivedFeatureSet)
    topo.network_output_layers.push_back(ol_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   flexnnet::BaseNeuralNet basennet(topo);
-
    flexnnet::NeuralNet<LabeledFeatureSet,
-                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(basennet);
+                       flexnnet::FeatureSetImpl<std::tuple<flexnnet::RawFeature<1>>>> nnet(topo);
 
    in.decode({{3.1419, 2.17, 9.5}, {666}});
    nnet.activate(in);

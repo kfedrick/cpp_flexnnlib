@@ -228,8 +228,8 @@ namespace flexnnet
 
       unsigned int consecutive_failback_count = 0;
 
-      actor_learning_rates.reset();
-      critic_learning_rates.reset();
+      actor_learning_rates.clear_learning_rate_adjustments();
+      critic_learning_rates.clear_learning_rate_adjustments();
 
       // Previous performance vectorize - used for failback testing
       double prev_trn_perf = std::numeric_limits<double>::max();
@@ -392,7 +392,7 @@ namespace flexnnet
        * Present the first item in the series and calculate the
        * initial eligibility trace info
        */
-      const S& state = _env.reset();
+      const S& state = _env.clear_learning_rate_adjustments();
 
 /*      std::cout << "init State: ";
       const S& istate = _env.state();

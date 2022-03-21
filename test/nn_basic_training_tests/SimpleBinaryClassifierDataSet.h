@@ -59,7 +59,7 @@ inline
 void SimpleBinaryClassifierDataSet::generate_samples(unsigned int _num, unsigned int _class, double _mean, double _stdev)
 {
    double val;
-   FeatureSetImpl<std::tuple<RawFeature<1>>> inmap, tgtmap;
+   FeatureSetImpl<std::tuple<RawFeature<1>>> inmap({"input"}), tgtmap({"output"});
 
    if (_class > 1)
       std::cout << "Error: Binary classifier must have class of [0,1]\n";

@@ -35,7 +35,10 @@ namespace flexnnet
       ~DeltaBarDeltaLearningRate();
 
       void
-      set_learning_rate(double _rate) override;
+      set_init_learning_rate(double _rate) override;
+
+      void
+      init_learning_rate() override;
 
       void
       set_smoothing_constant(double _lambda);
@@ -57,10 +60,10 @@ namespace flexnnet
          const DeltaBarDeltaLearningRate& _nnLRPolicy);
 
       void
-      reset() override;
+      clear_learning_rate_adjustments() override;
 
       void
-      calc_learning_rate_adjustment(unsigned int _timeStep = 1) override;
+      calc_learning_rate_adjustment(const BaseNeuralNet& _nnet, unsigned int _timeStep = 1) override;
 
       void
       apply_learning_rate_adjustments() override;
@@ -135,10 +138,20 @@ namespace flexnnet
 
    inline
    void
-   DeltaBarDeltaLearningRate::set_learning_rate(double _rate)
+   DeltaBarDeltaLearningRate::set_init_learning_rate(double _rate)
    {
       initial_learning_rate = _rate;
-      LearningRatePolicy::set_learning_rate(_rate);
+      LearningRatePolicy::set_init_learning_rate(_rate);
+
+      zero_smoothed_gradients();
+      zero_cumulative_gradients();
+   }
+
+   inline
+   void
+   DeltaBarDeltaLearningRate::init_learning_rate()
+   {
+      LearningRatePolicy::init_learning_rate();
 
       zero_smoothed_gradients();
       zero_cumulative_gradients();
@@ -230,23 +243,23 @@ namespace flexnnet
 
    inline
    void
-   DeltaBarDeltaLearningRate::reset()
+   DeltaBarDeltaLearningRate::clear_learning_rate_adjustments()
    {
-      set_learning_rate(initial_learning_rate);
+      set_init_learning_rate(initial_learning_rate);
       zero_cumulative_gradients();
       zero_smoothed_gradients();
    }
 
    inline
    void
-   DeltaBarDeltaLearningRate::calc_learning_rate_adjustment(
+   DeltaBarDeltaLearningRate::calc_learning_rate_adjustment(const BaseNeuralNet& _nnet,
       unsigned int _timeStep)
    {
       /*
        * Accumulate the error gradients so we can use them later to calculate
        * the learning rate adjustments.
        */
-      const std::map<std::string, std::shared_ptr<NetworkLayer>> network_layers = basennet.get_layers();
+      const std::map<std::string, std::shared_ptr<NetworkLayer>> network_layers = _nnet.get_layers();
       for (auto it = cumulative_dE_dw.begin(); it != cumulative_dE_dw.end(); it++)
       {
          std::string id = it->first;

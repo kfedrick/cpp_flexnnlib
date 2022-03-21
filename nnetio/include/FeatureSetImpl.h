@@ -114,7 +114,6 @@ namespace flexnnet
       typename std::enable_if<I == SIZE, void>::type
       set_feature_pointers() {};
 
-
    private:
       void initialize();
       void initialize_feature_names();
@@ -130,10 +129,6 @@ namespace flexnnet
       mutable ValarrMap vmap;
       mutable std::valarray<double> vectorized;
    };
-
-   //template<typename Fs>
-   //std::array<std::string, FeatureSet<Fs>::SIZE> FeatureSet<Fs>::feature_names;
-
 
    template<typename Fs> FeatureSetImpl<Fs>::FeatureSetImpl()
    {
@@ -153,8 +148,6 @@ namespace flexnnet
 
    template<typename Fs> FeatureSetImpl<Fs>::FeatureSetImpl(const FeatureSetImpl<Fs>& _fs)
    {
-      //std::cout << "FeatureSet<Fs>::FeatureSet(FeatureSet<FS>) : ENTRY\n";
-      //std::cout << _fs.feature_names.at(0) << "\n";
       features = _fs.features;
       feature_ptrs.resize(SIZE);
       set_feature_pointers<0>();
@@ -167,8 +160,6 @@ namespace flexnnet
    inline
    FeatureSetImpl<Fs>& FeatureSetImpl<Fs>::operator=(const FeatureSetImpl<Fs>& _fs)
    {
-      //std::cout << "FeatureSet<Fs>::operator= : ENTRY\n";
-
       features = _fs.features;
       feature_ptrs.resize(SIZE);
       set_feature_pointers<0>();
@@ -185,9 +176,6 @@ namespace flexnnet
        * Save feature count and set sizes of lists.
        */
       feature_ptrs.resize(SIZE);
-
-      // Initialize feature names to defaults
-      initialize_feature_names();
 
       // Set up the feature pointers
       set_feature_pointers<0>();
@@ -220,7 +208,8 @@ namespace flexnnet
    const std::vector<std::string>& FeatureSetImpl<Fs>::get_feature_namesv() const
    {
       feature_names_vec.clear();
-      feature_names_vec.push_back(feature_names[0]);
+      for (auto& it : feature_indices)
+         feature_names_vec.push_back(it.first);
       return feature_names_vec;
    }
 
