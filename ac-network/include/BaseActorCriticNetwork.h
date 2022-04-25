@@ -29,6 +29,8 @@ namespace flexnnet
 
       ~BaseActorCriticNetwork();
 
+      void set_random_action(bool _val);
+
       BaseActorCriticNetwork& operator=(const BaseActorCriticNetwork& _acnnet);
 
       /**
@@ -46,6 +48,8 @@ namespace flexnnet
       NeuralNet<StateAction, Reinforcement<N>>& get_critic();
 
    private:
+      bool random_action_flag = false;
+
       NeuralNet<State, Action> actor;
       NeuralNet<StateAction, Reinforcement<N>> critic;
 
@@ -61,7 +65,7 @@ namespace flexnnet
       const NeuralNet<S, A>& _actor, const NeuralNet<StateAction, Reinforcement<N>>& _critic)
       : actor(_actor), critic(_critic)
    {
-      critic_input = StateAction({"F0", "F1"});
+      critic_input = StateAction({"state", "action"});
       R = Reinforcement<N>(_critic.get_layers().begin()->first);
       //std::cout << "ACNet critic R name " << R.get_feature_names()[0] << "\n";
 
@@ -78,6 +82,12 @@ namespace flexnnet
 
       //std::cout << "------------- Copy Constructor ACNet critic R name " << R.get_feature_names()[0] << "\n";
 
+   }
+
+   template<typename S, typename A, size_t N>
+   void BaseActorCriticNetwork<S,A,N>::set_random_action(bool _val)
+   {
+      random_action_flag = _val;
    }
 
    template<typename S, typename A, size_t N>
@@ -105,18 +115,23 @@ namespace flexnnet
       // Activate the actor network and save it's output
       action = actor.activate(_state);
 
+      std::cout << "BaseActorCriticNetwork::activate action\n";
 
       // replace actor action with random
-      double r = ((double) rand()) / RAND_MAX - 0.5;
-      std::get<0>(action.get_features()).decode({r});
+      if (random_action_flag)
+      {
+         double r = ((double) rand()) / RAND_MAX - 0.5;
+         std::get<0>(action.get_features()).decode({r});
+      }
 
       // Marshal inputs for critic
       critic_input.get_features() = std::tuple_cat(_state.get_features(), action.get_features());
 
-/*      std::valarray<double> v = std::get<0>(_state.get_features()).get_encoding();
-      for (int i=0; i<v.size(); i++)
+/*      std::cout << "state input : ";
+      std::valarray<double> ss = std::get<0>(_state.get_features()).get_encoding();
+      for (int i=0; i<ss.size(); i++)
       {
-         std::cout << v[i] << " ";
+         std::cout << ss[i] << " ";
       }
       std::cout << "\n";*/
 
@@ -141,10 +156,12 @@ namespace flexnnet
    template<typename S, typename A, size_t N>
    const void BaseActorCriticNetwork<S,A,N>::backprop_actor(const ValarrMap& _err)
    {
-      critic.backprop(_err);
+      //critic.backprop(_err);
 
-      const ValarrMap& critic_dEdx = critic.get_dEdx();
-      actor.backprop(critic_dEdx);
+      //const ValarrMap& critic_dEdx = critic.get_dEdx();
+      //actor.backprop(critic_dEdx);
+
+      actor.backprop(_err);
    }
 
    template<typename S, typename A, size_t N>

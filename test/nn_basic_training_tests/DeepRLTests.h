@@ -11,7 +11,7 @@
 
 #include "flexnnet.h"
 #include "Evaluator.h"
-#include "RMSELossFunc.h"
+#include "RMSEFitnessFunc.h"
 #include "DataSet.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
@@ -37,8 +37,8 @@
 #include "BoundedRandomWalkDataSet.h"
 #include "Reinforcement.h"
 
-#include "TDFinalCostLossFunc.h"
-#include "TDCostToGoLossFunc.h"
+#include "TDFinalCostFitnessFunc.h"
+#include "TDC2GFitnessFunc.h"
 
 using flexnnet::PureLin;
 using flexnnet::TanSig;

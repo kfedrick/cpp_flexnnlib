@@ -90,7 +90,7 @@ typedef FeatureSetImpl<StateActionTuple> StateAction;
 
 typedef decltype(std::tuple_cat(std::declval<RawFeatureSet<14>>().get_features(),
                                 std::declval<ActionSet<SteeringActionFeature>>().get_features())) DerbyStateActionTuple0;
-typedef FeatureSetImpl<DerbyStateActionTuple0> DerbyStateAction0;
+typedef decltype(FeatureSetImpl<DerbyStateActionTuple0>({"state", "action"})) DerbyStateAction0;
 
 typedef decltype(std::tuple_cat(std::declval<RawFeatureSet<23>>().get_features(),
                                 std::declval<ActionSet<SteeringActionFeature>>().get_features())) DerbyStateActionTuple;
@@ -104,17 +104,14 @@ template<typename T>
 template<typename I, typename O>
 NeuralNet<I,O> ACTestFixture<T>::create_critic(const I& _isample)
 {
-   std::shared_ptr<NetworkLayerImpl<PureLin>> ol_ptr =
-      std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(1, "R", PureLin::DEFAULT_PARAMS, true));
+   std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr =
+      std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "R", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<T>> hl_ptr =
       std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(2, "critic-hidden", T::DEFAULT_PARAMS, false));
 
    auto& names = _isample.get_feature_names();
    for (int ndx=0; ndx<_isample.size();ndx++)
-   {
-      std::cout << "add " << names[ndx] << " size " << _isample.size(ndx) << " to critic input.\n";
       hl_ptr->add_external_input_field(names[ndx], _isample.size(ndx));
-   }
 
    ol_ptr->add_connection("activation", hl_ptr, LayerConnRecord::Forward);
    hl_ptr->add_connection("backprop", ol_ptr, LayerConnRecord::Forward);
@@ -128,8 +125,7 @@ NeuralNet<I,O> ACTestFixture<T>::create_critic(const I& _isample)
    topo.ordered_layers.push_back(hl_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   BaseNeuralNet criticactor(topo);
-   flexnnet::NeuralNet<I, O> critic(criticactor);
+   flexnnet::NeuralNet<I, O> critic(topo);
 
    critic.initialize_weights();
 
@@ -140,8 +136,10 @@ template<typename T>
 template<typename I, typename O>
 NeuralNet<I,O> ACTestFixture<T>::create_actor(const I& _isample, size_t _osz)
 {
+   //std::cout << "create_actor() ENTRY\n";
+
    std::shared_ptr<NetworkLayerImpl<T>> ol_ptr =
-      std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_osz, "F1", T::DEFAULT_PARAMS, true));
+      std::make_shared<NetworkLayerImpl<T>>(NetworkLayerImpl<T>(_osz, "action", T::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<TanSig>> hl_ptr =
       std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(2, "actor-hidden", TanSig::DEFAULT_PARAMS, false));
 
@@ -161,10 +159,11 @@ NeuralNet<I,O> ACTestFixture<T>::create_actor(const I& _isample, size_t _osz)
    topo.ordered_layers.push_back(hl_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   BaseNeuralNet baseactor(topo);
-   flexnnet::NeuralNet<I, O> actor(baseactor);
+   flexnnet::NeuralNet<I, O> actor(topo);
 
    actor.initialize_weights();
+
+   //std::cout << "create_actor() EXIT\n";
 
    return actor;
 }
@@ -176,7 +175,7 @@ BaseActorCriticNetwork<S,A,N> ACTestFixture<T>::create_actorcritic(const S& _is,
    NeuralNet<S, A> actor = create_actor<S, A>(_is, _actionsz);
    NeuralNet<SA, Reinforcement<1>> critic = create_critic<SA, Reinforcement<1>>(_sa);
 
-   BaseActorCriticNetwork<S, A, 1> acnn(actor,critic);
+   BaseActorCriticNetwork<S, A, 1> acnn;//(actor,critic);
 
    return acnn;
 }

@@ -16,10 +16,12 @@ namespace flexnnet
       Reinforcement();
       Reinforcement(const std::string& _name);
       Reinforcement(const Reinforcement& _r);
-
+      Reinforcement(const std::array<std::string,N>& _names) : RawFeatureSet<N>(_names)
+      {};
       void fill(double _val);
       virtual void set(size_t _ndx, double _val);
 
+      virtual Feature& operator[](size_t _ndx);
       virtual const Feature& operator[](size_t _ndx) const;
       virtual const Feature& at(const std::string& _field) const;
    };
@@ -41,6 +43,14 @@ namespace flexnnet
    Reinforcement<N>::Reinforcement(const Reinforcement& _r) : RawFeatureSet<N>(_r)
    {
 
+   }
+
+   template<size_t N>
+   inline
+   Feature& Reinforcement<N>::operator[](size_t _ndx)
+   {
+      return std::get<0>(this->get_features());
+      //return std::get<0>(this->get_features()).get_encoding()[_ndx];
    }
 
    template<size_t N>

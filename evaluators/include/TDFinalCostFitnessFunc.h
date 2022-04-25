@@ -2,16 +2,17 @@
 // Created by kfedrick on 3/15/22.
 //
 
-#ifndef FLEX_NEURALNET_TDFINALCOSTLOSSFUNC_H_
-#define FLEX_NEURALNET_TDFINALCOSTLOSSFUNC_H_
+#ifndef FLEX_NEURALNET_TDFINALCOSTFITNESSFUNC_H_
+#define FLEX_NEURALNET_TDFINALCOSTFITNESSFUNC_H_
 
 #include <flexnnet.h>
 #include <Exemplar.h>
+#include <FitnessFunc.h>
 
 namespace flexnnet
 {
    template<class InTyp, class TgtTyp, template<class, class> class Sample=ExemplarSeries>
-   class TDFinalCostLossFunc : public LossFunction<InTyp, TgtTyp, Sample>
+   class TDFinalCostFitnessFunc : public FitnessFunc<InTyp, TgtTyp, Sample>
    {
       using NNTyp = NeuralNet<InTyp, TgtTyp>;
       using DatasetTyp = DataSet<InTyp, TgtTyp, ExemplarSeries>;
@@ -21,7 +22,7 @@ namespace flexnnet
 
    public:
       double calc_fitness(
-         NNTyp& _nnet, const DatasetTyp& _nnout, unsigned int _subsample_sz = LossFunction<InTyp,
+         NNTyp& _nnet, const DatasetTyp& _nnout, unsigned int _subsample_sz = FitnessFunc<InTyp,
                                                                                            TgtTyp,ExemplarSeries>::DEFAULT_FITNESS_SUBSAMPLE_SZ);
       double evaluate_sample(
          NNTyp& _nnet, const ExemplarSeriesTyp& _series);
@@ -35,7 +36,7 @@ namespace flexnnet
    };
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDFinalCostLossFunc<InTyp, TgtTyp, Sample>::calc_fitness(
+   double TDFinalCostFitnessFunc<InTyp, TgtTyp, Sample>::calc_fitness(
       NNTyp& _nnet, const DatasetTyp& _tstset, unsigned int _subsample_sz)
    {
       _tstset.randomize_order();
@@ -69,7 +70,7 @@ namespace flexnnet
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDFinalCostLossFunc<InTyp, TgtTyp, Sample>::evaluate_sample(
+   double TDFinalCostFitnessFunc<InTyp, TgtTyp, Sample>::evaluate_sample(
       NNTyp& _nnet, const ExemplarSeriesTyp& _series)
    {
       //std::cout << "TDEvaluator.evaluate_series()\n";
@@ -108,7 +109,7 @@ namespace flexnnet
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDFinalCostLossFunc<InTyp, TgtTyp, Sample>::calc_tde_gradient(
+   double TDFinalCostFitnessFunc<InTyp, TgtTyp, Sample>::calc_tde_gradient(
       const TgtTyp& _tgt_t1, const TgtTyp& _est_t0, ValarrMap& _egradient, double _E)
    {
       const ValarrMap& tgt_vamap = _tgt_t1.value_map();
@@ -135,4 +136,4 @@ namespace flexnnet
    }
 }
 
-#endif // FLEX_NEURALNET_TDFINALCOSTLOSSFUNC_H_
+#endif // FLEX_NEURALNET_TDFINALCOSTFITNESSFUNC_H_

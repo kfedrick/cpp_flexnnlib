@@ -160,12 +160,24 @@ namespace flexnnet
    inline
    FeatureSetImpl<Fs>& FeatureSetImpl<Fs>::operator=(const FeatureSetImpl<Fs>& _fs)
    {
+      //std::cout << "FeatureSetImpl::operator=() ENTRY (" << SIZE << ")\n";
+
       features = _fs.features;
       feature_ptrs.resize(SIZE);
       set_feature_pointers<0>();
 
       feature_names = _fs.feature_names;
       feature_indices = _fs.feature_indices;
+
+/*      std::cout << "feature[0] value : ";
+      std::valarray<double> ss = std::get<0>(features).get_encoding();
+      for (int i=0; i<ss.size(); i++)
+      {
+         std::cout << ss[i] << " ";
+      }
+      std::cout << "\n";*/
+
+      //std::cout << "FeatureSetImpl::operator=() EXIT\n";
    }
 
    template<typename Fs>

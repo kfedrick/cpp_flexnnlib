@@ -13,7 +13,7 @@
 #include "NeuralNetTopology.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
-#include "RMSELossFunc.h"
+#include "RMSEFitnessFunc.h"
 #include "Evaluator.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
@@ -31,7 +31,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
    std::cout << "***** Test Trainer Constructor\n" << std::flush;
 
    flexnnet::DataSet<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
-   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
    flexnnet::NeuralNetTopology topo;
    MockNN<FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(topo);
 
@@ -39,7 +39,7 @@ TEST_F (SupervisedTrainerTestFixture, BasicConstructor)
    flexnnet::FFBackpropAlgo<FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer(nnet);
 
    EXPECT_NO_THROW("Unexpected exception thrown.");
@@ -50,14 +50,14 @@ TEST_F (SupervisedTrainerTestFixture, BasicConfigTest)
    std::cout << "***** Test Basic Training Config Setters\n" << std::flush;
 
    flexnnet::DataSet<FeatureSetImpl<std::tuple<RawFeature<1>>>, FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> dataset;
-   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
    flexnnet::NeuralNetTopology topo;
    MockNN<FeatureSetImpl<std::tuple<RawFeature<1>>>> nnet(topo);
 
    flexnnet::FFBackpropAlgo<FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer(nnet);
 
    size_t BATCH = 5;

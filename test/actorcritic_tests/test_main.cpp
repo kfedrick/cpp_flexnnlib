@@ -5,8 +5,8 @@
 #include "gtest/gtest.h"
 
 //#include "BasicACTests.h"
-#include "ACActivationTests.h"
-//#include "ACTrainerTest.h"
+//#include "ACActivationTests.h"
+#include "ACTrainerTest.h"
 
 int main(int argc, char** argv)
 {

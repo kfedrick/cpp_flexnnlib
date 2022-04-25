@@ -13,7 +13,7 @@
 
 // Make room 10 by 1 so rep = 12 (terminal states on either side) x 2 (terminal state
 // at end of room.
-template<class State=RawFeature<14>, class Action=SteeringActionFeature, size_t N=1>
+template<class State=RawFeature<14>, class Action=SteeringActionFeature, unsigned int N=1>
 class DerbySim0 : public flexnnet::Environment<State, Action, N>
 {
 public:
@@ -55,7 +55,7 @@ private:
    mutable std::mt19937_64 rand_engine;
 };
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 DerbySim0<S,A,N>::DerbySim0()
 {
@@ -65,6 +65,8 @@ DerbySim0<S,A,N>::DerbySim0()
 
    // Reset size of state vector
    state_vector.resize(ROOM_WIDTH+2+ROOM_LENGTH+1);
+
+   variadic = S({"state"});
 
    std::get<0>(variadic.get_features()).decode(state_vector);
    reinforcement = flexnnet::Reinforcement<N>("R");
@@ -77,7 +79,7 @@ DerbySim0<S,A,N>::DerbySim0()
 
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 DerbySim0<S,A,N>::DerbySim0(const DerbySim0<S,A,N>& _sim)
 {
@@ -93,27 +95,33 @@ DerbySim0<S,A,N>::DerbySim0(const DerbySim0<S,A,N>& _sim)
 
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 size_t DerbySim0<S,A,N>::size(void) const
 {
    return state_vector.size();
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 const flexnnet::Reinforcement<N>& DerbySim0<S,A,N>::get_reinforcement() const
 {
    double r;
 
    reinforcement.fill(-1.0);
+   // Off side board
    if (x_pos == 0 || x_pos == ROOM_WIDTH+1)
       reinforcement.set(0, -1.0);
+
+   // Off end of board
    else if (y_pos >= ROOM_LENGTH)
    {
-      if (x_pos > 4 && x_pos < 7)
+      // Exited end of board through door
+      if (x_pos > 3 && x_pos < 7)
          //if (x_pos == DOOR_POS || x_pos == DOOR_POS+1)
          reinforcement.set(0, 1.0);
+
+      // Exited end of board outside door
       else
       {
          double dist = x_pos - (double) DOOR_POS;
@@ -128,7 +136,7 @@ const flexnnet::Reinforcement<N>& DerbySim0<S,A,N>::get_reinforcement() const
    return reinforcement;
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 bool DerbySim0<S,A,N>::is_terminal(void) const
 {
@@ -136,7 +144,7 @@ bool DerbySim0<S,A,N>::is_terminal(void) const
           || (x_pos == 0 || x_pos == ROOM_WIDTH+1);
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 const S& DerbySim0<S,A,N>::reset(void)
 {
@@ -149,7 +157,7 @@ const S& DerbySim0<S,A,N>::reset(void)
    return state();
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 void DerbySim0<S,A,N>::set(unsigned int x, unsigned int y)
 {
@@ -158,7 +166,7 @@ void DerbySim0<S,A,N>::set(unsigned int x, unsigned int y)
    stale_state = true;
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 const S& DerbySim0<S,A,N>::next(const typename A::ActionEnum& _action)
 {
@@ -179,7 +187,7 @@ const S& DerbySim0<S,A,N>::next(const typename A::ActionEnum& _action)
    return state();
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 void DerbySim0<S,A,N>::update_state_vector() const
 {
@@ -187,7 +195,7 @@ void DerbySim0<S,A,N>::update_state_vector() const
    encode_kcoded_state_vector();
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 void DerbySim0<S,A,N>::encode_naive_state_vector() const
 {
@@ -201,7 +209,7 @@ void DerbySim0<S,A,N>::encode_naive_state_vector() const
    stale_state = false;
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 void DerbySim0<S,A,N>::encode_kcoded_state_vector() const
 {
@@ -219,7 +227,7 @@ void DerbySim0<S,A,N>::encode_kcoded_state_vector() const
    stale_state = false;
 }
 
-template<class S, class A, size_t N>
+template<class S, class A, unsigned int N>
 inline
 const S& DerbySim0<S,A,N>::state() const
 {

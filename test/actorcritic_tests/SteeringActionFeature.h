@@ -27,14 +27,22 @@ public:
    SteeringActionFeature& operator=(const SteeringActionFeature& _f);
 
 private:
-   ActionEnum action;
+   mutable ActionEnum action;
    ActionDetails details;
+   mutable std::mt19937_64 rand_engine;
+
 };
 
 inline
 SteeringActionFeature::SteeringActionFeature() : RawFeature<1>()
 {
    action = ActionEnum::Right;
+
+   std::random_device r;
+   std::seed_seq seed2{r(), r(), r(), r(), r(), r(), r(), r()};
+   rand_engine.seed(seed2);
+
+
 }
 
 inline
@@ -54,6 +62,14 @@ SteeringActionFeature& SteeringActionFeature::operator=(const SteeringActionFeat
 inline
 const SteeringActionFeature::ActionEnum& SteeringActionFeature::get_action() const
 {
+   std::normal_distribution<double> normal_dist(0, 0.01);
+   normal_dist(rand_engine);
+
+   if (const_encoding_ref[0] +  normal_dist(rand_engine) > 0)
+      action = ActionEnum::Right;
+   else
+      action = ActionEnum::Left;
+
    return action;
 }
 

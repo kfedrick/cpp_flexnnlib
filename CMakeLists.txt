@@ -99,7 +99,6 @@ add_library(flexneuralnet
         network/include/NetworkInput.h
         network/include/NetworkOutput.h
         envsimulator/include/ActionView.h
-        ac-network/BaseActorCriticNetwork.cpp
         ac-network/include/BaseActorCriticNetwork.h
         envsimulator/include/Environment.h
         util/include/Thing.h
@@ -124,7 +123,7 @@ add_library(flexneuralnet
         datasets/include/BaseExemplar.cpp
         datasets/include/BaseExemplar.h
         evaluators/include/Evaluator.h
-        evaluators/include/LossFunction.h evaluators/include/RMSELossFunc.h trainers/include/DeepRLFinalCostAlgo.h trainers/include/DeepRLCostToGoAlgo.h evaluators/include/TDFinalCostLossFunc.h evaluators/include/TDCostToGoLossFunc.h trainers/include/FFBackpropAlgo.h)
+        evaluators/include/FitnessFunc.h evaluators/include/RMSEFitnessFunc.h trainers/include/DeepRLFinalCostAlgo.h trainers/include/DeepRLCostToGoAlgo.h evaluators/include/TDFinalCostFitnessFunc.h evaluators/include/TDC2GFitnessFunc.h trainers/include/FFBackpropAlgo.h evaluators/include/ActorCriticC2GFitnessFunc.h evaluators/include/ActorCriticFinalCostFitnessFunc.h)
 
 target_include_directories(flexneuralnet PUBLIC
         actor_critic

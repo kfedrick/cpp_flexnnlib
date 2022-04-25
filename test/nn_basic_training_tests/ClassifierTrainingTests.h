@@ -12,7 +12,7 @@
 #include "flexnnet.h"
 #include "Evaluator.h"
 #include "DataSet.h"
-#include "RMSELossFunc.h"
+#include "RMSEFitnessFunc.h"
 #include <fstream>
 #include <CommonTestFixtureFunctions.h>
 #include <PureLin.h>
@@ -44,7 +44,7 @@ using flexnnet::CartesianCoord;
 using flexnnet::ExemplarSeries;
 using flexnnet::Exemplar;
 
-using flexnnet::RMSELossFunc;
+using flexnnet::RMSEFitnessFunc;
 
 
 TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
@@ -76,7 +76,7 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    /*
     * Set up RMSE fitness and performance evaluator.
     */
-   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
    ol_ptr->add_external_input_field("input", 1);
@@ -104,7 +104,7 @@ TEST_F (SupervisedTrainerTestFixture, NewSingleLinBinClassifierTrainingTest)
    flexnnet::FFBackpropAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer;
 
    trainer.set_saved_nnet_limit(20);
@@ -199,7 +199,7 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
 
    // Set up RMSE fitness and performance evaluator.
 
-    flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
+    flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<TanSig>> hl_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(3, "hidden", TanSig::DEFAULT_PARAMS, false));
@@ -228,7 +228,7 @@ TEST_F (SupervisedTrainerTestFixture, NewTanSigHiddenClassifierTrainingTest)
    flexnnet::FFBackpropAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer;
 
    trainer.set_saved_nnet_limit(20);
@@ -351,7 +351,7 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    tstset.generate_samples(251, 1, MEAN_B, STD_B);
    EXPECT_NO_THROW("Unexpected exception thrown while building training data set.");
 
-   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<LogSig>> hl_ptr = std::make_shared<NetworkLayerImpl<LogSig>>(NetworkLayerImpl<LogSig>(5, "hidden", LogSig::DEFAULT_PARAMS, false));
@@ -377,7 +377,7 @@ TEST_F (SupervisedTrainerTestFixture, NewLogSigHiddenClassifierTrainingTest)
    flexnnet::FFBackpropAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer;
 
    trainer.set_saved_nnet_limit(20);
@@ -510,7 +510,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    EXPECT_NO_THROW("Unexpected exception thrown while building test data set.");
 
 
-   flexnnet::RMSELossFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
+   flexnnet::RMSEFitnessFunc<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>, Exemplar> rmse_fit;
 
    std::shared_ptr<NetworkLayerImpl<TanSig>> ol_ptr = std::make_shared<NetworkLayerImpl<TanSig>>(NetworkLayerImpl<TanSig>(1, "output", TanSig::DEFAULT_PARAMS, true));
    std::shared_ptr<NetworkLayerImpl<PureLin>> hl_ptr = std::make_shared<NetworkLayerImpl<PureLin>>(NetworkLayerImpl<PureLin>(3, "hidden", PureLin::DEFAULT_PARAMS, false));
@@ -537,7 +537,7 @@ TEST_F (SupervisedTrainerTestFixture, NewPureLinHiddenClassifierTrainingTest)
    flexnnet::FFBackpropAlgo<flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     flexnnet::FeatureSetImpl<std::tuple<RawFeature<1>>>,
                                     Exemplar,
-                                    flexnnet::RMSELossFunc,
+                                    flexnnet::RMSEFitnessFunc,
                                     flexnnet::ConstantLearningRate> trainer;
 
    trainer.set_saved_nnet_limit(20);

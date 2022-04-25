@@ -39,7 +39,7 @@ public:
    reduce_learning_rate(double _reductionFactor = LearningRatePolicy::DEFAULT_REDUCTION_FACT);
 
 private:
-   double DEFAULT_LEARNING_RATE{0.01};
+   double DEFAULT_LEARNING_RATE{0.001};
 };
 
 inline ConstantLearningRate::ConstantLearningRate() :

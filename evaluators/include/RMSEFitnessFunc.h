@@ -2,16 +2,16 @@
 // Created by kfedrick on 3/13/22.
 //
 
-#ifndef FLEX_NEURALNET_RMSELOSSFUNC_H_
-#define FLEX_NEURALNET_RMSELOSSFUNC_H_
+#ifndef FLEX_NEURALNET_RMSEFITNESSFUNC_H_
+#define FLEX_NEURALNET_RMSEFITNESSFUNC_H_
 
-#include <LossFunction.h>
+#include <FitnessFunc.h>
 #include <Exemplar.h>
 
 namespace flexnnet
 {
    template<class InTyp, class TgtTyp, template<class, class> class Sample=Exemplar>
-   class RMSELossFunc : public LossFunction<InTyp, TgtTyp, Sample>
+   class RMSEFitnessFunc : public FitnessFunc<InTyp, TgtTyp, Sample>
    {
       using NNTyp = NeuralNet<InTyp, TgtTyp>;
       using SampleTyp = Sample<InTyp, TgtTyp>;
@@ -20,7 +20,7 @@ namespace flexnnet
 
    public:
       double calc_fitness(
-         NNTyp& _nnet, const DatasetTyp& _tstset, unsigned int _subsample_sz = LossFunction<InTyp,
+         NNTyp& _nnet, const DatasetTyp& _tstset, unsigned int _subsample_sz = FitnessFunc<InTyp,
                                                                                             TgtTyp,
                                                                                             Sample>::DEFAULT_FITNESS_SUBSAMPLE_SZ);
       double evaluate_sample(
@@ -30,7 +30,7 @@ namespace flexnnet
       calc_dEde(const TgtTyp& _tgt, const TgtTyp& _est, ValarrMap& _err, double _E = 1);
    };
 
-   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSELossFunc<InTyp, TgtTyp, Sample>::calc_fitness(
+   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSEFitnessFunc<InTyp, TgtTyp, Sample>::calc_fitness(
       NNTyp& _nnet, const DatasetTyp& _tstset, unsigned int _subsample_sz)
    {
       double rmse, sse = 0;
@@ -56,14 +56,14 @@ namespace flexnnet
       return (rmse > 0) ? sqrt(rmse) : 0;
    }
 
-   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSELossFunc<InTyp, TgtTyp,Sample>::evaluate_sample(
+   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSEFitnessFunc<InTyp, TgtTyp,Sample>::evaluate_sample(
       NNTyp& _nnet, const ExemplarTyp& _sample, TgtTyp& _est, ValarrMap& _egradient)
    {
       _est = _nnet.activate(_sample.first);
       return calc_dEde(_sample.second, _est, _egradient);
    }
 
-   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSELossFunc<InTyp,TgtTyp,Sample>::calc_dEde(
+   template<class InTyp, class TgtTyp, template<class, class> class Sample> double RMSEFitnessFunc<InTyp,TgtTyp,Sample>::calc_dEde(
       const TgtTyp& _tgt, const TgtTyp& _est, ValarrMap& _err, double _E)
    {
       ValarrMap temp = _tgt.value_map();
@@ -83,4 +83,4 @@ namespace flexnnet
    }
 }
 
-#endif // FLEX_NEURALNET_RMSELOSSFUNC_H_
+#endif // FLEX_NEURALNET_RMSEFITNESSFUNC_H_

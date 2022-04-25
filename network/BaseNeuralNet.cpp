@@ -74,6 +74,13 @@ BaseNeuralNet::activate(const ValarrMap& _externin)
    for (int i = 0; i < ordered_layers.size(); i++)
       const std::valarray<double>& temp = ordered_layers[i]->activate(_externin);
 
+/*   std::cout << "network out:\n";
+   const ValarrMap& nnout = value_map();
+   for (auto& v : nnout)
+      for (auto& val : v.second)
+         std::cout << "  " << val << ", ";
+   std::cout << "--\n";*/
+
    //std::cout << "BaseNeuralNet.activate() EXIT\n" << std::flush;
 
    return value_map();
@@ -92,6 +99,7 @@ BaseNeuralNet::backprop(const ValarrMap& _egradient)
    for (int i = ordered_layers.size() - 1; i >= 0; i--)
    {
       std::shared_ptr<NetworkLayer> layer = ordered_layers[i];
+      auto& id = layer->name();
       layer->backprop(_egradient);
 
       // Accumulate error derivatives for network inputs

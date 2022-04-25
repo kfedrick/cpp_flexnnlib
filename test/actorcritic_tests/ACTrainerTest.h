@@ -30,15 +30,14 @@
 #include <picojson.h>
 #include <fstream>
 #include <ActorCriticDeepRLAlgo.h>
-#include <TDFinalFitnessFunc.h>
+#include <ActorCriticC2GFitnessFunc.h>
+#include <ActorCriticFinalCostFitnessFunc.h>
 #include <ConstantLearningRate.h>
-#include <ActorCriticFinalFitnessFunc.h>
 
 #include "TestAction.h"
 
 #include "ACTestFixture.h"
 #include <ActionSet.h>
-#include <ActorCriticCostToGoFitnessFunc.h>
 #include "DerbySim.h"
 #include "DerbySim0.h"
 #include "DerbySim2.h"
@@ -136,7 +135,7 @@ std::vector<TrainerTestCase>& ACTrainerTestFixture<T>::read_trainer_test_cases(c
          arr2d = o.at("actor_hidden_weights");
          tcase.actor_hweights.set(read_array2d(arr2d));
 
-         arr2d = o.at("actor_F1_weights");
+         arr2d = o.at("actor_action_weights");
          tcase.actor_oweights.set(read_array2d(arr2d));
 
          arr2d = o.at("critic_hidden_weights");
@@ -185,7 +184,7 @@ Array2D<double> ACTrainerTestFixture<T>::read_array2d(const picojson::value& _ar
    return darr;
 }
 
-TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
+TYPED_TEST_P(ACTrainerTestFixture, TestFinalACCritic)
 {
    std::string layer_type_id = ACTrainerTestFixture<TypeParam>::get_typeid();
 
@@ -197,12 +196,12 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
    if (_id=="softmax")
       actor_osize = 2;
 
-   std::cout << "----- AC Trainer<" << _id << "> Test 0 -----\n" << std::flush;
+   std::cout << "----- AC Trainer<" << _id << "> Train Critic -----\n" << std::flush;
    GTEST_SKIP();
 
-   RawFeatureSet<14> isample;
+   RawFeatureSet<14> isample({"state"});
    ActionSet<SteeringActionFeature> action;
-   DerbyStateAction0 stateaction;
+   DerbyStateAction0 stateaction({"state","action"});
 
    NeuralNet<RawFeatureSet<14>, ActionSet<SteeringActionFeature>> act = this->template create_actor<RawFeatureSet<14>, ActionSet<SteeringActionFeature>>(isample, actor_osize);
    NeuralNet<DerbyStateAction0, Reinforcement<1>> crit = this->template create_critic<DerbyStateAction0, Reinforcement<1>>(stateaction);
@@ -213,12 +212,14 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
    flexnnet::NeuralNet<RawFeatureSet<14>, ActionSet<SteeringActionFeature>>& actor = acnn.get_actor();
    flexnnet::NeuralNet<DerbyStateAction0, Reinforcement<1>>& critic = acnn.get_critic();
 
-   flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim0, flexnnet::ActorCriticFinalFitnessFunc,
-                                   flexnnet::ConstantLearningRate> trainer(acnn);
+   //flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim0, flexnnet::ActorCriticFinalFitnessFunc,
+   //                                flexnnet::ConstantLearningRate> trainer(acnn);
+   flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1, DerbySim0, flexnnet::ActorCriticFinalCostFitnessFunc,
+                                   flexnnet::ConstantLearningRate> trainer;
 
    DerbySim0<RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1> derby_sim;
 
-   RawFeatureSet<14> in;
+   RawFeatureSet<14> in({"state"});
    std::tuple<ActionSet<SteeringActionFeature>, flexnnet::Reinforcement<1>> nnout;
 
    std::string sample_fname = _id + "_ac_trainer0.json";
@@ -227,19 +228,19 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
    for (auto& tcase : test_cases)
    {
       actor.set_weights("actor-hidden", tcase.actor_hweights);
-      actor.set_weights("F1", tcase.actor_oweights);
+      actor.set_weights("action", tcase.actor_oweights);
       critic.set_weights("critic-hidden", tcase.critic_hweights);
       critic.set_weights("R", tcase.critic_oweights);
 
-      trainer.set_td_mode(flexnnet::TDTrainerConfig::FINAL_COST);
+      //trainer.set_td_mode(flexnnet::TDTrainerConfig::FINAL_COST);
 
       trainer.set_training_runs(1);
-      trainer.set_max_epochs(15000);
-      trainer.set_batch_mode(1);
-      trainer.set_lambda(0.95);
+      trainer.set_max_epochs(2500);
+      trainer.set_batch_mode(30);
+      trainer.set_lambda(0.3);
 
       flexnnet::LayerWeights iahw = actor.get_weights("actor-hidden");
-      flexnnet::LayerWeights iaow = actor.get_weights("F1");
+      flexnnet::LayerWeights iaow = actor.get_weights("action");
 
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial actor hidden weights", iahw.const_weights_ref);
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial actor output weights", iaow.const_weights_ref);
@@ -250,10 +251,11 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial critic hidden weights", ichw.const_weights_ref);
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial critic output weights", icow.const_weights_ref);
 
-      trainer.train(derby_sim);
+      acnn.set_random_action(true);
+      trainer.train(acnn, derby_sim);
 
       flexnnet::LayerWeights ahw = actor.get_weights("actor-hidden");
-      flexnnet::LayerWeights aow = actor.get_weights("F1");
+      flexnnet::LayerWeights aow = actor.get_weights("action");
 
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor hidden weights", ahw.const_weights_ref);
       std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor output weights", aow.const_weights_ref);
@@ -300,6 +302,137 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest0)
    }
 }
 
+TYPED_TEST_P(ACTrainerTestFixture, TestFinalAC)
+{
+   std::string layer_type_id = ACTrainerTestFixture<TypeParam>::get_typeid();
+
+   // Get lower case parameterized type string
+   std::string _id = layer_type_id;
+   std::transform(_id.begin(), _id.end(), _id.begin(), ::tolower);
+
+   size_t actor_osize = 1;
+   if (_id=="softmax")
+      actor_osize = 2;
+
+   std::cout << "----- AC Trainer<" << _id << "> Train AC Final -----\n" << std::flush;
+   //GTEST_SKIP();
+
+   RawFeatureSet<14> isample({"state"});
+   ActionSet<SteeringActionFeature> action;
+   DerbyStateAction0 stateaction({"state","action"});
+
+   NeuralNet<RawFeatureSet<14>, ActionSet<SteeringActionFeature>> act = this->template create_actor<RawFeatureSet<14>, ActionSet<SteeringActionFeature>>(isample, actor_osize);
+   NeuralNet<DerbyStateAction0, Reinforcement<1>> crit = this->template create_critic<DerbyStateAction0, Reinforcement<1>>(stateaction);
+
+   BaseActorCriticNetwork<RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1> acnn(act,crit);
+
+   //BaseActorCriticNetwork<RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1> acnn = this->template create_actorcritic<RawFeatureSet<23>, ActionSet<SteeringActionFeature>, DerbyStateAction, 1>(isample, stateaction, actor_osize);
+   flexnnet::NeuralNet<RawFeatureSet<14>, ActionSet<SteeringActionFeature>>& actor = acnn.get_actor();
+   flexnnet::NeuralNet<DerbyStateAction0, Reinforcement<1>>& critic = acnn.get_critic();
+
+   //flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim0, flexnnet::ActorCriticFinalFitnessFunc,
+   //                                flexnnet::ConstantLearningRate> trainer(acnn);
+   flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1, DerbySim0, flexnnet::ActorCriticFinalCostFitnessFunc,
+                                   flexnnet::ConstantLearningRate> trainer;
+
+   DerbySim0<RawFeatureSet<14>, ActionSet<SteeringActionFeature>, 1> derby_sim;
+
+   RawFeatureSet<14> in({"state"});
+   std::tuple<ActionSet<SteeringActionFeature>, flexnnet::Reinforcement<1>> nnout;
+
+   std::string sample_fname = _id + "_ac_trainer0.json";
+
+   const std::vector<TrainerTestCase>& test_cases = this->read_trainer_test_cases(sample_fname);
+   for (auto& tcase : test_cases)
+   {
+      actor.set_weights("actor-hidden", tcase.actor_hweights);
+      actor.set_weights("action", tcase.actor_oweights);
+      critic.set_weights("critic-hidden", tcase.critic_hweights);
+      critic.set_weights("R", tcase.critic_oweights);
+
+      //trainer.set_td_mode(flexnnet::TDTrainerConfig::FINAL_COST);
+
+      trainer.set_training_runs(1);
+      trainer.set_max_epochs(1);
+      trainer.set_batch_mode(30);
+      trainer.set_lambda(0.3);
+
+      flexnnet::LayerWeights iahw = actor.get_weights("actor-hidden");
+      flexnnet::LayerWeights iaow = actor.get_weights("action");
+
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial actor hidden weights", iahw.const_weights_ref);
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial actor output weights", iaow.const_weights_ref);
+
+      flexnnet::LayerWeights ichw = critic.get_weights("critic-hidden");
+      flexnnet::LayerWeights icow = critic.get_weights("R");
+
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial critic hidden weights", ichw.const_weights_ref);
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("initial critic output weights", icow.const_weights_ref);
+
+      acnn.set_random_action(false);
+      trainer.train(acnn, derby_sim);
+
+      flexnnet::LayerWeights ahw = actor.get_weights("actor-hidden");
+      flexnnet::LayerWeights aow = actor.get_weights("action");
+
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor hidden weights", ahw.const_weights_ref);
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor output weights", aow.const_weights_ref);
+
+      flexnnet::LayerWeights chw = critic.get_weights("critic-hidden");
+      flexnnet::LayerWeights cow = critic.get_weights("R");
+
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("critic hidden weights", chw.const_weights_ref);
+      std::cout << CommonTestFixtureFunctions::prettyPrintArray("critic output weights", cow.const_weights_ref);
+
+      // Static evaluation of critic
+      RawFeatureSet<14> test_state;
+      std::valarray<double> test_statev(14);
+      std::valarray<double> Rvals(14);
+
+      int y_pos = 1;
+      const int SAMPLES = 50;
+      for (int x_pos=1; x_pos<11; x_pos++)
+      {
+         double mean_R = 0;
+         std::tuple<ActionSet<SteeringActionFeature>, Reinforcement<1>> ret;
+         derby_sim.set(x_pos, 0);
+         test_state = derby_sim.state();
+         std::cout << CommonTestFixtureFunctions::prettyPrintVector("INIT test statev", std::get<0>(test_state.get_features()).get_encoding(), 1) << "\n";
+
+         for (int sample_no = 0; sample_no < SAMPLES; sample_no++)
+         {
+            ret = acnn.activate(test_state);
+
+            //mean_R += std::get<1>(ret)[0] / SAMPLES;
+            mean_R += std::get<0>(std::get<1>(ret).get_features()).get_encoding()[0] / SAMPLES;
+         }
+
+         Rvals[x_pos] = mean_R;
+         std::cout << CommonTestFixtureFunctions::prettyPrintVector("test statev", std::get<0>(test_state.get_features()).get_encoding(), 1) << "\n";
+         std::cout << "R value = " << std::get<0>(std::get<1>(ret).get_features()).get_encoding()[0] << std::setprecision(10) << "\n";
+         std::cout << "R value = " << Rvals[x_pos] << std::setprecision(10) << "\n";
+         std::cout << "Action = " << std::get<0>(std::get<0>(ret).get_features()).get_encoding()[0] << std::setprecision(10) << "\n";
+
+         std::cout << "Decoded Action: ";
+         switch (std::get<0>(std::get<0>(ret).get_features()).get_action())
+         {
+            case SteeringActionFeature::ActionEnum::Left:
+               std::cout << "Left\n";
+               break;
+            case SteeringActionFeature::ActionEnum::Right:
+               std::cout << "Right\n";
+               break;
+            default:
+               std::cout << "neither\n";
+         };
+
+         std::cout << "-------------------------------------------------------\n";
+      }
+
+      std::cout << CommonTestFixtureFunctions::prettyPrintVector("R values", Rvals, 5) << "\n";
+   }
+}
+/*
 TYPED_TEST_P(ACTrainerTestFixture, TrainerTest1)
 {
    std::string layer_type_id = ACTrainerTestFixture<TypeParam>::get_typeid();
@@ -328,7 +461,9 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest1)
    flexnnet::NeuralNet<RawFeatureSet<23>, ActionSet<SteeringActionFeature>>& actor = acnn.get_actor();
    flexnnet::NeuralNet<DerbyStateAction, Reinforcement<1>>& critic = acnn.get_critic();
 
-   flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<23>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim, flexnnet::ActorCriticFinalFitnessFunc,
+   //flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<23>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim, flexnnet::ActorCriticFinalFitnessFunc,
+   //                                flexnnet::ConstantLearningRate> trainer(acnn);
+   flexnnet::ActorCriticDeepRLAlgo<flexnnet::RawFeatureSet<23>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim, flexnnet::TDFinalCostFitnessFunc,
                                    flexnnet::ConstantLearningRate> trainer(acnn);
 
    DerbySim<RawFeatureSet<23>, ActionSet<SteeringActionFeature>, 1> derby_sim;
@@ -441,7 +576,9 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest2)
    flexnnet::NeuralNet<RawFeatureSet<(10+2)*(10+1)>, ActionSet<SteeringActionFeature>>& actor = acnn.get_actor();
    flexnnet::NeuralNet<DerbyStateAction2, Reinforcement<1>>& critic = acnn.get_critic();
 
-   flexnnet::ActorCriticDeepRLAlgo<RawFeatureSet<(10+2)*(10+1)>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim2, flexnnet::ActorCriticFinalFitnessFunc,
+   //flexnnet::ActorCriticDeepRLAlgo<RawFeatureSet<(10+2)*(10+1)>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim2, flexnnet::ActorCriticFinalFitnessFunc,
+   //                                flexnnet::ConstantLearningRate> trainer(acnn);
+   flexnnet::ActorCriticDeepRLAlgo<RawFeatureSet<(10+2)*(10+1)>, ActionSet<SteeringActionFeature>, 1, BaseActorCriticNetwork, DerbySim2, flexnnet::TDFinalCostFitnessFunc,
                                    flexnnet::ConstantLearningRate> trainer(acnn);
 
    RawFeatureSet<(10+2)*(10+1)> in;
@@ -464,7 +601,7 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest2)
 
       std::cout << "what about here\n" << std::flush;
 
-      trainer.set_td_mode(flexnnet::TDTrainerConfig::FINAL_COST);
+      //trainer.set_td_mode(flexnnet::TDTrainerConfig::FINAL_COST);
       trainer.set_training_runs(1);
       trainer.set_max_epochs(40);
       trainer.set_batch_mode(1);
@@ -531,9 +668,10 @@ TYPED_TEST_P(ACTrainerTestFixture, TrainerTest2)
 
    }
 }
+*/
 
 REGISTER_TYPED_TEST_CASE_P
-(ACTrainerTestFixture, TrainerTest0, TrainerTest1, TrainerTest2);
+(ACTrainerTestFixture, TestFinalACCritic, TestFinalAC/*, TrainerTest1, TrainerTest2*/);
 INSTANTIATE_TYPED_TEST_CASE_P
 (My, ACTrainerTestFixture, MyTypes);
 

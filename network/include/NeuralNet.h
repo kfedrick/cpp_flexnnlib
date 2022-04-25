@@ -59,7 +59,7 @@ namespace flexnnet
       //std::cout << "NeuralNet::NeuralNet(const NeuralNet&)\n";
       copy(_nnet);
 
-      network_output = flexnnet::NNFeatureSet<OutTyp>(network_output_layers);
+      network_output = flexnnet::NNFeatureSet<OutTyp>(network_output_layers, _nnet.get_output_layer_names<OutTyp::SIZE>());
       //std::cout << "NN<>.copy constructor nnout.name() " << _nnet.network_output.value_map().begin()->first << "\n";
    }
 
@@ -93,6 +93,12 @@ namespace flexnnet
    {
       const ValarrMap& vm = BaseNeuralNet::activate(_nninput.value_map());
 
+/*      std::cout << "network<> out:\n";
+      for (auto& v : vm)
+         for (auto& val : v.second)
+            std::cout << "  " << val << ", ";
+      std::cout << "--\n";*/
+
 /*      std::cout << "nn inputs : ";
       for (auto entry : _nninput.value_map())
          std::cout << entry.first << " ";
@@ -103,6 +109,7 @@ namespace flexnnet
       network_output.activate();
 
       //std::cout << "NN<>.activate nnout.name() " << network_output.value_map().begin()->first << "\n";
+      //std::cout << "NeuralNet.activate() EXIT\n";
 
       return network_output;
    }

@@ -178,6 +178,16 @@ namespace flexnnet
       CachedValues& cache = get_cache(_nnet);
 
       cache.cumulative_weight_updates[_id] += _deltaw;
+
+      Array2D<double>::Dimensions dim = cache.cumulative_weight_updates[_id].size();
+      Array2D<double>& aw = cache.cumulative_weight_updates[_id];
+/*      std::cout << "accum weight updates " << _id << "\n";
+      for (size_t row=0; row<dim.rows; row++)
+      {
+         for (size_t col = 0; col < dim.cols; col++)
+            std::cout << aw.at(row,col) << " ";
+         std::cout << "\n";
+      }*/
    }
 
 } // end namespace flexnnet

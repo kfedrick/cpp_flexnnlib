@@ -310,6 +310,7 @@ TYPED_TEST_P(ACActivationTestFixture, ConstructorTest)
 
    std::cout << "----- AC Constructor<" << _id << "> Test -----\n" << std::flush;
 
+
    InputFeatures isample;
    TestAction action;
    StateAction stateaction;
@@ -317,10 +318,16 @@ TYPED_TEST_P(ACActivationTestFixture, ConstructorTest)
    NeuralNet<InputFeatures, TestAction> actor = this->template create_actor<InputFeatures, TestAction>(isample, actor_osize);
    NeuralNet<StateAction, Reinforcement<1>> critic = this->template create_critic<StateAction, Reinforcement<1>>(stateaction);
 
-   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
 
+   NeuralNet<InputFeatures, TestAction> tmpactor = this->template create_actor<InputFeatures, TestAction>(isample, actor_osize);
+   NeuralNet<StateAction, Reinforcement<1>> tmpcritic = this->template create_critic<StateAction, Reinforcement<1>>(stateaction);
+
+   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn(tmpactor,tmpcritic);
+
+   //BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
    std::cout << "----------------------------------------\n\n" << std::flush;
 }
+
 
 TYPED_TEST_P(ACActivationTestFixture, ActivationTest)
 {
@@ -340,7 +347,12 @@ TYPED_TEST_P(ACActivationTestFixture, ActivationTest)
    TestAction action;
    StateAction stateaction;
 
-   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
+   NeuralNet<InputFeatures, TestAction> tmpactor = this->template create_actor<InputFeatures, TestAction>(isample, actor_osize);
+   NeuralNet<StateAction, Reinforcement<1>> tmpcritic = this->template create_critic<StateAction, Reinforcement<1>>(stateaction);
+
+   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn(tmpactor,tmpcritic);
+
+   //BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
    flexnnet::NeuralNet<InputFeatures, TestAction>& actor = acnn.get_actor();
    flexnnet::NeuralNet<StateAction, Reinforcement<1>>& critic = acnn.get_critic();
 
@@ -349,19 +361,32 @@ TYPED_TEST_P(ACActivationTestFixture, ActivationTest)
 
    std::string sample_fname = _id + "_ac_activate.json";
    const std::vector<ActivationTestCase>& test_cases = this->read_activation_test_cases(sample_fname);
+
    for (auto& tcase : test_cases)
    {
-      actor.set_weights("hidden", tcase.actor_hweights);
+      actor.set_weights("actor-hidden", tcase.actor_hweights);
       actor.set_weights("F1", tcase.actor_oweights);
-      critic.set_weights("hidden", tcase.critic_hweights);
+      critic.set_weights("critic-hidden", tcase.critic_hweights);
       critic.set_weights("R", tcase.critic_oweights);
 
       in.decode({tcase.state});
       nnout = acnn.activate(in);
 
+      //std::cout << this->template prettyPrintVector("in", tcase.state) << "\n\n";
+
+
       std::valarray<double> nnout_R = std::get<0>(std::get<1>(nnout).get_features()).get_encoding();
       std::valarray<double>
          nnout_A_enc = std::get<0>(std::get<0>(nnout).get_features()).get_encoding();
+
+
+
+/*
+      std::cout << this->template prettyPrintVector("nnout_R", nnout_R) << "\n\n";
+      std::cout << this->template prettyPrintVector("nnout Action", nnout_A_enc) << "\n\n";
+      std::cout << this->template prettyPrintVector("tgt R", tcase.tgt_reinforcement) << "\n\n";
+      std::cout << this->template prettyPrintVector("tgt Action", tcase.tgt_action_enc) << "\n\n";
+*/
 
       // Test AC reinforcement and action encoding against targets
       bool R_eq = CommonTestFixtureFunctions::valarray_double_near(nnout_R, tcase.tgt_reinforcement, 1e-5);
@@ -389,20 +414,24 @@ TYPED_TEST_P(ACActivationTestFixture, ActivationTest)
                std::cout << "neither\n";
          };
 
-         flexnnet::LayerWeights ahw = actor.get_weights("hidden");
+
+         flexnnet::LayerWeights ahw = actor.get_weights("actor-hidden");
          flexnnet::LayerWeights aow = actor.get_weights("F1");
 
          std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor hidden weights", ahw.const_weights_ref);
          std::cout << CommonTestFixtureFunctions::prettyPrintArray("actor output weights", aow.const_weights_ref);
 
-         flexnnet::LayerWeights chw = critic.get_weights("hidden");
+         flexnnet::LayerWeights chw = critic.get_weights("critic-hidden");
          flexnnet::LayerWeights cow = critic.get_weights("R");
 
          std::cout << CommonTestFixtureFunctions::prettyPrintArray("critic hidden weights", chw.const_weights_ref);
          std::cout << CommonTestFixtureFunctions::prettyPrintArray("critic output weights", cow.const_weights_ref);
       }
+
+      std::cout << "\n----------------------------------------\n" << std::flush;
+
    }
-   std::cout << "----------------------------------------\n" << std::flush;
+   std::cout << "********************************************\n" << std::flush;
 }
 
 
@@ -425,7 +454,12 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropCriticTest)
    TestAction action;
    StateAction stateaction;
 
-   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
+   NeuralNet<InputFeatures, TestAction> tmpactor = this->template create_actor<InputFeatures, TestAction>(isample, actor_osize);
+   NeuralNet<StateAction, Reinforcement<1>> tmpcritic = this->template create_critic<StateAction, Reinforcement<1>>(stateaction);
+
+   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn(tmpactor,tmpcritic);
+
+   //BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
    flexnnet::NeuralNet<InputFeatures, TestAction>& actor = acnn.get_actor();
    flexnnet::NeuralNet<StateAction, Reinforcement<1>>& critic = acnn.get_critic();
 
@@ -440,9 +474,9 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropCriticTest)
    const std::vector<BackpropTestCase>& test_cases = this->read_backprop_test_cases(sample_fname);
    for (auto& tcase : test_cases)
    {
-      actor.set_weights("hidden", tcase.actor_hweights);
+      actor.set_weights("actor-hidden", tcase.actor_hweights);
       actor.set_weights("F1", tcase.actor_oweights);
-      critic.set_weights("hidden", tcase.critic_hweights);
+      critic.set_weights("critic-hidden", tcase.critic_hweights);
       critic.set_weights("R", tcase.critic_oweights);
 
       in.decode({tcase.state});
@@ -457,11 +491,11 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropCriticTest)
          & actor_network_layers = actor.get_layers();
 
       EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("R")->dEdw(), tcase.critic_odEdw, 1e-6) << "Bad critic R dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("hidden")->dEdw(), tcase.critic_hdEdw, 1e-6) << "Bad critic hidden dEdw";
+      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("critic-hidden")->dEdw(), tcase.critic_hdEdw, 1e-6) << "Bad critic hidden dEdw";
       EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("F1")->dEdw(), tcase.actor_odEdw, 1e-6) << "Bad actor F1 dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("hidden")->dEdw(), tcase.actor_hdEdw, 1e-6) << "Bad actor hidden dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("hidden")->dEdx().at("F0"), tcase.critic_dEdx0, 1e-6) << "Bad critic dEdx F0";
-      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("hidden")->dEdx().at("F1"), tcase.critic_dEdx1, 1e-6) << "Bad critic dEdx F1";
+      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("actor-hidden")->dEdw(), tcase.actor_hdEdw, 1e-6) << "Bad actor hidden dEdw";
+      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("critic-hidden")->dEdx().at("F0"), tcase.critic_dEdx0, 1e-6) << "Bad critic dEdx F0";
+      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("critic-hidden")->dEdx().at("F1"), tcase.critic_dEdx1, 1e-6) << "Bad critic dEdx F1";
 
       for (auto& layer : critic_network_layers)
       {
@@ -470,7 +504,6 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropCriticTest)
          std::cout << CommonTestFixtureFunctions::prettyPrintArray(label, dEdw, 7);
 
          const flexnnet::ValarrMap& dEdx = layer.second->dEdx();
-         std::cout << "size of dEdx " << dEdx.size() << "\n";
 
          for (auto dx : dEdx)
          {
@@ -509,7 +542,12 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropActorTest)
    TestAction action;
    StateAction stateaction;
 
-   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
+   NeuralNet<InputFeatures, TestAction> tmpactor = this->template create_actor<InputFeatures, TestAction>(isample, actor_osize);
+   NeuralNet<StateAction, Reinforcement<1>> tmpcritic = this->template create_critic<StateAction, Reinforcement<1>>(stateaction);
+
+   BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn(tmpactor,tmpcritic);
+
+   //BaseActorCriticNetwork<InputFeatures, TestAction, 1> acnn = this->template create_actorcritic<InputFeatures, TestAction, StateAction, 1>(isample, stateaction, actor_osize);
    flexnnet::NeuralNet<InputFeatures, TestAction>& actor = acnn.get_actor();
    flexnnet::NeuralNet<StateAction, Reinforcement<1>>& critic = acnn.get_critic();
 
@@ -524,9 +562,9 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropActorTest)
    const std::vector<BackpropTestCase>& test_cases = this->read_backprop_test_cases(sample_fname);
    for (auto& tcase : test_cases)
    {
-      actor.set_weights("hidden", tcase.actor_hweights);
+      actor.set_weights("actor-hidden", tcase.actor_hweights);
       actor.set_weights("F1", tcase.actor_oweights);
-      critic.set_weights("hidden", tcase.critic_hweights);
+      critic.set_weights("critic-hidden", tcase.critic_hweights);
       critic.set_weights("R", tcase.critic_oweights);
 
       in.decode({tcase.state});
@@ -540,11 +578,11 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropActorTest)
          & actor_network_layers = actor.get_layers();
 
       EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("R")->dEdw(), tcase.critic_odEdw, 1e-6) << "Bad critic R dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("hidden")->dEdw(), tcase.critic_hdEdw, 1e-6) << "Bad critic hidden dEdw";
+      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, critic_network_layers.at("critic-hidden")->dEdw(), tcase.critic_hdEdw, 1e-6) << "Bad critic hidden dEdw";
       EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("F1")->dEdw(), tcase.actor_odEdw, 1e-6) << "Bad actor F1 dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("hidden")->dEdw(), tcase.actor_hdEdw, 1e-6) << "Bad actor hidden dEdw";
-      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("hidden")->dEdx().at("F0"), tcase.critic_dEdx0, 1e-6) << "Bad critic dEdx F0";
-      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("hidden")->dEdx().at("F1"), tcase.critic_dEdx1, 1e-6) << "Bad critic dEdx F1";
+      EXPECT_PRED3(CommonTestFixtureFunctions::array_double_near, actor_network_layers.at("actor-hidden")->dEdw(), tcase.actor_hdEdw, 1e-6) << "Bad actor hidden dEdw";
+      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("critic-hidden")->dEdx().at("F0"), tcase.critic_dEdx0, 1e-6) << "Bad critic dEdx F0";
+      EXPECT_PRED3(CommonTestFixtureFunctions::vector_double_near, critic_network_layers.at("critic-hidden")->dEdx().at("F1"), tcase.critic_dEdx1, 1e-6) << "Bad critic dEdx F1";
 
       std::string label;
 
@@ -555,7 +593,6 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropActorTest)
          std::cout << CommonTestFixtureFunctions::prettyPrintArray(label, dEdw, 7);
 
          const flexnnet::ValarrMap& dEdx = layer.second->dEdx();
-         std::cout << "size of dEdx " << dEdx.size() << "\n";
 
          for (auto dx : dEdx)
          {
@@ -575,8 +612,9 @@ TYPED_TEST_P(ACActivationTestFixture, BackpropActorTest)
    std::cout << "----------------------------------------\n\n" << std::flush;
 }
 
+
 REGISTER_TYPED_TEST_CASE_P
-(ACActivationTestFixture, ConstructorTest, ActivationTest, BackpropActorTest, BackpropCriticTest);
+(ACActivationTestFixture, ConstructorTest, ActivationTest, BackpropCriticTest, BackpropActorTest);
 INSTANTIATE_TYPED_TEST_CASE_P
 (My, ACActivationTestFixture, MyTypes);
 

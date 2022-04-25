@@ -2,15 +2,16 @@
 // Created by kfedrick on 3/13/22.
 //
 
-#ifndef FLEX_NEURALNET_LOSSFUNCTION_H_
-#define FLEX_NEURALNET_LOSSFUNCTION_H_
+#ifndef FLEX_NEURALNET_FITNESSFUNC_H_
+#define FLEX_NEURALNET_FITNESSFUNC_H_
 
 #include <flexnnet.h>
 #include <tuple>
+#include <DataSet.h>
 
 namespace flexnnet
 {
-   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp> class LossFunction
+   template<class InTyp, class TgtTyp, template<class, class> class SampleTyp> class FitnessFunc
    {
       using NNTyp = NeuralNet<InTyp, TgtTyp>;
       using DatasetTyp = DataSet<InTyp, TgtTyp, SampleTyp>;
@@ -24,7 +25,7 @@ namespace flexnnet
       /**
        * protected: LossFunction()
        */
-      LossFunction();
+      FitnessFunc();
 
    public:
       /**
@@ -75,13 +76,13 @@ namespace flexnnet
    };
 
    template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
-   LossFunction<InTyp, TgtTyp, SampleTyp>::LossFunction()
+   FitnessFunc<InTyp, TgtTyp, SampleTyp>::FitnessFunc()
    {
       performance_cache.resize(1);
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
-   void LossFunction<InTyp, TgtTyp, SampleTyp>::set_subsample_count(unsigned int _sz)
+   void FitnessFunc<InTyp, TgtTyp, SampleTyp>::set_subsample_count(unsigned int _sz)
    {
       if (_sz == 0)
          throw std::invalid_argument("invalid subsample size : 0 (zero)");
@@ -90,13 +91,13 @@ namespace flexnnet
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
-   unsigned int LossFunction<InTyp, TgtTyp, SampleTyp>::get_subsample_count()
+   unsigned int FitnessFunc<InTyp, TgtTyp, SampleTyp>::get_subsample_count()
    {
       return performance_cache.size();
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class SampleTyp>
-   std::tuple<double, double> LossFunction<InTyp, TgtTyp, SampleTyp>::calc_fitness_standard_error(
+   std::tuple<double, double> FitnessFunc<InTyp, TgtTyp, SampleTyp>::calc_fitness_standard_error(
       NNTyp& _nnet, const DatasetTyp& _tstset, double _subsample_fraction)
    {
       /*
@@ -144,4 +145,4 @@ namespace flexnnet
    }
 }
 
-#endif // FLEX_NEURALNET_LOSSFUNCTION_H_
+#endif // FLEX_NEURALNET_FITNESSFUNC_H_

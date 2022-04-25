@@ -53,8 +53,8 @@ TEST_F(BasicACTestFixture, CriticNetConstructor)
    topo.network_output_layers.push_back(ol_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
+   //flexnnet::BaseNeuralNet basecritic(topo);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(topo);
 }
 
 TEST_F(BasicACTestFixture, SingleCriticActivate)
@@ -71,8 +71,7 @@ TEST_F(BasicACTestFixture, SingleCriticActivate)
    topo.network_output_layers.push_back(ol_ptr);
    topo.ordered_layers.push_back(ol_ptr);
 
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(topo);
    critic.initialize_weights();
 
    RawFeatureSet<3> f;
@@ -88,7 +87,7 @@ TEST_F(BasicACTestFixture, MultiCriticAccessField)
    std::cout << "Multi Critic Access by field Test\n" << std::flush;
 
    std::shared_ptr<flexnnet::NetworkLayerImpl<flexnnet::TanSig>> ol1_ptr =
-      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(2, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
+      std::make_shared<flexnnet::NetworkLayerImpl<flexnnet::TanSig>>(flexnnet::NetworkLayerImpl<flexnnet::TanSig>(1, "F0", flexnnet::TanSig::DEFAULT_PARAMS, true));
    ol1_ptr->add_external_input_field("F0", 3);
 
    flexnnet::NeuralNetTopology topo;
@@ -96,15 +95,14 @@ TEST_F(BasicACTestFixture, MultiCriticAccessField)
    topo.network_output_layers.push_back(ol1_ptr);
    topo.ordered_layers.push_back(ol1_ptr);
 
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(topo);
    critic.initialize_weights();
 
    RawFeatureSet<3> f;
    f.decode({{0, 1, 2}});
    critic.activate(f);
 
-   flexnnet::Reinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<1> nnout = critic.activate(f);
 
    std::array<std::string,1> fields = nnout.get_feature_names();
    for (auto a_field : fields)
@@ -127,15 +125,14 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndex)
    topo.network_output_layers.push_back(ol1_ptr);
    topo.ordered_layers.push_back(ol1_ptr);
 
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(topo);
    critic.initialize_weights();
 
    RawFeatureSet<3> f;
    f.decode({{0, 1, 2}});
    critic.activate(f);
 
-   flexnnet::Reinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<1> nnout = critic.activate(f);
 
    std::array<std::string,1> fields = nnout.get_feature_names();
    for (int ndx=0; ndx<fields.size(); ndx++)
@@ -158,14 +155,14 @@ TEST_F(BasicACTestFixture, MultiCriticAccessIndexAt)
    topo.network_output_layers.push_back(ol1_ptr);
    topo.ordered_layers.push_back(ol1_ptr);
 
-   flexnnet::BaseNeuralNet basecritic(topo);
-   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<2>> critic(basecritic);
+   //flexnnet::BaseNeuralNet basecritic(topo);
+   flexnnet::NeuralNet<RawFeatureSet<3>, flexnnet::Reinforcement<1>> critic(topo);
    critic.initialize_weights();
 
    RawFeatureSet<3> f;
    f.decode({{0, 1, 2}});
 
-   flexnnet::Reinforcement<2> nnout = critic.activate(f);
+   flexnnet::Reinforcement<1> nnout = critic.activate(f);
 
    EXPECT_EQ(nnout.size(), 1) << "Reinforcement size not correct\n";
 

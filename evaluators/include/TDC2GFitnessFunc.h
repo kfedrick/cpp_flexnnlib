@@ -2,8 +2,8 @@
 // Created by kfedrick on 3/16/22.
 //
 
-#ifndef FLEX_NEURALNET_TDCOSTTOGOLOSSFUNC_H_
-#define FLEX_NEURALNET_TDCOSTTOGOLOSSFUNC_H_
+#ifndef FLEX_NEURALNET_TDC2GFITNESSFUNC_H_
+#define FLEX_NEURALNET_TDC2GFITNESSFUNC_H_
 
 #include <flexnnet.h>
 #include <Exemplar.h>
@@ -11,7 +11,7 @@
 namespace flexnnet
 {
    template<class InTyp, class TgtTyp, template<class, class> class Sample=ExemplarSeries>
-   class TDCostToGoLossFunc : public LossFunction<InTyp, TgtTyp, Sample>
+   class TDC2GFitnessFunc : public LossFunction<InTyp, TgtTyp, Sample>
    {
       using NNTyp = NeuralNet<InTyp, TgtTyp>;
       using DatasetTyp = DataSet<InTyp, TgtTyp, ExemplarSeries>;
@@ -40,7 +40,7 @@ namespace flexnnet
    };
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDCostToGoLossFunc<InTyp, TgtTyp, Sample>::calc_fitness(
+   double TDC2GFitnessFunc<InTyp, TgtTyp, Sample>::calc_fitness(
       NNTyp& _nnet, const DatasetTyp& _tstset, unsigned int _subsample_sz)
    {
       _tstset.randomize_order();
@@ -74,7 +74,7 @@ namespace flexnnet
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDCostToGoLossFunc<InTyp, TgtTyp, Sample>::evaluate_sample(
+   double TDC2GFitnessFunc<InTyp, TgtTyp, Sample>::evaluate_sample(
       NNTyp& _nnet, const ExemplarSeriesTyp& _series)
    {
       //std::cout << "TDEvaluator.evaluate_series()\n";
@@ -122,7 +122,7 @@ namespace flexnnet
    }
 
    template<class InTyp, class TgtTyp, template<class, class> class Sample>
-   double TDCostToGoLossFunc<InTyp, TgtTyp, Sample>::calc_tde_gradient(
+   double TDC2GFitnessFunc<InTyp, TgtTyp, Sample>::calc_tde_gradient(
       const TgtTyp& _tgt_t1, const TgtTyp& _est_t1, const TgtTyp& _est_t0, ValarrMap& _egradient,
       double _E)
    {
@@ -153,4 +153,4 @@ namespace flexnnet
    }
 }
 
-#endif // FLEX_NEURALNET_TDCOSTTOGOLOSSFUNC_H_
+#endif // FLEX_NEURALNET_TDC2GFITNESSFUNC_H_

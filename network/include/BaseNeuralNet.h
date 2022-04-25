@@ -139,7 +139,10 @@ namespace flexnnet
       {
          const ValarrMap& layer_dEdx = layer_ptr.second->dEdx();
          for (auto dEdx_entry : layer_dEdx)
+         {
+            auto& id = dEdx_entry.first;
             dEdx[dEdx_entry.first] = dEdx_entry.second;
+         }
       }
 
       return dEdx;

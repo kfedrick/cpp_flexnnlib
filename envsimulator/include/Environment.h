@@ -16,7 +16,7 @@ namespace flexnnet
     * @tparam EAction - the class that encodes the actions (implements ActionView)
     * @tparam RSZ - the number of reinforcement signals returned by the environment (>0)
     */
-   template<class EState, typename EAction, size_t RSZ>
+   template<class EState, typename EAction, unsigned int RSZ>
    class Environment
    {
    public:
